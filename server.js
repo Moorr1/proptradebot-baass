@@ -4,7 +4,7 @@ const cors = require('cors');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors());
@@ -48,8 +48,8 @@ app.post('/api/checkout', async (req, res) => {
         },
       ],
       mode: 'subscription',
-      success_url: successUrl || 'http://localhost:3000/success',
-      cancel_url: cancelUrl || 'http://localhost:3000/cancel',
+      success_url: successUrl || 'http://localhost:3001/success',
+      cancel_url: cancelUrl || 'http://localhost:3001/cancel',
     });
 
     res.json({ success: true, sessionId: session.id, url: session.url });
