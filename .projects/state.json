@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "providers": {
+    "clerk": {
+      "name": "Clerk"
+    },
+    "neon": {
+      "name": "Neon"
+    },
+    "posthog": {
+      "name": "PostHog"
+    }
+  },
+  "resources": {
+    "clerk-auth": {
+      "name": "clerk-auth",
+      "providerName": "Clerk",
+      "serviceId": "auth"
+    },
+    "neon-postgres": {
+      "name": "neon-postgres",
+      "providerName": "Neon",
+      "serviceId": "postgres"
+    },
+    "posthog-analytics": {
+      "name": "posthog-analytics",
+      "providerName": "PostHog",
+      "serviceId": "analytics"
+    }
+  }
+}

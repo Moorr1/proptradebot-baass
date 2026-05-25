@@ -1,6 +1,4 @@
 # Environment variables
-.env
-.env.local
 .env.*.local
 
 # Dependencies
@@ -21,3 +19,11 @@ npm-debug.log*
 # Build
 dist/
 build/
+
+.projects/cache
+.projects/vault
+.projects/state.test.json
+.projects/state.local.test.json
+.env
+.env.local
+.env.test
