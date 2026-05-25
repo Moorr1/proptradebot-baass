@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PropTradeBot BaaS</title>
+  <style>
+    body { font-family: -apple-system, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+    h1 { color: #333; }
+    .endpoint { background: #f5f5f5; padding: 15px; margin: 10px 0; border-radius: 8px; }
+    .method { color: #0066cc; font-weight: bold; }
+    code { background: #e0e0e0; padding: 2px 6px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>🤖 PropTradeBot BaaS</h1>
+  <p>Backend-as-a-Service for automated futures trading.</p>
+  
+  <h2>API Endpoints</h2>
+  
+  <div class="endpoint">
+    <span class="method">GET</span> <code>/health</code><br>
+    Health check
+  </div>
+  
+  <div class="endpoint">
+    <span class="method">GET</span> <code>/api/config</code><br>
+    Get Stripe publishable key
+  </div>
+  
+  <div class="endpoint">
+    <span class="method">POST</span> <code>/api/customers</code><br>
+    Create Stripe customer<br>
+    Body: <code>{"email": "user@example.com", "name": "User Name"}</code>
+  </div>
+  
+  <div class="endpoint">
+    <span class="method">POST</span> <code>/api/checkout</code><br>
+    Create checkout session<br>
+    Body: <code>{"priceId": "price_xxx", "customerId": "cus_xxx"}</code>
+  </div>
+  
+  <div class="endpoint">
+    <span class="method">GET</span> <code>/api/customers/:id/subscriptions</code><br>
+    List customer subscriptions
+  </div>
+  
+  <div class="endpoint">
+    <span class="method">POST</span> <code>/api/subscriptions/:id/cancel</code><br>
+    Cancel subscription
+  </div>
+  
+  <div class="endpoint">
+    <span class="method">POST</span> <code>/webhook</code><br>
+    Stripe webhook endpoint
+  </div>
+
+  <h2>Status</h2>
+  <p id="status">Checking...</p>
+
+  <script>
+    fetch('/health')
+      .then(r => r.json())
+      .then(data => {
+        document.getElementById('status').innerHTML = 
+          `✅ Server is ${data.status} (${data.timestamp})`;
+      })
+      .catch(err => {
+        document.getElementById('status').innerHTML = 
+          `❌ Server offline: ${err.message}`;
+      });
+  </script>
+</body>
+</html>
