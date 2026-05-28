@@ -484,6 +484,12 @@
         return;
       }
 
+      // Debug: log what we're about to send
+      console.log('CHECKOUT DEBUG - priceId:', priceId);
+      console.log('CHECKOUT DEBUG - priceMap:', JSON.stringify(priceMap));
+      const payload = JSON.stringify({ priceId });
+      console.log('CHECKOUT DEBUG - payload:', payload);
+
       try {
         const token = await clerk.session.getToken();
         const res = await fetch('/api/checkout', {
@@ -492,9 +498,10 @@
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           },
-          body: JSON.stringify({ priceId })
+          body: payload
         });
         const data = await res.json();
+        console.log('CHECKOUT DEBUG - response:', JSON.stringify(data));
         if (data.success && data.url) {
           window.location.href = data.url;
         } else {
