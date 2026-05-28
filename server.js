@@ -26,11 +26,12 @@ pool.query('SELECT NOW()', (err, res) => {
 
 // Middleware
 app.use(cors());
+
+// Raw body for Stripe webhooks — MUST be before express.json()
+app.use('/webhook', express.raw({ type: 'application/json' }));
+
 app.use(express.json());
 app.use(express.static('public', { extensions: ['html'] }));
-
-// Raw body for Stripe webhooks
-app.use('/webhook', express.raw({ type: 'application/json' }));
 
 // Helper: get email from Clerk (session claims first, then API fallback)
 async function getClerkEmail(auth) {
