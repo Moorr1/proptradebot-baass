@@ -320,7 +320,7 @@
             <li>Real-time dashboard</li>
             <li>Email support</li>
           </ul>
-          <button class="btn btn-outline" onclick="startCheckout('price_1Tb0E1CQuzBsqlSnPAQ0BcBA')">Start Trial</button>
+          <button class="btn btn-outline" id="btn-basic" onclick="startCheckoutTier('basic')" disabled>Loading...</button>
         </div>
         <div class="pricing-card popular">
           <div class="popular-badge">MOST POPULAR</div>
@@ -335,7 +335,7 @@
             <li>Priority support</li>
             <li>API access</li>
           </ul>
-          <button class="btn btn-primary" onclick="startCheckout('price_1Tb0ECCQuzBsqlSntS5cc9CU')">Start Trial</button>
+          <button class="btn btn-primary" id="btn-pro" onclick="startCheckoutTier('pro')" disabled>Loading...</button>
         </div>
         <div class="pricing-card">
           <h3>Enterprise</h3>
@@ -349,7 +349,7 @@
             <li>Dedicated support</li>
             <li>API + webhooks</li>
           </ul>
-          <button class="btn btn-outline" onclick="startCheckout('price_1Tb0EMCQuzBsqlSn5zDSH6zk')">Start Trial</button>
+          <button class="btn btn-outline" id="btn-enterprise" onclick="startCheckoutTier('enterprise')" disabled>Loading...</button>
         </div>
       </div>
     </div>
@@ -407,6 +407,9 @@
       } catch (e) {
         console.error('Failed to load Stripe config:', e);
       }
+
+      // Load prices from server (bypass Cloudflare obfuscation)
+      await loadPrices();
     });
 
     function showAuth(mode) {
@@ -436,6 +439,38 @@
     function hideAuth() {
       document.getElementById('auth-modal').classList.remove('active');
       document.getElementById('clerk-target').innerHTML = '';
+    }
+
+    // Price map loaded from server (avoids Cloudflare email obfuscation mangling)
+    let priceMap = {};
+
+    async function loadPrices() {
+      try {
+        const res = await fetch('/api/products');
+        const data = await res.json();
+        const products = data.products || data;
+        products.forEach(p => {
+          const price = p.prices && p.prices[0];
+          if (!price) return;
+          const amount = (price.unit_amount || price.amount) / 100;
+          if (amount === 99) { priceMap.basic = price.id; }
+          else if (amount === 149) { priceMap.pro = price.id; }
+          else if (amount === 299) { priceMap.enterprise = price.id; }
+        });
+        // Enable buttons
+        if (priceMap.basic) { const b = document.getElementById('btn-basic'); b.textContent = 'Start Trial'; b.disabled = false; }
+        if (priceMap.pro) { const b = document.getElementById('btn-pro'); b.textContent = 'Start Trial'; b.disabled = false; }
+        if (priceMap.enterprise) { const b = document.getElementById('btn-enterprise'); b.textContent = 'Start Trial'; b.disabled = false; }
+        console.log('Prices loaded:', priceMap);
+      } catch (e) {
+        console.error('Failed to load prices:', e);
+      }
+    }
+
+    function startCheckoutTier(tier) {
+      const priceId = priceMap[tier];
+      if (!priceId) { alert('Pricing not loaded yet. Please refresh.'); return; }
+      startCheckout(priceId);
     }
 
     async function startCheckout(priceId) {
