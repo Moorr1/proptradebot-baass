@@ -738,4 +738,3 @@ app.listen(PORT, () => {
   console.log(`🔐 Protected routes require Clerk auth`);
   console.log(`🤖 Bot gateway: /api/bot/* (API key auth)`);
 });
-// deploy trigger 1779981293

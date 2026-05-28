@@ -27,3 +27,4 @@ build/
 .env
 .env.local
 .env.test
+render-env-vars.txt
