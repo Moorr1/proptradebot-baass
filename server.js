@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const crypto = require('crypto');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const { ClerkExpressRequireAuth } = require('@clerk/clerk-sdk-node');
+const { ClerkExpressRequireAuth, clerkClient } = require('@clerk/clerk-sdk-node');
 const { Pool } = require('pg');
 
 const app = express();
@@ -31,6 +31,26 @@ app.use(express.static('public'));
 
 // Raw body for Stripe webhooks
 app.use('/webhook', express.raw({ type: 'application/json' }));
+
+// Helper: get email from Clerk (session claims first, then API fallback)
+async function getClerkEmail(auth) {
+  // Try session claims first
+  let email = auth.sessionClaims?.email 
+    || auth.sessionClaims?.email_address
+    || auth.sessionClaims?.primary_email_address;
+  if (email) return email;
+  
+  // Fallback: fetch from Clerk API
+  try {
+    const user = await clerkClient.users.getUser(auth.userId);
+    email = user.emailAddresses?.find(e => e.id === user.primaryEmailAddressId)?.emailAddress
+      || user.emailAddresses?.[0]?.emailAddress;
+    return email || null;
+  } catch (e) {
+    console.error('Failed to fetch Clerk user email:', e.message);
+    return null;
+  }
+}
 
 // Health check
 app.get('/health', (req, res) => {
@@ -92,7 +112,7 @@ app.use('/api/accounts', ClerkExpressRequireAuth());
 app.get('/api/user/profile', async (req, res) => {
   try {
     const clerkId = req.auth.userId;
-    const email = req.auth.sessionClaims.email;
+    const email = await getClerkEmail(req.auth);
     
     // Check if user exists
     let result = await pool.query(
@@ -106,7 +126,7 @@ app.get('/api/user/profile', async (req, res) => {
         `INSERT INTO users (clerk_id, email, name, plan_tier, subscription_status)
          VALUES ($1, $2, $3, 'none', 'inactive')
          RETURNING *`,
-        [clerkId, email, req.auth.sessionClaims.name || email]
+        [clerkId, email, email]
       );
     }
     
@@ -257,7 +277,11 @@ app.post('/api/checkout', ClerkExpressRequireAuth(), async (req, res) => {
   try {
     const { priceId } = req.body;
     const clerkId = req.auth.userId;
-    const email = req.auth.sessionClaims.email;
+    const email = await getClerkEmail(req.auth);
+    
+    if (!email) {
+      return res.status(400).json({ success: false, error: 'Could not retrieve email from auth provider' });
+    }
     
     // Get or create user
     let userResult = await pool.query(
@@ -270,7 +294,7 @@ app.post('/api/checkout', ClerkExpressRequireAuth(), async (req, res) => {
         `INSERT INTO users (clerk_id, email, name)
          VALUES ($1, $2, $3)
          RETURNING *`,
-        [clerkId, email, req.auth.sessionClaims.name || email]
+        [clerkId, email, email]
       );
     }
     
