@@ -57,6 +57,23 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Stripe diagnostics (temporary)
+app.get('/api/stripe-diag', async (req, res) => {
+  try {
+    const keyPrefix = process.env.STRIPE_SECRET_KEY?.substring(0, 25) + '...';
+    const acct = await stripe.accounts.retrieve();
+    const prices = await stripe.prices.list({ active: true, limit: 10 });
+    res.json({
+      keyPrefix,
+      accountId: acct.id,
+      accountName: acct.settings?.dashboard?.display_name,
+      prices: prices.data.map(p => ({ id: p.id, amount: p.unit_amount/100 }))
+    });
+  } catch (e) {
+    res.json({ error: e.message });
+  }
+});
+
 // Get Stripe config (publishable key for frontend)
 app.get('/api/config', (req, res) => {
   res.json({
