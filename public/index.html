@@ -3,72 +3,467 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PropTradeBot BaaS</title>
+  <title>PropTradeBot — Automated Futures Trading</title>
+  <script async crossorigin="anonymous" data-clerk-publishable-key="pk_test_Y2FsbS1za2luay0yNi5jbGVyay5hY2NvdW50cy5kZXYk" src="https://calm-skink-26.clerk.accounts.dev/npm/@clerk/clerk-js@5/dist/clerk.browser.js" type="text/javascript"></script>
   <style>
-    body { font-family: -apple-system, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
-    h1 { color: #333; }
-    .endpoint { background: #f5f5f5; padding: 15px; margin: 10px 0; border-radius: 8px; }
-    .method { color: #0066cc; font-weight: bold; }
-    code { background: #e0e0e0; padding: 2px 6px; border-radius: 4px; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0e1a;
+      color: #e2e8f0;
+      line-height: 1.6;
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+    /* Nav */
+    nav {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 20px 0; border-bottom: 1px solid #1e293b;
+    }
+    .logo { font-size: 24px; font-weight: 700; color: #22c55e; }
+    .logo span { color: #e2e8f0; }
+    #auth-buttons { display: flex; gap: 12px; }
+    .btn {
+      padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer;
+      font-size: 14px; font-weight: 600; transition: all 0.2s;
+    }
+    .btn-outline {
+      background: transparent; color: #94a3b8; border: 1px solid #334155;
+    }
+    .btn-outline:hover { border-color: #22c55e; color: #22c55e; }
+    .btn-primary {
+      background: #22c55e; color: #0a0e1a;
+    }
+    .btn-primary:hover { background: #16a34a; }
+    .btn-lg { padding: 14px 32px; font-size: 16px; }
+
+    /* Hero */
+    .hero {
+      text-align: center; padding: 100px 0 80px;
+    }
+    .hero h1 {
+      font-size: 56px; font-weight: 800; line-height: 1.1;
+      background: linear-gradient(135deg, #22c55e 0%, #10b981 50%, #06b6d4 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 24px;
+    }
+    .hero p {
+      font-size: 20px; color: #94a3b8; max-width: 600px;
+      margin: 0 auto 40px;
+    }
+    .hero-cta { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+    /* Social proof */
+    .social-proof {
+      display: flex; justify-content: center; gap: 48px;
+      padding: 40px 0; border-top: 1px solid #1e293b;
+      border-bottom: 1px solid #1e293b; margin-bottom: 80px;
+    }
+    .stat { text-align: center; }
+    .stat-number { font-size: 32px; font-weight: 700; color: #22c55e; }
+    .stat-label { font-size: 14px; color: #64748b; }
+
+    /* Features */
+    .features { padding: 80px 0; }
+    .section-title {
+      text-align: center; font-size: 36px; font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .section-subtitle {
+      text-align: center; color: #64748b; margin-bottom: 60px;
+    }
+    .feature-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 32px;
+    }
+    .feature-card {
+      background: #111827; border: 1px solid #1e293b;
+      border-radius: 16px; padding: 32px;
+    }
+    .feature-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      background: rgba(34, 197, 94, 0.1); display: flex;
+      align-items: center; justify-content: center;
+      font-size: 24px; margin-bottom: 20px;
+    }
+    .feature-card h3 { font-size: 20px; margin-bottom: 12px; }
+    .feature-card p { color: #64748b; font-size: 15px; }
+
+    /* How it works */
+    .how-it-works { padding: 80px 0; background: #0f172a; }
+    .steps {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 32px; margin-top: 60px;
+    }
+    .step {
+      text-align: center; position: relative;
+    }
+    .step-number {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: #22c55e; color: #0a0e1a;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; font-weight: 700; margin: 0 auto 20px;
+    }
+    .step h3 { margin-bottom: 8px; }
+    .step p { color: #64748b; font-size: 15px; }
+
+    /* Pricing */
+    .pricing { padding: 80px 0; }
+    .pricing-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px; margin-top: 60px;
+    }
+    .pricing-card {
+      background: #111827; border: 1px solid #1e293b;
+      border-radius: 16px; padding: 40px 32px;
+      position: relative;
+    }
+    .pricing-card.popular {
+      border-color: #22c55e;
+      transform: scale(1.02);
+    }
+    .popular-badge {
+      position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+      background: #22c55e; color: #0a0e1a; padding: 4px 16px;
+      border-radius: 20px; font-size: 12px; font-weight: 700;
+    }
+    .pricing-card h3 { font-size: 20px; margin-bottom: 8px; }
+    .price {
+      font-size: 48px; font-weight: 800; color: #e2e8f0;
+      margin: 16px 0;
+    }
+    .price span { font-size: 16px; color: #64748b; font-weight: 400; }
+    .pricing-card ul { list-style: none; margin: 24px 0; }
+    .pricing-card li {
+      padding: 8px 0; color: #94a3b8; font-size: 15px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .pricing-card li::before {
+      content: "✓"; color: #22c55e; font-weight: 700;
+    }
+    .pricing-card .btn { width: 100%; margin-top: 16px; }
+
+    /* CTA */
+    .cta {
+      text-align: center; padding: 100px 0;
+      background: linear-gradient(135deg, #0f172a 0%, #111827 100%);
+    }
+    .cta h2 { font-size: 36px; margin-bottom: 16px; }
+    .cta p { color: #64748b; margin-bottom: 32px; }
+
+    /* Footer */
+    footer {
+      text-align: center; padding: 40px 0;
+      border-top: 1px solid #1e293b; color: #475569;
+      font-size: 14px;
+    }
+
+    /* Auth modal */
+    #auth-modal {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.8); z-index: 100;
+      align-items: center; justify-content: center;
+    }
+    #auth-modal.active { display: flex; }
+    .auth-box {
+      background: #111827; border: 1px solid #1e293b;
+      border-radius: 16px; padding: 40px; width: 100%;
+      max-width: 420px;
+    }
+    .auth-box h2 { margin-bottom: 24px; text-align: center; }
+    .close-modal {
+      position: absolute; top: 20px; right: 20px;
+      background: none; border: none; color: #64748b;
+      font-size: 24px; cursor: pointer;
+    }
+
+    /* Dashboard link (shown when logged in) */
+    #user-nav { display: none; align-items: center; gap: 16px; }
+    #user-nav.active { display: flex; }
+    #user-email { color: #94a3b8; font-size: 14px; }
+
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 36px; }
+      .social-proof { flex-direction: column; gap: 24px; }
+    }
   </style>
 </head>
 <body>
-  <h1>🤖 PropTradeBot BaaS</h1>
-  <p>Backend-as-a-Service for automated futures trading.</p>
-  
-  <h2>API Endpoints</h2>
-  
-  <div class="endpoint">
-    <span class="method">GET</span> <code>/health</code><br>
-    Health check
-  </div>
-  
-  <div class="endpoint">
-    <span class="method">GET</span> <code>/api/config</code><br>
-    Get Stripe publishable key
-  </div>
-  
-  <div class="endpoint">
-    <span class="method">POST</span> <code>/api/customers</code><br>
-    Create Stripe customer<br>
-    Body: <code>{"email": "user@example.com", "name": "User Name"}</code>
-  </div>
-  
-  <div class="endpoint">
-    <span class="method">POST</span> <code>/api/checkout</code><br>
-    Create checkout session<br>
-    Body: <code>{"priceId": "price_xxx", "customerId": "cus_xxx"}</code>
-  </div>
-  
-  <div class="endpoint">
-    <span class="method">GET</span> <code>/api/customers/:id/subscriptions</code><br>
-    List customer subscriptions
-  </div>
-  
-  <div class="endpoint">
-    <span class="method">POST</span> <code>/api/subscriptions/:id/cancel</code><br>
-    Cancel subscription
-  </div>
-  
-  <div class="endpoint">
-    <span class="method">POST</span> <code>/webhook</code><br>
-    Stripe webhook endpoint
+  <div class="container">
+    <nav>
+      <div class="logo">Prop<span>TradeBot</span></div>
+      <div id="auth-buttons">
+        <button class="btn btn-outline" onclick="showAuth('sign-in')">Sign In</button>
+        <button class="btn btn-primary" onclick="showAuth('sign-up')">Get Started</button>
+      </div>
+      <div id="user-nav">
+        <span id="user-email"></span>
+        <a href="/dashboard.html" class="btn btn-primary">Dashboard</a>
+        <button class="btn btn-outline" onclick="clerk.signOut()">Sign Out</button>
+      </div>
+    </nav>
   </div>
 
-  <h2>Status</h2>
-  <p id="status">Checking...</p>
+  <section class="hero">
+    <div class="container">
+      <h1>Trade Futures on Autopilot</h1>
+      <p>PropTradeBot connects your Discord trading signals directly to prop firm accounts. No manual execution. No missed entries. Just set it and trade.</p>
+      <div class="hero-cta">
+        <button class="btn btn-primary btn-lg" onclick="showAuth('sign-up')">Start Free Trial</button>
+        <button class="btn btn-outline btn-lg" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">View Pricing</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+    <div class="social-proof">
+      <div class="stat">
+        <div class="stat-number">$3,600</div>
+        <div class="stat-label">First Payout Generated</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">77%</div>
+        <div class="stat-label">Win Rate (Live)</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">&lt;1s</div>
+        <div class="stat-label">Signal to Fill</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">8</div>
+        <div class="stat-label">Accounts Managed</div>
+      </div>
+    </div>
+  </div>
+
+  <section class="features">
+    <div class="container">
+      <h2 class="section-title">Why PropTradeBot?</h2>
+      <p class="section-subtitle">Built by a trader, for traders. Every feature solves a real problem.</p>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <h3>Instant Execution</h3>
+          <p>Discord alert hits → bot executes across all your prop accounts in under 1 second. No more fumbling with multiple platforms during volatile opens.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎯</div>
+          <h3>Smart Ladder Strategy</h3>
+          <p>Auto-trim positions at T1 and T2 targets, move stops to breakeven, let runners ride. Configurable contract sizing per account.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🏦</div>
+          <h3>Multi-Account Support</h3>
+          <p>Mirror trades across Topstep, Apex, and Tradovate accounts simultaneously. One signal, many accounts, one P&L dashboard.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🛡️</div>
+          <h3>Risk Management</h3>
+          <p>Built-in daily loss limits, trailing stop logic, and automatic flattening. The bot protects your accounts even when you step away.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h3>Real-Time Dashboard</h3>
+          <p>Track P&L, win rate, per-account performance, and trade history from any browser. Auto-refreshes every 30 seconds.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔌</div>
+          <h3>Universal Signal Input</h3>
+          <p>Works with Discord webhooks, TradingView alerts, or generic HTTP signals. Normalize any alert format automatically.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="how-it-works">
+    <div class="container">
+      <h2 class="section-title">How It Works</h2>
+      <p class="section-subtitle">From signal to filled position in 4 steps.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3>Connect Your Accounts</h3>
+          <p>Add your Topstep, Apex, or Tradovate credentials via the secure setup wizard.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3>Configure Strategy</h3>
+          <p>Set contract size, targets, stops, and which accounts to trade. Save as a preset.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3>Connect Signals</h3>
+          <p>Paste your Discord webhook URL or TradingView alert endpoint. The bot listens 24/7.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <h3>Trade Automatically</h3>
+          <p>Every alert triggers execution across all connected accounts. Watch the dashboard stack P&L.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pricing" id="pricing">
+    <div class="container">
+      <h2 class="section-title">Simple Pricing</h2>
+      <p class="section-subtitle">14-day free trial. No credit card required. Cancel anytime.</p>
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <h3>Basic</h3>
+          <div class="price">$99<span>/month</span></div>
+          <p style="color:#64748b; margin-bottom:16px;">For traders getting started with automation.</p>
+          <ul>
+            <li>1-2 prop accounts</li>
+            <li>Discord signal support</li>
+            <li>Basic ladder strategy</li>
+            <li>Real-time dashboard</li>
+            <li>Email support</li>
+          </ul>
+          <button class="btn btn-outline" onclick="startCheckout('price_1Tb0E1CQuzBsqlSnPAQ0BcBA')">Start Trial</button>
+        </div>
+        <div class="pricing-card popular">
+          <div class="popular-badge">MOST POPULAR</div>
+          <h3>Pro</h3>
+          <div class="price">$149<span>/month</span></div>
+          <p style="color:#64748b; margin-bottom:16px;">For serious traders scaling across multiple accounts.</p>
+          <ul>
+            <li>3-5 prop accounts</li>
+            <li>Discord + TradingView signals</li>
+            <li>Advanced ladder (T1/T2/Runner)</li>
+            <li>Real-time dashboard</li>
+            <li>Priority support</li>
+            <li>API access</li>
+          </ul>
+          <button class="btn btn-primary" onclick="startCheckout('price_1Tb0ECCQuzBsqlSntS5cc9CU')">Start Trial</button>
+        </div>
+        <div class="pricing-card">
+          <h3>Enterprise</h3>
+          <div class="price">$299<span>/month</span></div>
+          <p style="color:#64748b; margin-bottom:16px;">For power users and trading teams.</p>
+          <ul>
+            <li>Unlimited accounts</li>
+            <li>All signal sources</li>
+            <li>Custom strategy development</li>
+            <li>White-label dashboard</li>
+            <li>Dedicated support</li>
+            <li>API + webhooks</li>
+          </ul>
+          <button class="btn btn-outline" onclick="startCheckout('price_1Tb0EMCQuzBsqlSn5zDSH6zk')">Start Trial</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="container">
+      <h2>Ready to Automate Your Trading?</h2>
+      <p>Join traders who never miss a signal again. 14-day free trial, no credit card required.</p>
+      <button class="btn btn-primary btn-lg" onclick="showAuth('sign-up')">Get Started Free</button>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p>© 2026 PropTradeBot. Built for traders, by traders.</p>
+    </div>
+  </footer>
+
+  <!-- Auth Modal -->
+  <div id="auth-modal">
+    <button class="close-modal" onclick="hideAuth()">×</button>
+    <div class="auth-box">
+      <h2 id="auth-title">Get Started</h2>
+      <div id="clerk-target"></div>
+    </div>
+  </div>
 
   <script>
-    fetch('/health')
-      .then(r => r.json())
-      .then(data => {
-        document.getElementById('status').innerHTML = 
-          `✅ Server is ${data.status} (${data.timestamp})`;
-      })
-      .catch(err => {
-        document.getElementById('status').innerHTML = 
-          `❌ Server offline: ${err.message}`;
-      });
+    let clerk = null;
+    let stripeKey = null;
+
+    // Initialize Clerk
+    window.addEventListener('load', async () => {
+      await Clerk.load();
+      clerk = Clerk;
+
+      // Update UI based on auth state
+      if (clerk.user) {
+        document.getElementById('auth-buttons').style.display = 'none';
+        document.getElementById('user-nav').classList.add('active');
+        document.getElementById('user-email').textContent = clerk.user.primaryEmailAddress?.emailAddress || '';
+      }
+
+      // Fetch Stripe key
+      try {
+        const res = await fetch('/api/config');
+        const data = await res.json();
+        stripeKey = data.publishableKey;
+      } catch (e) {
+        console.error('Failed to load Stripe config:', e);
+      }
+    });
+
+    function showAuth(mode) {
+      const modal = document.getElementById('auth-modal');
+      const title = document.getElementById('auth-title');
+      const target = document.getElementById('clerk-target');
+
+      title.textContent = mode === 'sign-up' ? 'Create Account' : 'Sign In';
+      modal.classList.add('active');
+
+      if (clerk) {
+        target.innerHTML = '';
+        if (mode === 'sign-up') {
+          clerk.mountSignUp(target, {
+            afterSignUpUrl: '/dashboard.html',
+            signInUrl: '/'
+          });
+        } else {
+          clerk.mountSignIn(target, {
+            afterSignInUrl: '/dashboard.html',
+            signUpUrl: '/'
+          });
+        }
+      }
+    }
+
+    function hideAuth() {
+      document.getElementById('auth-modal').classList.remove('active');
+      document.getElementById('clerk-target').innerHTML = '';
+    }
+
+    async function startCheckout(priceId) {
+      if (!clerk || !clerk.user) {
+        showAuth('sign-up');
+        return;
+      }
+
+      if (!stripeKey) {
+        alert('Payment system loading... please try again in a moment.');
+        return;
+      }
+
+      try {
+        const token = await clerk.session.getToken();
+        const res = await fetch('/api/checkout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ priceId })
+        });
+        const data = await res.json();
+        if (data.success && data.url) {
+          window.location.href = data.url;
+        } else {
+          alert('Checkout failed: ' + (data.error || 'Unknown error'));
+        }
+      } catch (e) {
+        alert('Checkout error: ' + e.message);
+      }
+    }
   </script>
 </body>
 </html>
