@@ -97,8 +97,15 @@
           </div>
         </div>
         <div id="api-key-instructions" style="margin-top:16px; display:none;">
-          <p><strong>Next step:</strong> Paste this key into your PropTradeBot app on first launch.</p>
-          <pre>PTB_API_KEY=&lt;your-key-here&gt; python server_projectx_v2.py</pre>
+          <p><strong>How to use your API key:</strong></p>
+          <pre style="margin-top:8px;"># Set as environment variable
+export PTB_API_KEY=&lt;your-key-here&gt;
+
+# Or add to your shell profile (~/.zshrc)
+echo 'export PTB_API_KEY=&lt;your-key-here&gt;' >> ~/.zshrc
+
+# Then run the bot
+python server_projectx_v2.py</pre>
         </div>
       </div>
 
@@ -122,13 +129,34 @@
         <button class="btn btn-secondary" onclick="loadBotStatus()" style="margin-top:16px;">Refresh Status</button>
       </div>
 
-      <!-- Quick Links -->
+      <!-- Setup Guide -->
+      <div class="card" id="setup-guide">
+        <h2>🚀 Setup Guide</h2>
+        <div id="setup-steps">
+          <div style="margin-bottom:16px; padding:12px; background:#0f172a; border-radius:8px; border-left:3px solid #38bdf8;">
+            <strong>Step 1:</strong> Generate your API key above ☝️
+          </div>
+          <div style="margin-bottom:16px; padding:12px; background:#0f172a; border-radius:8px; border-left:3px solid #38bdf8;">
+            <strong>Step 2:</strong> Install the Chrome Extension
+            <p style="margin:8px 0 0; font-size:13px;">Scrapes Discord signals and sends them to your bot.</p>
+            <a href="https://github.com/Moorr1/proptradebot-baass/tree/main/chrome-extension" target="_blank" style="color:#38bdf8; font-size:13px;">Chrome Extension →</a>
+          </div>
+          <div style="margin-bottom:16px; padding:12px; background:#0f172a; border-radius:8px; border-left:3px solid #38bdf8;">
+            <strong>Step 3:</strong> Download & Run the Bot
+            <p style="margin:8px 0 0; font-size:13px;">Python-based trading engine. Runs on your Mac.</p>
+            <a href="https://github.com/Moorr1/proptradebot-baass/tree/main/bot" target="_blank" style="color:#38bdf8; font-size:13px;">Bot Source Code →</a>
+          </div>
+          <div style="padding:12px; background:#0f172a; border-radius:8px; border-left:3px solid #22c55e;">
+            <strong>Step 4:</strong> Start Trading
+            <p style="margin:8px 0 0; font-size:13px;">Set your <code>PTB_API_KEY</code> environment variable and run <code>python server_projectx_v2.py</code></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resources -->
       <div class="card">
         <h2>📚 Resources</h2>
         <div style="display:flex; flex-direction:column; gap:8px;">
-          <a href="#" style="color:#38bdf8;">Download PropTradeBot App (Mac)</a>
-          <a href="#" style="color:#38bdf8;">Chrome Extension Setup</a>
-          <a href="#" style="color:#38bdf8;">Strategy Configuration Guide</a>
           <a href="mailto:support@proptradebot.com" style="color:#38bdf8;">Contact Support</a>
         </div>
       </div>
