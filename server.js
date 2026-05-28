@@ -362,6 +362,82 @@ app.post('/api/checkout', ClerkExpressRequireAuth(), async (req, res) => {
   }
 });
 
+// Checkout success page
+app.get('/success', async (req, res) => {
+  const sessionId = req.query.session_id;
+  if (!sessionId) {
+    return res.redirect('/dashboard');
+  }
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    if (session.payment_status === 'paid' || session.status === 'complete') {
+      res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Payment Successful — PropTradeBot</title>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #0a0e1a; color: #e2e8f0; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+            .card { background: #111827; border: 1px solid #1e293b; border-radius: 16px; padding: 48px; text-align: center; max-width: 420px; }
+            .icon { font-size: 64px; margin-bottom: 16px; }
+            h1 { margin: 0 0 8px; font-size: 24px; }
+            p { color: #94a3b8; margin: 0 0 24px; }
+            .btn { background: #3b82f6; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; font-weight: 500; }
+            .btn:hover { background: #2563eb; }
+          </style>
+        </head>
+        <body>
+          <div class="card">
+            <div class="icon">✅</div>
+            <h1>Payment Successful!</h1>
+            <p>Your subscription is active. Welcome to PropTradeBot!</p>
+            <a href="/dashboard" class="btn">Go to Dashboard</a>
+          </div>
+        </body>
+        </html>
+      `);
+    } else {
+      res.redirect('/dashboard');
+    }
+  } catch (e) {
+    console.error('Success page error:', e.message);
+    res.redirect('/dashboard');
+  }
+});
+
+// Checkout cancel page
+app.get('/cancel', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Cancelled — PropTradeBot</title>
+      <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #0a0e1a; color: #e2e8f0; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+        .card { background: #111827; border: 1px solid #1e293b; border-radius: 16px; padding: 48px; text-align: center; max-width: 420px; }
+        .icon { font-size: 64px; margin-bottom: 16px; }
+        h1 { margin: 0 0 8px; font-size: 24px; }
+        p { color: #94a3b8; margin: 0 0 24px; }
+        .btn { background: #3b82f6; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; font-weight: 500; }
+        .btn:hover { background: #2563eb; }
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <div class="icon">❌</div>
+        <h1>Payment Cancelled</h1>
+        <p>No worries — you can subscribe anytime from your dashboard.</p>
+        <a href="/dashboard" class="btn">Go to Dashboard</a>
+      </div>
+    </body>
+    </html>
+  `);
+});
+
 // Stripe webhook
 app.post('/webhook', async (req, res) => {
   const sig = req.headers['stripe-signature'];
