@@ -27,7 +27,7 @@ pool.query('SELECT NOW()', (err, res) => {
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static('public', { extensions: ['html'] }));
 
 // Raw body for Stripe webhooks
 app.use('/webhook', express.raw({ type: 'application/json' }));
