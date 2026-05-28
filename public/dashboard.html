@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PropTradeBot Dashboard</title>
+  <script async crossorigin="anonymous"
+    data-clerk-publishable-key="pk_test_Y2FsbS1za2luay0yNi5jbGVyay5hY2NvdW50cy5kZXYk"
+    src="https://calm-skink-26.clerk.accounts.dev/npm/@clerk/clerk-js@4/dist/clerk.browser.js"
+    type="text/javascript">
+  </script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+    .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+    h1 { font-size: 28px; color: #fff; }
+    .logo { font-weight: 700; font-size: 20px; color: #38bdf8; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+    .card h2 { font-size: 18px; margin-bottom: 16px; color: #f1f5f9; }
+    .card p { color: #94a3b8; margin-bottom: 12px; line-height: 1.5; }
+    .status-badge { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; text-transform: uppercase; }
+    .status-active { background: #166534; color: #86efac; }
+    .status-trialing { background: #7c3aed; color: #d8b4fe; }
+    .status-inactive { background: #7f1d1d; color: #fca5a5; }
+    .btn { display: inline-block; padding: 10px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+    .btn-primary { background: #0ea5e9; color: #fff; }
+    .btn-primary:hover { background: #0284c7; }
+    .btn-danger { background: #dc2626; color: #fff; }
+    .btn-secondary { background: #334155; color: #e2e8f0; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    pre { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 16px; overflow-x: auto; font-size: 13px; color: #e2e8f0; }
+    .api-key-box { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+    .api-key-display { flex: 1; font-family: monospace; font-size: 14px; padding: 12px 16px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; word-break: break-all; }
+    .hidden { color: #64748b; font-style: italic; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+    .stat { text-align: center; padding: 20px; }
+    .stat-val { font-size: 32px; font-weight: 700; color: #38bdf8; }
+    .stat-label { font-size: 13px; color: #94a3b8; margin-top: 4px; }
+    .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; }
+    .alert-success { background: #166534; color: #86efac; }
+    .alert-error { background: #7f1d1d; color: #fca5a5; }
+    #sign-in { margin: auto; }
+    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #fff; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">🤖 PropTradeBot</div>
+      <div id="auth-section">Loading...</div>
+    </header>
+
+    <div id="signed-out" style="display:none;">
+      <div class="card" style="text-align:center; padding:60px 20px;">
+        <h2 style="font-size:24px; margin-bottom:12px;">Welcome to PropTradeBot</h2>
+        <p style="margin-bottom:24px;">Cloud-gated automated futures trading. Subscribe, get your API key, and let the bot trade.</p>
+        <div id="sign-in"></div>
+      </div>
+    </div>
+
+    <div id="signed-in" style="display:none;">
+      <div id="alerts"></div>
+
+      <!-- Subscription Status -->
+      <div class="card">
+        <h2>📋 Subscription</h2>
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <div>
+            <div id="plan-tier" style="font-size:24px; font-weight:700; margin-bottom:4px;">—</div>
+            <div id="plan-status">Loading...</div>
+          </div>
+          <div>
+            <span id="sub-badge" class="status-badge status-inactive">—</span>
+          </div>
+        </div>
+        <div id="subscribe-section" style="margin-top:16px;">
+          <p>Choose a plan to get started:</p>
+          <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:12px;">
+            <button class="btn btn-primary" onclick="checkout('price_1Tb0E1BqMBErKPJd3vRGHx3F')">Basic $99/mo</button>
+            <button class="btn btn-primary" onclick="checkout('price_1Tb0ECBqMBErKPJdbB6EJ9y1')">Pro $149/mo</button>
+            <button class="btn btn-primary" onclick="checkout('price_1Tb0EMBqMBErKPJdUdKsFUVy')">Enterprise $299/mo</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- API Key -->
+      <div class="card">
+        <h2>🔑 API Key</h2>
+        <p>Your bot uses this key to connect to our cloud backend. Keep it secret.</p>
+        <div id="api-key-section">
+          <div class="api-key-box">
+            <div id="api-key-display" class="api-key-display hidden">No API key generated yet</div>
+            <button id="btn-generate" class="btn btn-primary" onclick="generateKey()">Generate Key</button>
+            <button id="btn-copy" class="btn btn-secondary" onclick="copyKey()" style="display:none;">Copy</button>
+          </div>
+        </div>
+        <div id="api-key-instructions" style="margin-top:16px; display:none;">
+          <p><strong>Next step:</strong> Paste this key into your PropTradeBot app on first launch.</p>
+          <pre>PTB_API_KEY=&lt;your-key-here&gt; python server_projectx_v2.py</pre>
+        </div>
+      </div>
+
+      <!-- Bot Status -->
+      <div class="card">
+        <h2>🤖 Bot Status</h2>
+        <div class="grid">
+          <div class="stat">
+            <div id="bot-online" class="stat-val">—</div>
+            <div class="stat-label">Bot Online</div>
+          </div>
+          <div class="stat">
+            <div id="last-beat" class="stat-val">—</div>
+            <div class="stat-label">Last Heartbeat</div>
+          </div>
+          <div class="stat">
+            <div id="trades-count" class="stat-val">—</div>
+            <div class="stat-label">Trades Today</div>
+          </div>
+        </div>
+        <button class="btn btn-secondary" onclick="loadBotStatus()" style="margin-top:16px;">Refresh Status</button>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="card">
+        <h2>📚 Resources</h2>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <a href="#" style="color:#38bdf8;">Download PropTradeBot App (Mac)</a>
+          <a href="#" style="color:#38bdf8;">Chrome Extension Setup</a>
+          <a href="#" style="color:#38bdf8;">Strategy Configuration Guide</a>
+          <a href="mailto:support@proptradebot.com" style="color:#38bdf8;">Contact Support</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ─── State ───
+    let currentApiKey = null;
+    let currentUser = null;
+
+    // ─── Init Clerk ───
+    window.addEventListener('load', async () => {
+      await Clerk.load();
+
+      if (Clerk.user) {
+        showSignedIn();
+      } else {
+        showSignedOut();
+      }
+    });
+
+    function showSignedOut() {
+      document.getElementById('signed-out').style.display = 'block';
+      document.getElementById('signed-in').style.display = 'none';
+      document.getElementById('auth-section').innerHTML = '';
+
+      const signInDiv = document.getElementById('sign-in');
+      Clerk.mountSignIn(signInDiv, {
+        afterSignInUrl: window.location.href,
+        redirectUrl: window.location.href
+      });
+    }
+
+    async function showSignedIn() {
+      document.getElementById('signed-out').style.display = 'none';
+      document.getElementById('signed-in').style.display = 'block';
+
+      // Auth button
+      const authSec = document.getElementById('auth-section');
+      authSec.innerHTML = `
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="color:#94a3b8;">${Clerk.user.emailAddresses[0].emailAddress}</span>
+          <button class="btn btn-secondary" onclick="Clerk.signOut()">Sign Out</button>
+        </div>
+      `;
+
+      currentUser = Clerk.user;
+      await loadProfile();
+      await loadApiKey();
+      await loadBotStatus();
+    }
+
+    // ─── API Helpers ───
+    async function apiGet(path) {
+      const token = await Clerk.session.getToken();
+      const r = await fetch(path, { headers: { Authorization: `Bearer ${token}` } });
+      return r.json();
+    }
+
+    async function apiPost(path, body) {
+      const token = await Clerk.session.getToken();
+      const r = await fetch(path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(body)
+      });
+      return r.json();
+    }
+
+    // ─── Load Profile ───
+    async function loadProfile() {
+      try {
+        const data = await apiGet('/api/user/profile');
+        if (!data.success) return;
+        const u = data.user;
+
+        document.getElementById('plan-tier').textContent = u.plan_tier && u.plan_tier !== 'none'
+          ? u.plan_tier.charAt(0).toUpperCase() + u.plan_tier.slice(1)
+          : 'No Plan';
+
+        const badge = document.getElementById('sub-badge');
+        badge.textContent = u.subscription_status;
+        badge.className = 'status-badge status-' + u.subscription_status;
+
+        const subscribeSection = document.getElementById('subscribe-section');
+        if (u.subscription_status === 'active' || u.subscription_status === 'trialing') {
+          subscribeSection.style.display = 'none';
+          document.getElementById('plan-status').textContent = 'Your subscription is active';
+        } else {
+          subscribeSection.style.display = 'block';
+          document.getElementById('plan-status').textContent = 'Subscribe to activate your bot';
+        }
+      } catch (e) { console.error('loadProfile error:', e); }
+    }
+
+    // ─── Checkout ───
+    async function checkout(priceId) {
+      try {
+        const data = await apiPost('/api/checkout', { priceId });
+        if (data.success && data.url) {
+          window.location.href = data.url;
+        } else {
+          showAlert('Checkout failed: ' + (data.error || 'Unknown'), 'error');
+        }
+      } catch (e) {
+        showAlert('Checkout error: ' + e.message, 'error');
+      }
+    }
+
+    // ─── API Key ───
+    async function loadApiKey() {
+      try {
+        const data = await apiGet('/api/user/api-key');
+        if (!data.success) return;
+
+        const display = document.getElementById('api-key-display');
+        const btnGen = document.getElementById('btn-generate');
+        const btnCopy = document.getElementById('btn-copy');
+        const instructions = document.getElementById('api-key-instructions');
+
+        if (data.has_key && data.api_key) {
+          currentApiKey = data.api_key; // masked
+          display.textContent = data.api_key;
+          display.classList.remove('hidden');
+          btnGen.textContent = 'Regenerate Key';
+          btnCopy.style.display = 'inline-block';
+          instructions.style.display = 'block';
+        } else {
+          display.textContent = 'No API key generated yet';
+          display.classList.add('hidden');
+          btnGen.textContent = 'Generate Key';
+          btnCopy.style.display = 'none';
+          instructions.style.display = 'none';
+        }
+      } catch (e) { console.error('loadApiKey error:', e); }
+    }
+
+    async function generateKey() {
+      const btn = document.getElementById('btn-generate');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>';
+
+      try {
+        const data = await apiPost('/api/user/api-key', {});
+        if (data.success) {
+          currentApiKey = data.api_key;
+          document.getElementById('api-key-display').textContent = data.api_key;
+          document.getElementById('api-key-display').classList.remove('hidden');
+          document.getElementById('btn-copy').style.display = 'inline-block';
+          document.getElementById('api-key-instructions').style.display = 'block';
+          btn.textContent = 'Regenerate Key';
+          showAlert('API key generated! Copy it now — it won\'t be shown again.', 'success');
+        } else {
+          showAlert(data.error || 'Failed to generate key', 'error');
+        }
+      } catch (e) {
+        showAlert('Error: ' + e.message, 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function copyKey() {
+      if (!currentApiKey) return;
+      navigator.clipboard.writeText(currentApiKey).then(() => {
+        showAlert('API key copied to clipboard!', 'success');
+      });
+    }
+
+    // ─── Bot Status ───
+    async function loadBotStatus() {
+      try {
+        const data = await apiGet('/api/user/bot-status');
+        if (!data.success) return;
+
+        document.getElementById('bot-online').textContent = data.bot_online ? '✅' : '❌';
+        document.getElementById('bot-online').style.color = data.bot_online ? '#86efac' : '#fca5a5';
+
+        if (data.last_heartbeat) {
+          const d = new Date(data.last_heartbeat);
+          const mins = Math.floor((Date.now() - d) / 60000);
+          document.getElementById('last-beat').textContent = mins < 1 ? 'Just now' : mins + 'm ago';
+        } else {
+          document.getElementById('last-beat').textContent = 'Never';
+        }
+      } catch (e) { console.error('loadBotStatus error:', e); }
+    }
+
+    // ─── Alerts ───
+    function showAlert(msg, type) {
+      const div = document.getElementById('alerts');
+      div.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+      setTimeout(() => { div.innerHTML = ''; }, 5000);
+    }
+  </script>
+</body>
+</html>

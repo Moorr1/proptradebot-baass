@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const crypto = require('crypto');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { ClerkExpressRequireAuth } = require('@clerk/clerk-sdk-node');
 const { Pool } = require('pg');
@@ -83,7 +84,9 @@ app.get('/api/products', async (req, res) => {
 // Protected routes - require Clerk auth
 app.use('/api/user', ClerkExpressRequireAuth());
 app.use('/api/accounts', ClerkExpressRequireAuth());
-app.use('/api/bot', ClerkExpressRequireAuth());
+
+// Bot gateway routes use API key auth (below), not Clerk
+// app.use('/api/bot', ClerkExpressRequireAuth());  // ← bot routes use requireApiKey instead
 
 // Get or create user profile
 app.get('/api/user/profile', async (req, res) => {
@@ -415,8 +418,323 @@ app.post('/webhook', async (req, res) => {
   res.json({ received: true });
 });
 
+// =============================================================================
+// BOT GATEWAY — API Key Auth (for local bot connections)
+// =============================================================================
+
+async function requireApiKey(req, res, next) {
+  const apiKey = req.headers['x-api-key'] || req.query.apiKey;
+
+  if (!apiKey) {
+    return res.status(401).json({
+      success: false,
+      error: 'API key required. Get your key at https://proptradebot.com/dashboard',
+      code: 'NO_API_KEY'
+    });
+  }
+
+  try {
+    const result = await pool.query(
+      `SELECT id, clerk_id, email, plan_tier, subscription_status,
+              stripe_customer_id, stripe_subscription_id, name,
+              created_at as user_created_at
+       FROM users WHERE api_key = $1`,
+      [apiKey]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid API key',
+        code: 'INVALID_API_KEY'
+      });
+    }
+
+    const user = result.rows[0];
+    const activeStatuses = ['active', 'trialing'];
+    if (!activeStatuses.includes(user.subscription_status)) {
+      return res.status(403).json({
+        success: false,
+        error: `Subscription ${user.subscription_status}. Please renew at https://proptradebot.com/dashboard`,
+        code: 'SUBSCRIPTION_INACTIVE',
+        subscription_status: user.subscription_status,
+        plan_tier: user.plan_tier
+      });
+    }
+
+    req.botUser = user;
+    next();
+  } catch (error) {
+    console.error('API key validation error:', error);
+    res.status(500).json({ success: false, error: 'Internal error' });
+  }
+}
+
+// POST /api/bot/auth — Validate API key, return full config
+app.post('/api/bot/auth', requireApiKey, async (req, res) => {
+  try {
+    const user = req.botUser;
+
+    const configResult = await pool.query(
+      'SELECT * FROM bot_configs WHERE user_id = $1',
+      [user.id]
+    );
+
+    const accountsResult = await pool.query(
+      'SELECT * FROM accounts WHERE user_id = $1 AND status = $2',
+      [user.id, 'active']
+    );
+
+    let subscription = null;
+    if (user.stripe_subscription_id) {
+      try {
+        subscription = await stripe.subscriptions.retrieve(user.stripe_subscription_id);
+      } catch (e) {
+        console.log('Could not fetch subscription from Stripe:', e.message);
+      }
+    }
+
+    res.json({
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        plan_tier: user.plan_tier,
+        subscription_status: user.subscription_status,
+        created_at: user.user_created_at
+      },
+      config: configResult.rows[0] || null,
+      accounts: accountsResult.rows,
+      subscription: subscription ? {
+        id: subscription.id,
+        status: subscription.status,
+        current_period_end: subscription.current_period_end,
+        cancel_at_period_end: subscription.cancel_at_period_end
+      } : null
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// POST /api/bot/heartbeat — Bot pings every 5 minutes
+app.post('/api/bot/heartbeat', requireApiKey, async (req, res) => {
+  try {
+    const user = req.botUser;
+    const { version, uptime_seconds, alerts_processed, positions_active } = req.body;
+
+    await pool.query(
+      'UPDATE users SET last_bot_heartbeat = NOW() WHERE id = $1',
+      [user.id]
+    );
+
+    await pool.query(
+      `INSERT INTO bot_heartbeats (user_id, version, uptime_seconds, alerts_processed, positions_active)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [user.id, version || 'unknown', uptime_seconds || 0, alerts_processed || 0, positions_active || 0]
+    );
+
+    const configResult = await pool.query(
+      'SELECT * FROM bot_configs WHERE user_id = $1',
+      [user.id]
+    );
+
+    res.json({
+      success: true,
+      timestamp: new Date().toISOString(),
+      config: configResult.rows[0] || null,
+      subscription_status: user.subscription_status
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// POST /api/bot/trades — Report completed trade
+app.post('/api/bot/trades', requireApiKey, async (req, res) => {
+  try {
+    const user = req.botUser;
+    const {
+      account_id, signal_id, trade_direction, symbol, contracts,
+      entry_price, exit_price, stop_price, target_prices,
+      realized_pnl, commission, status, opened_at, closed_at, metadata
+    } = req.body;
+
+    const result = await pool.query(
+      `INSERT INTO trades (
+        user_id, account_id, signal_id, trade_direction, symbol,
+        contracts, entry_price, exit_price, stop_price, target_prices,
+        realized_pnl, commission, status, opened_at, closed_at, metadata
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+      RETURNING *`,
+      [
+        user.id, account_id, signal_id, trade_direction, symbol,
+        contracts, entry_price, exit_price, stop_price,
+        target_prices ? JSON.stringify(target_prices) : null,
+        realized_pnl, commission || 0, status || 'open',
+        opened_at || new Date(), closed_at,
+        metadata ? JSON.stringify(metadata) : null
+      ]
+    );
+
+    res.json({ success: true, trade: result.rows[0] });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// GET /api/bot/config — Get full bot config (accounts + strategy)
+app.get('/api/bot/config', requireApiKey, async (req, res) => {
+  try {
+    const user = req.botUser;
+
+    const [configResult, accountsResult] = await Promise.all([
+      pool.query('SELECT * FROM bot_configs WHERE user_id = $1', [user.id]),
+      pool.query('SELECT * FROM accounts WHERE user_id = $1', [user.id])
+    ]);
+
+    res.json({
+      success: true,
+      config: configResult.rows[0] || null,
+      accounts: accountsResult.rows
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// PUT /api/bot/config — Update bot config (from local bot or dashboard)
+app.put('/api/bot/config', requireApiKey, async (req, res) => {
+  try {
+    const user = req.botUser;
+    const updates = req.body;
+
+    const allowedFields = [
+      'strategy', 'contract_count', 'stop_loss_ticks', 'target_multipliers',
+      'auto_trading', 'risk_per_trade', 'max_daily_trades', 'allowed_symbols'
+    ];
+
+    const fields = [];
+    const values = [];
+    let paramIndex = 1;
+
+    for (const field of allowedFields) {
+      if (updates[field] !== undefined) {
+        fields.push(`${field} = $${paramIndex}`);
+        values.push(updates[field]);
+        paramIndex++;
+      }
+    }
+
+    if (fields.length === 0) {
+      return res.status(400).json({ success: false, error: 'No valid fields to update' });
+    }
+
+    values.push(user.id);
+
+    const result = await pool.query(
+      `UPDATE bot_configs SET ${fields.join(', ')} WHERE user_id = $${paramIndex} RETURNING *`,
+      values
+    );
+
+    res.json({ success: true, config: result.rows[0] });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// =============================================================================
+// USER DASHBOARD ENDPOINTS (for web UI)
+// =============================================================================
+
+// POST /api/user/api-key — Generate/regenerate API key
+app.post('/api/user/api-key', ClerkExpressRequireAuth(), async (req, res) => {
+  try {
+    const clerkId = req.auth.userId;
+    const apiKey = 'ptb_' + crypto.randomBytes(32).toString('hex');
+
+    const result = await pool.query(
+      `UPDATE users SET api_key = $1, api_key_created_at = NOW()
+       WHERE clerk_id = $2
+       RETURNING api_key, api_key_created_at`,
+      [apiKey, clerkId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+
+    res.json({
+      success: true,
+      api_key: result.rows[0].api_key,
+      created_at: result.rows[0].api_key_created_at
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// GET /api/user/api-key — Get existing API key (masked)
+app.get('/api/user/api-key', ClerkExpressRequireAuth(), async (req, res) => {
+  try {
+    const clerkId = req.auth.userId;
+
+    const result = await pool.query(
+      'SELECT api_key, api_key_created_at FROM users WHERE clerk_id = $1',
+      [clerkId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+
+    const key = result.rows[0].api_key;
+    res.json({
+      success: true,
+      has_key: !!key,
+      api_key: key ? key.substring(0, 8) + '...' + key.substring(key.length - 4) : null,
+      created_at: result.rows[0].api_key_created_at
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// GET /api/user/bot-status — Bot health for dashboard
+app.get('/api/user/bot-status', ClerkExpressRequireAuth(), async (req, res) => {
+  try {
+    const clerkId = req.auth.userId;
+
+    const result = await pool.query(
+      `SELECT last_bot_heartbeat, subscription_status, plan_tier
+       FROM users WHERE clerk_id = $1`,
+      [clerkId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+
+    const user = result.rows[0];
+    const lastHeartbeat = user.last_bot_heartbeat;
+    const isOnline = lastHeartbeat && (new Date() - new Date(lastHeartbeat)) < 10 * 60 * 1000;
+
+    res.json({
+      success: true,
+      bot_online: isOnline,
+      last_heartbeat: lastHeartbeat,
+      subscription_status: user.subscription_status,
+      plan_tier: user.plan_tier
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/health`);
   console.log(`🔐 Protected routes require Clerk auth`);
+  console.log(`🤖 Bot gateway: /api/bot/* (API key auth)`);
 });
