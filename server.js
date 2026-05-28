@@ -357,7 +357,8 @@ app.post('/api/checkout', ClerkExpressRequireAuth(), async (req, res) => {
 
     res.json({ success: true, sessionId: session.id, url: session.url });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    console.error('🛒 Checkout FAILED — priceId:', req.body?.priceId, 'error:', error.message);
+    res.status(400).json({ success: false, error: error.message, receivedPriceId: req.body?.priceId });
   }
 });
 
