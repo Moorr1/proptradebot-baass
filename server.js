@@ -276,8 +276,10 @@ app.put('/api/bot/config', async (req, res) => {
 app.post('/api/checkout', ClerkExpressRequireAuth(), async (req, res) => {
   try {
     const { priceId } = req.body;
+    console.log('🛒 Checkout request — priceId:', priceId);
     const clerkId = req.auth.userId;
     const email = await getClerkEmail(req.auth);
+    console.log('🛒 Checkout user — clerkId:', clerkId, 'email:', email);
     
     if (!email) {
       return res.status(400).json({ success: false, error: 'Could not retrieve email from auth provider' });
