@@ -78,9 +78,9 @@
         <div id="subscribe-section" style="margin-top:16px;">
           <p>Choose a plan to get started:</p>
           <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:12px;">
-            <button class="btn btn-primary" onclick="checkout('price_1Tb0E1BqMBErKPJd3vRGHx3F')">Basic $99/mo</button>
-            <button class="btn btn-primary" onclick="checkout('price_1Tb0ECBqMBErKPJdbB6EJ9y1')">Pro $149/mo</button>
-            <button class="btn btn-primary" onclick="checkout('price_1Tb0EMBqMBErKPJdUdKsFUVy')">Enterprise $299/mo</button>
+            <button class="btn btn-primary" id="btn-basic" disabled>Loading...</button>
+            <button class="btn btn-primary" id="btn-pro" disabled>Loading...</button>
+            <button class="btn btn-primary" id="btn-enterprise" disabled>Loading...</button>
           </div>
         </div>
       </div>
@@ -141,8 +141,33 @@
     let currentUser = null;
 
     // ─── Init Clerk ───
+    let priceMap = {};
+
+    async function loadPrices() {
+      try {
+        const res = await fetch('/api/products');
+        const data = await res.json();
+        const products = data.products || data;
+        products.forEach(p => {
+          const price = p.prices && p.prices[0];
+          if (!price) return;
+          const amount = (price.unit_amount || price.amount) / 100;
+          if (amount === 99) priceMap.basic = price.id;
+          else if (amount === 149) priceMap.pro = price.id;
+          else if (amount === 299) priceMap.enterprise = price.id;
+        });
+        const bb = document.getElementById('btn-basic');
+        const bp = document.getElementById('btn-pro');
+        const be = document.getElementById('btn-enterprise');
+        if (priceMap.basic) { bb.textContent = 'Basic $99/mo'; bb.disabled = false; bb.onclick = () => checkout(priceMap.basic); }
+        if (priceMap.pro) { bp.textContent = 'Pro $149/mo'; bp.disabled = false; bp.onclick = () => checkout(priceMap.pro); }
+        if (priceMap.enterprise) { be.textContent = 'Enterprise $299/mo'; be.disabled = false; be.onclick = () => checkout(priceMap.enterprise); }
+      } catch (e) { console.error('Failed to load prices:', e); }
+    }
+
     window.addEventListener('load', async () => {
       await Clerk.load();
+      await loadPrices();
 
       if (Clerk.user) {
         showSignedIn();
