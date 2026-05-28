@@ -1,0 +1,26 @@
+{
+  "accounts": [
+    {
+      "name": "Topstep Account 1",
+      "broker": "topstep",
+      "account_id": "YOUR_ACCOUNT_ID",
+      "api_key": "YOUR_TOPSTEP_API_KEY",
+      "enabled": true
+    }
+  ],
+  "strategy": {
+    "contract": "MNQ",
+    "contracts_per_entry": 5,
+    "t1_target": 20,
+    "t1_contracts": 3,
+    "t2_target": 40,
+    "t2_contracts": 1,
+    "runner_target": 60,
+    "runner_contracts": 1,
+    "stop_loss": 35
+  },
+  "cloud": {
+    "enabled": true,
+    "api_url": "https://proptradebot.com"
+  }
+}
