@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PropTradeBot Control Panel</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0e1a;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #1e293b;
+    }
+    .logo { font-size: 24px; font-weight: 700; color: #38bdf8; }
+    .status-bar {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      background: #1e293b;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #ef4444;
+      animation: pulse 2s infinite;
+    }
+    .status-dot.active { background: #22c55e; }
+    .status-dot.warning { background: #f59e0b; }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 768px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: #111827;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .card h2 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-primary {
+      background: #0ea5e9;
+      color: white;
+    }
+    .btn-primary:hover { background: #0284c7; }
+    .btn-success {
+      background: #22c55e;
+      color: white;
+    }
+    .btn-success:hover { background: #16a34a; }
+    .btn-danger {
+      background: #dc2626;
+      color: white;
+    }
+    .btn-danger:hover { background: #b91c1c; }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .control-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .config-section {
+      margin-top: 16px;
+    }
+    .config-section label {
+      display: block;
+      font-size: 12px;
+      color: #94a3b8;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .config-value {
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 14px;
+      color: #e2e8f0;
+      padding: 8px 12px;
+      background: #0f172a;
+      border-radius: 6px;
+      border: 1px solid #334155;
+      word-break: break-all;
+    }
+    .log-container {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 12px;
+      height: 300px;
+      overflow-y: auto;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    .log-entry {
+      padding: 2px 0;
+      border-bottom: 1px solid #1e293b;
+    }
+    .log-time { color: #64748b; }
+    .log-info { color: #38bdf8; }
+    .log-success { color: #22c55e; }
+    .log-error { color: #ef4444; }
+    .log-warning { color: #f59e0b; }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .stat-box {
+      text-align: center;
+      padding: 16px;
+      background: #0f172a;
+      border-radius: 8px;
+    }
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #38bdf8;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+    .positions-list {
+      margin-top: 12px;
+    }
+    .position-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      background: #0f172a;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      border-left: 3px solid #22c55e;
+    }
+    .position-item.short { border-left-color: #ef4444; }
+    .position-info { font-size: 14px; }
+    .position-pnl {
+      font-weight: 700;
+      font-size: 16px;
+    }
+    .pnl-positive { color: #22c55e; }
+    .pnl-negative { color: #ef4444; }
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #64748b;
+    }
+    .alert-banner {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .alert-banner.show { display: block; }
+    .alert-success { background: #166534; color: #86efac; }
+    .alert-error { background: #7f1d1d; color: #fca5a5; }
+    .alert-warning { background: #713f12; color: #fde047; }
+    .refresh-btn {
+      background: transparent;
+      border: 1px solid #334155;
+      color: #94a3b8;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .refresh-btn:hover {
+      border-color: #38bdf8;
+      color: #38bdf8;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      color: #94a3b8;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 10px 12px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      color: #e2e8f0;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #38bdf8;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #38bdf8;
+      margin: 20px 0 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #1e293b;
+    }
+    .section-title:first-child {
+      margin-top: 0;
+    }
+    .account-card {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    .account-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .account-name {
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+    .account-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #94a3b8;
+    }
+    .toggle-switch {
+      position: relative;
+      width: 40px;
+      height: 22px;
+      background: #334155;
+      border-radius: 11px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .toggle-switch.active {
+      background: #22c55e;
+    }
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 18px;
+      height: 18px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+    .toggle-switch.active::after {
+      transform: translateX(18px);
+    }
+    .add-account-btn {
+      width: 100%;
+      padding: 12px;
+      background: #0f172a;
+      border: 2px dashed #334155;
+      border-radius: 8px;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    .add-account-btn:hover {
+      border-color: #38bdf8;
+      color: #38bdf8;
+    }
+    .remove-btn {
+      background: transparent;
+      border: none;
+      color: #ef4444;
+      cursor: pointer;
+      font-size: 12px;
+      padding: 4px 8px;
+    }
+    .remove-btn:hover {
+      color: #dc2626;
+    }
+    .save-indicator {
+      font-size: 12px;
+      color: #22c55e;
+      margin-left: 12px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .save-indicator.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">🤖 PropTradeBot</div>
+      <div class="status-bar">
+        <div class="status-indicator">
+          <div class="status-dot" id="bot-status-dot"></div>
+          <span id="bot-status-text">Connecting...</span>
+        </div>
+        <button class="refresh-btn" onclick="refreshAll()">↻ Refresh</button>
+      </div>
+    </header>
+
+    <div id="alert-banner" class="alert-banner"></div>
+
+    <div class="grid">
+      <!-- Bot Control -->
+      <div class="card">
+        <h2>🎮 Bot Control</h2>
+        <div class="config-section">
+          <label>API Key Status</label>
+          <div class="config-value" id="api-key-status">Checking...</div>
+        </div>
+        <div class="config-section">
+          <label>Cloud Connection</label>
+          <div class="config-value" id="cloud-status">Checking...</div>
+        </div>
+        <div class="control-buttons">
+          <button class="btn btn-success" id="btn-start" onclick="startBot()" disabled>
+            ▶ Start Bot
+          </button>
+          <button class="btn btn-danger" id="btn-stop" onclick="stopBot()" disabled>
+            ⏹ Stop Bot
+          </button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="card">
+        <h2>📊 Today's Performance</h2>
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-value" id="stat-pnl">—</div>
+            <div class="stat-label">P&L</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value" id="stat-trades">—</div>
+            <div class="stat-label">Trades</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value" id="stat-winrate">—</div>
+            <div class="stat-label">Win Rate</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- Active Positions -->
+      <div class="card">
+        <h2>📈 Active Positions</h2>
+        <div class="positions-list" id="positions-list">
+          <div class="empty-state">No active positions</div>
+        </div>
+      </div>
+
+      <!-- Live Logs -->
+      <div class="card">
+        <h2>📝 Live Logs</h2>
+        <div class="log-container" id="log-container">
+          <div class="log-entry"><span class="log-time">--:--:--</span> Waiting for logs...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Configuration -->
+    <div class="card" style="margin-top: 20px;">
+      <h2>⚙️ Configuration <span class="save-indicator" id="save-indicator">✓ Saved</span></h2>
+      
+      <div class="section-title">Trading Accounts</div>
+      <div id="accounts-container">
+        <!-- Accounts added dynamically -->
+      </div>
+      <button class="add-account-btn" onclick="addAccount()">+ Add Account</button>
+
+      <div class="section-title">Strategy Settings</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Instrument</label>
+          <select id="config-instrument" onchange="saveConfig()">
+            <option value="MNQ">MNQ (Micro Nasdaq)</option>
+            <option value="MES">MES (Micro S&P)</option>
+            <option value="NQ">NQ (E-mini Nasdaq)</option>
+            <option value="ES">ES (E-mini S&P)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Contracts Per Entry</label>
+          <input type="number" id="config-contracts" value="5" min="1" max="20" onchange="saveConfig()">
+        </div>
+      </div>
+
+      <div class="section-title">Profit Targets</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>T1 Target (ticks)</label>
+          <input type="number" id="config-t1-target" value="20" min="1" onchange="saveConfig()">
+        </div>
+        <div class="form-group">
+          <label>T1 Contracts</label>
+          <input type="number" id="config-t1-contracts" value="3" min="1" onchange="saveConfig()">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>T2 Target (ticks)</label>
+          <input type="number" id="config-t2-target" value="40" min="1" onchange="saveConfig()">
+        </div>
+        <div class="form-group">
+          <label>T2 Contracts</label>
+          <input type="number" id="config-t2-contracts" value="1" min="1" onchange="saveConfig()">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Runner Target (ticks)</label>
+          <input type="number" id="config-runner-target" value="60" min="1" onchange="saveConfig()">
+        </div>
+        <div class="form-group">
+          <label>Runner Contracts</label>
+          <input type="number" id="config-runner-contracts" value="1" min="1" onchange="saveConfig()">
+        </div>
+      </div>
+
+      <div class="section-title">Risk Management</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Stop Loss (ticks)</label>
+          <input type="number" id="config-stop" value="35" min="1" onchange="saveConfig()">
+        </div>
+        <div class="form-group">
+          <label>Max Daily Loss ($)</label>
+          <input type="number" id="config-max-loss" value="500" min="0" step="50" onchange="saveConfig()">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let logs = [];
+    let isRunning = false;
+
+    function showAlert(message, type = 'success') {
+      const banner = document.getElementById('alert-banner');
+      banner.textContent = message;
+      banner.className = 'alert-banner alert-' + type + ' show';
+      setTimeout(() => banner.classList.remove('show'), 5000);
+    }
+
+    async function fetchStatus() {
+      try {
+        const res = await fetch('/health');
+        const data = await res.json();
+        
+        // Update status
+        const isConnected = data.projectx_connected;
+        const dot = document.getElementById('bot-status-dot');
+        const text = document.getElementById('bot-status-text');
+        
+        if (isConnected) {
+          dot.className = 'status-dot active';
+          text.textContent = 'Bot Running';
+          isRunning = true;
+        } else {
+          dot.className = 'status-dot';
+          text.textContent = 'Bot Stopped';
+          isRunning = false;
+        }
+        
+        // Update buttons
+        document.getElementById('btn-start').disabled = isConnected;
+        document.getElementById('btn-stop').disabled = !isConnected;
+        
+        // Update API key status
+        document.getElementById('api-key-status').textContent = 
+          data.px_accounts > 0 ? '✅ Configured (' + data.px_accounts + ' accounts)' : '❌ Not configured';
+        
+        // Update cloud status
+        document.getElementById('cloud-status').textContent = 
+          data.projectx_connected ? '✅ Connected' : '❌ Disconnected';
+        
+      } catch (e) {
+        document.getElementById('bot-status-text').textContent = 'Connection Error';
+        document.getElementById('bot-status-dot').className = 'status-dot warning';
+      }
+    }
+
+    async function fetchDashboard() {
+      try {
+        const res = await fetch('/dashboard');
+        // The dashboard returns HTML, we'd need a JSON endpoint for stats
+        // For now, use placeholder values
+        document.getElementById('stat-pnl').textContent = '$0';
+        document.getElementById('stat-trades').textContent = '0';
+        document.getElementById('stat-winrate').textContent = '0%';
+      } catch (e) {
+        console.error('Dashboard fetch failed:', e);
+      }
+    }
+
+    async function fetchPositions() {
+      try {
+        const res = await fetch('/positions');
+        const data = await res.json();
+        const container = document.getElementById('positions-list');
+        
+        if (!data.positions || data.positions.length === 0) {
+          container.innerHTML = '<div class="empty-state">No active positions</div>';
+          return;
+        }
+        
+        container.innerHTML = data.positions.map(p => `
+          <div class="position-item ${p.direction === 'SHORT' ? 'short' : ''}">
+            <div class="position-info">
+              <strong>${p.instrument}</strong> ${p.direction}<br>
+              <small>${p.contracts} contracts @ ${p.entry_price}</small>
+            </div>
+            <div class="position-pnl ${p.pnl >= 0 ? 'pnl-positive' : 'pnl-negative'}">
+              ${p.pnl >= 0 ? '+' : ''}$${p.pnl}
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        console.error('Positions fetch failed:', e);
+      }
+    }
+
+    function addLog(message, type = 'info') {
+      const container = document.getElementById('log-container');
+      const time = new Date().toLocaleTimeString();
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      entry.innerHTML = `<span class="log-time">${time}</span> <span class="log-${type}">${message}</span>`;
+      container.appendChild(entry);
+      container.scrollTop = container.scrollHeight;
+      
+      // Keep only last 100 logs
+      while (container.children.length > 100) {
+        container.removeChild(container.firstChild);
+      }
+    }
+
+    async function startBot() {
+      try {
+        addLog('Starting bot...', 'warning');
+        // The bot is already running if the server is up
+        // In a real implementation, this would trigger a start command
+        showAlert('Bot is already running! The server is active.', 'success');
+        await fetchStatus();
+      } catch (e) {
+        showAlert('Failed to start bot: ' + e.message, 'error');
+      }
+    }
+
+    async function stopBot() {
+      try {
+        addLog('Stopping bot...', 'warning');
+        // In a real implementation, this would trigger a graceful shutdown
+        showAlert('Use Ctrl+C in the terminal to stop the bot safely.', 'warning');
+      } catch (e) {
+        showAlert('Failed to stop bot: ' + e.message, 'error');
+      }
+    }
+
+    async function refreshAll() {
+      await fetchStatus();
+      await fetchPositions();
+      addLog('Refreshed', 'info');
+    }
+
+    // Poll for updates every 5 seconds
+    setInterval(() => {
+      fetchStatus();
+      fetchPositions();
+    }, 5000);
+
+    // Configuration management
+    let config = {
+      accounts: [],
+      strategy: {
+        instrument: 'MNQ',
+        contracts_per_entry: 5,
+        t1_target: 20,
+        t1_contracts: 3,
+        t2_target: 40,
+        t2_contracts: 1,
+        runner_target: 60,
+        runner_contracts: 1,
+        stop_loss: 35,
+        max_daily_loss: 500
+      }
+    };
+
+    async function loadConfig() {
+      try {
+        const res = await fetch('/config');
+        if (res.ok) {
+          config = await res.json();
+          renderAccounts();
+          renderStrategy();
+          addLog('Config loaded', 'success');
+        }
+      } catch (e) {
+        console.error('Failed to load config:', e);
+        // Use defaults
+        renderAccounts();
+        renderStrategy();
+      }
+    }
+
+    function renderAccounts() {
+      const container = document.getElementById('accounts-container');
+      if (!config.accounts || config.accounts.length === 0) {
+        container.innerHTML = '<div class="empty-state" style="padding:20px;">No accounts configured. Click "Add Account" below.</div>';
+        return;
+      }
+      
+      container.innerHTML = config.accounts.map((acc, i) => `
+        <div class="account-card">
+          <div class="account-header">
+            <div>
+              <div class="account-name">${acc.name || 'Account ' + (i+1)}</div>
+              <small style="color:#64748b;">${acc.broker || 'topstep'} — ${acc.account_id || 'No ID'}</small>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div class="account-toggle">
+                <div class="toggle-switch ${acc.enabled !== false ? 'active' : ''}" onclick="toggleAccount(${i})"></div>
+                ${acc.enabled !== false ? 'Active' : 'Disabled'}
+              </div>
+              <button class="remove-btn" onclick="removeAccount(${i})">Remove</button>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Account Name</label>
+              <input type="text" value="${acc.name || ''}" onchange="updateAccount(${i}, 'name', this.value)" placeholder="My Topstep Account">
+            </div>
+            <div class="form-group">
+              <label>Broker</label>
+              <select onchange="updateAccount(${i}, 'broker', this.value)">
+                <option value="topstep" ${acc.broker === 'topstep' ? 'selected' : ''}>Topstep</option>
+                <option value="tradovate" ${acc.broker === 'tradovate' ? 'selected' : ''}>Tradovate</option>
+                <option value="apex" ${acc.broker === 'apex' ? 'selected' : ''}>Apex</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Account ID</label>
+              <input type="text" value="${acc.account_id || ''}" onchange="updateAccount(${i}, 'account_id', this.value)" placeholder="12345678">
+            </div>
+            <div class="form-group">
+              <label>API Key</label>
+              <input type="password" value="${acc.api_key || ''}" onchange="updateAccount(${i}, 'api_key', this.value)" placeholder="Paste API key here">
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderStrategy() {
+      const s = config.strategy || {};
+      document.getElementById('config-instrument').value = s.instrument || 'MNQ';
+      document.getElementById('config-contracts').value = s.contracts_per_entry || 5;
+      document.getElementById('config-t1-target').value = s.t1_target || 20;
+      document.getElementById('config-t1-contracts').value = s.t1_contracts || 3;
+      document.getElementById('config-t2-target').value = s.t2_target || 40;
+      document.getElementById('config-t2-contracts').value = s.t2_contracts || 1;
+      document.getElementById('config-runner-target').value = s.runner_target || 60;
+      document.getElementById('config-runner-contracts').value = s.runner_contracts || 1;
+      document.getElementById('config-stop').value = s.stop_loss || 35;
+      document.getElementById('config-max-loss').value = s.max_daily_loss || 500;
+    }
+
+    function addAccount() {
+      if (!config.accounts) config.accounts = [];
+      config.accounts.push({
+        name: 'New Account',
+        broker: 'topstep',
+        account_id: '',
+        api_key: '',
+        enabled: true
+      });
+      renderAccounts();
+      saveConfig();
+    }
+
+    function removeAccount(index) {
+      config.accounts.splice(index, 1);
+      renderAccounts();
+      saveConfig();
+    }
+
+    function toggleAccount(index) {
+      config.accounts[index].enabled = !config.accounts[index].enabled;
+      renderAccounts();
+      saveConfig();
+    }
+
+    function updateAccount(index, field, value) {
+      config.accounts[index][field] = value;
+      saveConfig();
+    }
+
+    async function saveConfig() {
+      // Update strategy from form
+      config.strategy = {
+        instrument: document.getElementById('config-instrument').value,
+        contracts_per_entry: parseInt(document.getElementById('config-contracts').value) || 5,
+        t1_target: parseInt(document.getElementById('config-t1-target').value) || 20,
+        t1_contracts: parseInt(document.getElementById('config-t1-contracts').value) || 3,
+        t2_target: parseInt(document.getElementById('config-t2-target').value) || 40,
+        t2_contracts: parseInt(document.getElementById('config-t2-contracts').value) || 1,
+        runner_target: parseInt(document.getElementById('config-runner-target').value) || 60,
+        runner_contracts: parseInt(document.getElementById('config-runner-contracts').value) || 1,
+        stop_loss: parseInt(document.getElementById('config-stop').value) || 35,
+        max_daily_loss: parseInt(document.getElementById('config-max-loss').value) || 500
+      };
+
+      try {
+        const res = await fetch('/config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(config)
+        });
+        
+        if (res.ok) {
+          const indicator = document.getElementById('save-indicator');
+          indicator.classList.add('show');
+          setTimeout(() => indicator.classList.remove('show'), 2000);
+          addLog('Config saved', 'success');
+        } else {
+          addLog('Failed to save config', 'error');
+        }
+      } catch (e) {
+        addLog('Config save error: ' + e.message, 'error');
+      }
+    }
+
+    // Initial load
+    fetchStatus();
+    fetchPositions();
+    loadConfig();
+    addLog('Control panel loaded', 'success');
+  </script>
+</body>
+</html>
