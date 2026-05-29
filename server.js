@@ -853,6 +853,63 @@ app.get('/api/user/bot-status', ClerkExpressRequireAuth(), async (req, res) => {
   }
 });
 
+// Privacy Policy page (for Chrome Web Store)
+app.get('/privacy', (req, res) => {
+  res.send(`<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Privacy Policy - PropTradeBot</title>
+<style>body{font-family:sans-serif;max-width:800px;margin:40px auto;padding:0 20px;color:#333}
+h1{color:#0f172a;border-bottom:2px solid #38bdf8}h2{color:#1e293b;margin-top:30px}
+.last-updated{color:#64748b;font-style:italic}</style></head>
+<body>
+<h1>Privacy Policy</h1>
+<p class="last-updated">Last updated: May 29, 2026</p>
+<h2>Overview</h2>
+<p>PropTradeBot is committed to protecting your privacy. This policy explains how we handle information.</p>
+<h2>Information We Do Not Collect</h2>
+<p>PropTradeBot does <strong>not</strong> collect, store, or transmit:</p>
+<ul>
+<li>Personally identifiable information</li>
+<li>Financial or payment information</li>
+<li>Authentication credentials</li>
+<li>Personal communications or chat messages</li>
+<li>Location data</li>
+<li>Web browsing history</li>
+<li>User activity tracking</li>
+</ul>
+<h2>Local Storage Only</h2>
+<p>The Chrome extension stores all configuration <strong>locally in your browser</strong>: server URL, author lists, signal preferences, and connection stats. This data never leaves your device.</p>
+<h2>How It Works</h2>
+<p>The extension monitors Discord pages you have open, detects trading signals from configured authors, and forwards them directly to your local PropTradeBot instance. No data is sent to our servers.</p>
+<h2>Contact</h2>
+<p>Email: support@proptradebot.com</p>
+<p>Website: <a href="https://proptradebot.com">https://proptradebot.com</a></p>
+</body></html>`);
+});
+
+// Support page (for Chrome Web Store)
+app.get('/support', (req, res) => {
+  res.send(`<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Support - PropTradeBot</title>
+<style>body{font-family:sans-serif;max-width:800px;margin:40px auto;padding:0 20px;color:#333}
+h1{color:#0f172a;border-bottom:2px solid #38bdf8}</style></head>
+<body>
+<h1>PropTradeBot Support</h1>
+<p>Need help? Contact us:</p>
+<ul>
+<li>Email: <a href="mailto:support@proptradebot.com">support@proptradebot.com</a></li>
+<li>Website: <a href="https://proptradebot.com">https://proptradebot.com</a></li>
+</ul>
+<h2>Getting Started</h2>
+<ol>
+<li>Install the PropTradeBot app on your Mac</li>
+<li>Install the Chrome extension</li>
+<li>Configure your API key and server URL</li>
+<li>Add trusted signal authors</li>
+<li>Start receiving alerts</li>
+</ol>
+</body></html>`);
+});
+
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/health`);
