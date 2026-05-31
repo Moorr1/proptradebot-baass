@@ -337,7 +337,7 @@ app.post('/api/checkout', ClerkExpressRequireAuth(), async (req, res) => {
       );
     }
     
-    // Create checkout session
+    // Create checkout session with 7-day trial
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       payment_method_types: ['card'],
@@ -348,6 +348,9 @@ app.post('/api/checkout', ClerkExpressRequireAuth(), async (req, res) => {
         },
       ],
       mode: 'subscription',
+      subscription_data: {
+        trial_period_days: 7,
+      },
       success_url: `${process.env.FRONTEND_URL || 'http://localhost:3001'}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:3001'}/cancel`,
       metadata: {
@@ -465,11 +468,74 @@ app.post('/webhook', async (req, res) => {
       const session = event.data.object;
       console.log('✅ Checkout completed:', session.id);
       
+      // Trial abuse check: look up card fingerprint
+      if (session.subscription) {
+        try {
+          const subscription = await stripe.subscriptions.retrieve(session.subscription, {
+            expand: ['default_payment_method']
+          });
+          
+          const pm = subscription.default_payment_method;
+          if (pm && pm.card && pm.card.fingerprint) {
+            const fingerprint = pm.card.fingerprint;
+            console.log('💳 Card fingerprint:', fingerprint);
+            
+            // Check if this fingerprint was used for a previous trial
+            const existingFingerprint = await pool.query(
+              `SELECT u.email, u.created_at 
+               FROM trial_fingerprints tf
+               JOIN users u ON tf.user_id = u.id
+               WHERE tf.fingerprint = $1
+                 AND tf.fingerprint_type = 'card'
+                 AND tf.created_at > now() - interval '90 days'`,
+              [fingerprint]
+            );
+            
+            if (existingFingerprint.rows.length > 0) {
+              console.log('🚫 Trial abuse detected — card fingerprint already used');
+              // Cancel the subscription immediately (no charge)
+              await stripe.subscriptions.cancel(session.subscription, {
+                invoice_now: false,
+                prorate: false
+              });
+              
+              // Update user status
+              if (session.metadata?.user_id) {
+                await pool.query(
+                  `UPDATE users 
+                   SET subscription_status = 'cancelled',
+                       plan_tier = 'none'
+                   WHERE id = $1`,
+                  [session.metadata.user_id]
+                );
+              }
+              
+              // Send email or notification
+              console.log('🚫 Cancelled subscription due to trial abuse');
+              break;
+            }
+            
+            // Store fingerprint for future checks
+            if (session.metadata?.user_id) {
+              await pool.query(
+                `INSERT INTO trial_fingerprints (fingerprint, fingerprint_type, user_id)
+                 VALUES ($1, 'card', $2)
+                 ON CONFLICT (fingerprint, fingerprint_type) DO NOTHING`,
+                [fingerprint, session.metadata.user_id]
+              );
+            }
+          }
+        } catch (err) {
+          console.error('Error checking card fingerprint:', err.message);
+          // Don't block checkout if fingerprint check fails
+        }
+      }
+      
       // Update user subscription status
       if (session.metadata?.user_id) {
         await pool.query(
           `UPDATE users 
-           SET subscription_status = 'active',
+           SET subscription_status = 'trialing',
                stripe_subscription_id = $1
            WHERE id = $2`,
           [session.subscription, session.metadata.user_id]
@@ -487,10 +553,7 @@ app.post('/webhook', async (req, res) => {
       const prices = await stripe.prices.retrieve(priceId, { expand: ['product'] });
       const productName = prices.product.name;
       
-      let planTier = 'none';
-      if (productName.includes('Basic')) planTier = 'basic';
-      else if (productName.includes('Pro')) planTier = 'pro';
-      else if (productName.includes('Enterprise')) planTier = 'enterprise';
+      let planTier = 'pro';  // Single plan: Pro only
       
       await pool.query(
         `UPDATE users 

@@ -100,7 +100,17 @@ CREATE TABLE IF NOT EXISTS performance_snapshots (
     UNIQUE(user_id, account_id, date)
 );
 
--- Create indexes
+-- Trial fingerprint tracking (prevents trial abuse)
+CREATE TABLE IF NOT EXISTS trial_fingerprints (
+    id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+    fingerprint text NOT NULL,
+    fingerprint_type text NOT NULL CHECK (fingerprint_type IN ('card', 'email_domain', 'ip_hash')),
+    user_id uuid REFERENCES users(id) ON DELETE CASCADE,
+    created_at timestamptz DEFAULT now(),
+    UNIQUE(fingerprint, fingerprint_type)
+);
+
+CREATE INDEX IF NOT EXISTS idx_trial_fingerprints_lookup ON trial_fingerprints(fingerprint, fingerprint_type);
 CREATE INDEX IF NOT EXISTS idx_users_clerk_id ON users(clerk_id);
 CREATE INDEX IF NOT EXISTS idx_users_stripe_customer ON users(stripe_customer_id);
 CREATE INDEX IF NOT EXISTS idx_accounts_user_id ON accounts(user_id);
