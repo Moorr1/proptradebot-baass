@@ -301,51 +301,27 @@
   <section class="pricing" id="pricing">
     <div class="container">
       <h2 class="section-title">Simple Pricing</h2>
-      <p class="section-subtitle">14-day free trial. No credit card required. Cancel anytime.</p>
-      <div class="pricing-grid">
-        <div class="pricing-card">
-          <h3>Basic</h3>
-          <div class="price">$99<span>/month</span></div>
-          <p style="color:#64748b; margin-bottom:16px;">For traders getting started with automation.</p>
-          <ul>
-            <li>Up to 2 accounts</li>
-            <li>Discord signal support</li>
-            <li>Basic ladder strategy</li>
-            <li>Real-time dashboard</li>
-            <li>Email support</li>
-          </ul>
-          <button class="btn btn-outline" id="btn-basic" onclick="startCheckoutTier('basic')" disabled>Loading...</button>
-        </div>
+      <p class="section-subtitle">One plan. Everything included. 14-day free trial.</p>
+      <div class="pricing-grid" style="max-width: 420px; margin: 60px auto 0;">
         <div class="pricing-card popular">
-          <div class="popular-badge">MOST POPULAR</div>
-          <h3>Pro</h3>
+          <div class="popular-badge">ALL-INCLUSIVE</div>
+          <h3>PropTradeBot Pro</h3>
           <div class="price">$149<span>/month</span></div>
-          <p style="color:#64748b; margin-bottom:16px;">For serious traders scaling to the max.</p>
+          <p style="color:#64748b; margin-bottom:16px;">Full automation for serious prop firm traders.</p>
           <ul>
-            <li>Up to 5 accounts</li>
+            <li>Up to 5 accounts (Topstep max)</li>
             <li>Discord + TradingView signals</li>
-            <li>Advanced ladder (T1/T2/Runner)</li>
-            <li>Real-time dashboard</li>
+            <li>Auto-entry, trim & runner management</li>
+            <li>Real-time P&L dashboard</li>
+            <li>EOD auto-flatten</li>
             <li>Priority support</li>
-            <li>API access</li>
           </ul>
           <button class="btn btn-primary" id="btn-pro" onclick="startCheckoutTier('pro')" disabled>Loading...</button>
         </div>
-        <div class="pricing-card">
-          <h3>Enterprise</h3>
-          <div class="price">$299<span>/month</span></div>
-          <p style="color:#64748b; margin-bottom:16px;">For power users and trading teams.</p>
-          <ul>
-            <li>Up to 5 accounts per trader</li>
-            <li>Multiple trader seats</li>
-            <li>Custom strategy development</li>
-            <li>White-label dashboard</li>
-            <li>Dedicated support</li>
-            <li>API + webhooks</li>
-          </ul>
-          <button class="btn btn-outline" id="btn-enterprise" onclick="startCheckoutTier('enterprise')" disabled>Loading...</button>
-        </div>
       </div>
+      <p style="text-align: center; color: #64748b; margin-top: 32px; font-size: 14px;">
+        14-day free trial · No credit card required · Cancel anytime
+      </p>
     </div>
   </section>
 
@@ -452,14 +428,10 @@
           const price = p.prices && p.prices[0];
           if (!price) return;
           const amount = (price.unit_amount || price.amount) / 100;
-          if (amount === 99) { priceMap.basic = price.id; }
-          else if (amount === 149) { priceMap.pro = price.id; }
-          else if (amount === 299) { priceMap.enterprise = price.id; }
+          if (amount === 149) { priceMap.pro = price.id; }
         });
         // Enable buttons
-        if (priceMap.basic) { const b = document.getElementById('btn-basic'); b.textContent = 'Start Trial'; b.disabled = false; }
-        if (priceMap.pro) { const b = document.getElementById('btn-pro'); b.textContent = 'Start Trial'; b.disabled = false; }
-        if (priceMap.enterprise) { const b = document.getElementById('btn-enterprise'); b.textContent = 'Start Trial'; b.disabled = false; }
+        if (priceMap.pro) { const b = document.getElementById('btn-pro'); b.textContent = 'Start Free Trial'; b.disabled = false; }
         console.log('Prices loaded:', priceMap);
       } catch (e) {
         console.error('Failed to load prices:', e);
