@@ -344,6 +344,7 @@ INSTRUMENTS.forEach(inst => {
   state.instruments[inst.symbol] = {
     enabled: inst.symbol === 'MNQ',
     contracts: inst.symbol === 'MNQ' ? 5 : 1,
+    useTicks: false,
     stopPoints: inst.defaultStop,
     t1Contracts: inst.symbol === 'MNQ' ? 3 : 1,
     t1Points: inst.defaultT1,
@@ -448,6 +449,15 @@ function renderInstrumentConfigs() {
         <span class="chevron open" id="chevron-${inst.symbol}">▾</span>
       </div>
       <div class="instrument-config-body open" id="ibody-${inst.symbol}">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+          <div class="toggle-row" style="margin-bottom:0;">
+            <label class="toggle"><input type="checkbox" id="${inst.symbol}-useticks" ${cfg.useTicks ? 'checked' : ''}
+              onchange="toggleUnit('${inst.symbol}')"><span class="toggle-slider"></span></label>
+            <span class="toggle-label">Use ticks instead of points</span>
+          </div>
+          <span style="font-size:12px; color:var(--text-muted);">1 pt = ${inst.tickSize === 1 ? '1' : inst.tickSize} tick${inst.tickSize !== 1 ? 's' : ''}</span>
+        </div>
+
         <div class="section-label">Position Size</div>
         <div class="form-row" style="max-width:320px;">
           <div class="form-group">
@@ -457,9 +467,9 @@ function renderInstrumentConfigs() {
             <p class="help">No limit — your call</p>
           </div>
           <div class="form-group">
-            <label>Stop Loss (pts)</label>
-            <input type="number" min="0.01" step="0.01" value="${cfg.stopPoints}" id="${inst.symbol}-stop"
-              onchange="updateInstrument('${inst.symbol}', 'stopPoints', this.value); calcRisk('${inst.symbol}')">
+            <label>Stop Loss (${cfg.useTicks ? 'ticks' : 'pts'})</label>
+            <input type="number" min="0.01" step="0.01" value="${cfg.useTicks ? (cfg.stopPoints / inst.tickSize).toFixed(inst.tickSize < 1 ? 2 : 0) : cfg.stopPoints}" id="${inst.symbol}-stop"
+              onchange="updateStop('${inst.symbol}', this.value); calcRisk('${inst.symbol}')">
           </div>
         </div>
 
@@ -471,9 +481,9 @@ function renderInstrumentConfigs() {
               onchange="updateInstrument('${inst.symbol}', 't1Contracts', this.value); validateMath('${inst.symbol}')">
           </div>
           <div class="form-group">
-            <label>T1 Target (pts)</label>
-            <input type="number" min="0.01" step="0.01" value="${cfg.t1Points}" id="${inst.symbol}-t1p"
-              onchange="updateInstrument('${inst.symbol}', 't1Points', this.value)">
+            <label>T1 Target (${cfg.useTicks ? 'ticks' : 'pts'})</label>
+            <input type="number" min="0.01" step="0.01" value="${cfg.useTicks ? (cfg.t1Points / inst.tickSize).toFixed(inst.tickSize < 1 ? 2 : 0) : cfg.t1Points}" id="${inst.symbol}-t1p"
+              onchange="updateTarget('${inst.symbol}', 't1Points', this.value)">
           </div>
           <div class="form-group">
             <label>T2 Contracts</label>
@@ -481,9 +491,9 @@ function renderInstrumentConfigs() {
               onchange="updateInstrument('${inst.symbol}', 't2Contracts', this.value); validateMath('${inst.symbol}')">
           </div>
           <div class="form-group">
-            <label>T2 Target (pts)</label>
-            <input type="number" min="0.01" step="0.01" value="${cfg.t2Points}" id="${inst.symbol}-t2p"
-              onchange="updateInstrument('${inst.symbol}', 't2Points', this.value)">
+            <label>T2 Target (${cfg.useTicks ? 'ticks' : 'pts'})</label>
+            <input type="number" min="0.01" step="0.01" value="${cfg.useTicks ? (cfg.t2Points / inst.tickSize).toFixed(inst.tickSize < 1 ? 2 : 0) : cfg.t2Points}" id="${inst.symbol}-t2p"
+              onchange="updateTarget('${inst.symbol}', 't2Points', this.value)">
           </div>
         </div>
 
@@ -495,9 +505,9 @@ function renderInstrumentConfigs() {
               onchange="updateInstrument('${inst.symbol}', 'runnerContracts', this.value); validateMath('${inst.symbol}')">
           </div>
           <div class="form-group">
-            <label>Runner Auto-Close (pts)</label>
-            <input type="number" min="0.01" step="0.01" value="${cfg.runnerPoints}" id="${inst.symbol}-rp"
-              onchange="updateInstrument('${inst.symbol}', 'runnerPoints', this.value)">
+            <label>Runner Auto-Close (${cfg.useTicks ? 'ticks' : 'pts'})</label>
+            <input type="number" min="0.01" step="0.01" value="${cfg.useTicks ? (cfg.runnerPoints / inst.tickSize).toFixed(inst.tickSize < 1 ? 2 : 0) : cfg.runnerPoints}" id="${inst.symbol}-rp"
+              onchange="updateTarget('${inst.symbol}', 'runnerPoints', this.value)">
           </div>
         </div>
 
@@ -532,17 +542,41 @@ function updateInstrument(symbol, key, value) {
   state.instruments[symbol][key] = isNaN(numVal) ? value : numVal;
 }
 
+function toggleUnit(symbol) {
+  const inst = INSTRUMENTS.find(i => i.symbol === symbol);
+  const cfg = state.instruments[symbol];
+  cfg.useTicks = !cfg.useTicks;
+  // Re-render just this instrument's config body
+  renderInstrumentConfigs();
+}
+
+function updateStop(symbol, value) {
+  const inst = INSTRUMENTS.find(i => i.symbol === symbol);
+  const cfg = state.instruments[symbol];
+  const numVal = parseFloat(value);
+  if (isNaN(numVal)) return;
+  cfg.stopPoints = cfg.useTicks ? numVal * inst.tickSize : numVal;
+}
+
+function updateTarget(symbol, key, value) {
+  const inst = INSTRUMENTS.find(i => i.symbol === symbol);
+  const cfg = state.instruments[symbol];
+  const numVal = parseFloat(value);
+  if (isNaN(numVal)) return;
+  cfg[key] = cfg.useTicks ? numVal * inst.tickSize : numVal;
+}
+
 function calcRisk(symbol) {
   const inst = INSTRUMENTS.find(i => i.symbol === symbol);
   const cfg = state.instruments[symbol];
   const contracts = parseFloat(document.getElementById(`${symbol}-contracts`)?.value) || 0;
-  const stop = parseFloat(document.getElementById(`${symbol}-stop`)?.value) || 0;
+  const stop = cfg.stopPoints;
   const maxRisk = contracts * stop * inst.pointValue;
-  const t1pts = parseFloat(document.getElementById(`${symbol}-t1p`)?.value) || 0;
+  const t1pts = cfg.t1Points;
   const t1c = parseFloat(document.getElementById(`${symbol}-t1c`)?.value) || 0;
-  const t2pts = parseFloat(document.getElementById(`${symbol}-t2p`)?.value) || 0;
+  const t2pts = cfg.t2Points;
   const t2c = parseFloat(document.getElementById(`${symbol}-t2c`)?.value) || 0;
-  const rpts = parseFloat(document.getElementById(`${symbol}-rp`)?.value) || 0;
+  const rpts = cfg.runnerPoints;
   const rc = parseFloat(document.getElementById(`${symbol}-rc`)?.value) || 0;
 
   const t1profit = t1c * t1pts * inst.pointValue;
@@ -616,9 +650,14 @@ function renderReview() {
   html += `<div class="review-section"><h3>Instruments (${enabledInstruments.length})</h3>`;
   enabledInstruments.forEach(inst => {
     const cfg = state.instruments[inst.symbol];
+    const unit = cfg.useTicks ? 'tick' : 'pt';
+    const stopDisplay = cfg.useTicks ? (cfg.stopPoints / inst.tickSize).toFixed(inst.tickSize < 1 ? 2 : 0) : cfg.stopPoints;
+    const t1Display = cfg.useTicks ? (cfg.t1Points / inst.tickSize).toFixed(inst.tickSize < 1 ? 2 : 0) : cfg.t1Points;
+    const t2Display = cfg.useTicks ? (cfg.t2Points / inst.tickSize).toFixed(inst.tickSize < 1 ? 2 : 0) : cfg.t2Points;
+    const rDisplay = cfg.useTicks ? (cfg.runnerPoints / inst.tickSize).toFixed(inst.tickSize < 1 ? 2 : 0) : cfg.runnerPoints;
     html += `<div class="review-row">
-      <span class="label">${inst.symbol} — ${cfg.contracts} contracts, -${cfg.stopPoints}pt stop</span>
-      <span class="value">T1 ${cfg.t1Contracts}c@+${cfg.t1Points}pt · T2 ${cfg.t2Contracts}c@+${cfg.t2Points}pt · Runner ${cfg.runnerContracts}c@+${cfg.runnerPoints}pt</span>
+      <span class="label">${inst.symbol} — ${cfg.contracts} contracts, -${stopDisplay}${unit} stop</span>
+      <span class="value">T1 ${cfg.t1Contracts}c@+${t1Display}${unit} · T2 ${cfg.t2Contracts}c@+${t2Display}${unit} · Runner ${cfg.runnerContracts}c@+${rDisplay}${unit}</span>
     </div>`;
   });
   html += '</div>';
