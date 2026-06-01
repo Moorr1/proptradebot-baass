@@ -455,7 +455,7 @@ function renderInstrumentConfigs() {
               onchange="toggleUnit('${inst.symbol}')"><span class="toggle-slider"></span></label>
             <span class="toggle-label">Use ticks instead of points</span>
           </div>
-          <span style="font-size:12px; color:var(--text-muted);">1 pt = ${inst.tickSize === 1 ? '1' : inst.tickSize} tick${inst.tickSize !== 1 ? 's' : ''}</span>
+          <span style="font-size:12px; color:var(--text-muted);">1 pt = ${(1 / inst.tickSize).toFixed(inst.tickSize < 1 ? 0 : 0)} tick${(1 / inst.tickSize) !== 1 ? 's' : ''}</span>
         </div>
 
         <div class="section-label">Position Size</div>
