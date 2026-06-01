@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PropTradeBot — Setup</title>
+<style>
+  :root {
+    --primary: #22c55e;
+    --primary-dark: #16a34a;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1e293b;
+    --text: #e2e8f0;
+    --text-muted: #64748b;
+    --border: #1e293b;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 32px 16px;
+    line-height: 1.6;
+  }
+  .container { max-width: 960px; margin: 0 auto; }
+
+  /* Header */
+  .header { text-align: center; margin-bottom: 40px; }
+  .header h1 { font-size: 32px; font-weight: 800; color: var(--primary); }
+  .header p { color: var(--text-muted); margin-top: 8px; }
+
+  /* Progress */
+  .progress { display: flex; gap: 0; margin-bottom: 40px; border-radius: var(--radius); overflow: hidden; }
+  .progress-step {
+    flex: 1; padding: 12px; text-align: center; font-size: 13px; font-weight: 600;
+    background: var(--surface2); color: var(--text-muted); cursor: pointer;
+    border-right: 1px solid var(--bg); transition: all 0.2s;
+  }
+  .progress-step:last-child { border-right: none; }
+  .progress-step.active { background: var(--primary); color: #0a0e1a; }
+  .progress-step.done { background: var(--primary-dark); color: white; }
+
+  /* Panels */
+  .panel { display: none; }
+  .panel.active { display: block; animation: fadeIn 0.25s; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Cards */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 28px; margin-bottom: 20px;
+  }
+  .card-title {
+    font-size: 18px; font-weight: 700; margin-bottom: 20px;
+    padding-bottom: 12px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  /* Form */
+  .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  input[type="text"], input[type="number"], input[type="password"], input[type="time"], select {
+    width: 100%; padding: 10px 12px; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); font-size: 14px; transition: border 0.2s;
+  }
+  input:focus, select:focus { outline: none; border-color: var(--primary); }
+  input::placeholder { color: var(--text-muted); }
+  .help { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+  /* Toggle */
+  .toggle-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .toggle { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute; inset: 0; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 24px; cursor: pointer; transition: 0.3s;
+  }
+  .toggle-slider:before {
+    content: ""; position: absolute; height: 16px; width: 16px;
+    left: 3px; bottom: 3px; background: var(--text-muted); border-radius: 50%; transition: 0.3s;
+  }
+  input:checked + .toggle-slider { background: var(--primary); border-color: var(--primary); }
+  input:checked + .toggle-slider:before { transform: translateX(20px); background: white; }
+  .toggle-label { font-size: 14px; font-weight: 500; }
+
+  /* Instrument Grid */
+  .instrument-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .instrument-tile {
+    background: var(--surface2); border: 2px solid var(--border); border-radius: var(--radius);
+    padding: 16px; cursor: pointer; text-align: center; transition: all 0.2s;
+  }
+  .instrument-tile:hover { border-color: var(--primary); }
+  .instrument-tile.active { border-color: var(--primary); background: rgba(34, 197, 94, 0.08); }
+  .instrument-tile .symbol { font-size: 20px; font-weight: 800; color: var(--primary); }
+  .instrument-tile .name { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+  .instrument-tile .tick-val { font-size: 11px; color: var(--text-muted); }
+
+  /* Instrument Config */
+  .instrument-config { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 16px; overflow: hidden; }
+  .instrument-config-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 20px; background: var(--surface2); cursor: pointer;
+  }
+  .instrument-config-header .left { display: flex; align-items: center; gap: 12px; }
+  .instrument-config-header .symbol { font-weight: 700; font-size: 16px; color: var(--primary); }
+  .instrument-config-header .meta { font-size: 12px; color: var(--text-muted); }
+  .instrument-config-body { padding: 20px; display: none; }
+  .instrument-config-body.open { display: block; }
+  .chevron { transition: transform 0.2s; color: var(--text-muted); }
+  .chevron.open { transform: rotate(180deg); }
+
+  /* Warnings */
+  .warning-box {
+    background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: 8px; padding: 12px 16px; margin-top: 12px;
+    font-size: 13px; color: var(--warning); display: none;
+  }
+  .warning-box.show { display: flex; align-items: center; gap: 8px; }
+  .error-box {
+    background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px; padding: 12px 16px; margin-top: 12px;
+    font-size: 13px; color: var(--danger); display: none;
+  }
+  .error-box.show { display: flex; align-items: center; gap: 8px; }
+
+  /* Risk preview */
+  .risk-preview {
+    background: var(--surface2); border-radius: 8px; padding: 14px 16px;
+    margin-top: 12px; font-size: 13px;
+  }
+  .risk-preview .risk-row { display: flex; justify-content: space-between; padding: 4px 0; }
+  .risk-preview .risk-label { color: var(--text-muted); }
+  .risk-preview .risk-value { font-weight: 600; }
+  .risk-preview .risk-value.warn { color: var(--warning); }
+  .risk-preview .risk-value.ok { color: var(--primary); }
+
+  /* Account table */
+  .account-table { width: 100%; border-collapse: collapse; }
+  .account-table th { padding: 10px 12px; text-align: left; font-size: 11px; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+  .account-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  .account-table tr:last-child td { border-bottom: none; }
+  .account-table input[type="text"], .account-table input[type="number"] { padding: 8px 10px; font-size: 13px; }
+  .account-table input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary); }
+  .btn-remove { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px; padding: 4px 8px; }
+  .btn-remove:hover { color: var(--danger); }
+  .btn-add-account {
+    background: none; border: 1px dashed var(--border); color: var(--text-muted);
+    border-radius: 8px; padding: 10px 16px; width: 100%; margin-top: 12px;
+    cursor: pointer; font-size: 13px; transition: all 0.2s;
+  }
+  .btn-add-account:hover { border-color: var(--primary); color: var(--primary); }
+
+  /* Nav buttons */
+  .nav-buttons { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; }
+  .btn { padding: 12px 28px; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .btn-primary { background: var(--primary); color: #0a0e1a; }
+  .btn-primary:hover { background: var(--primary-dark); }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--primary); color: var(--primary); }
+
+  /* Review */
+  .review-section { margin-bottom: 20px; }
+  .review-section h3 { font-size: 14px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+  .review-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .review-row:last-child { border-bottom: none; }
+  .review-row .label { color: var(--text-muted); }
+  .review-row .value { font-weight: 600; color: var(--primary); }
+
+  .success-msg {
+    background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3);
+    border-radius: var(--radius); padding: 20px; text-align: center; color: var(--primary);
+    font-size: 18px; font-weight: 700; display: none; margin-bottom: 20px;
+  }
+  .success-msg.show { display: block; }
+
+  /* Section divider */
+  .section-label {
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--text-muted); margin-bottom: 12px; margin-top: 8px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🎯 PropTradeBot Setup</h1>
+    <p>Configure your bot in 4 steps. You're in full control.</p>
+  </div>
+
+  <div class="progress">
+    <div class="progress-step active" data-step="0" onclick="goStep(0)">1. Accounts</div>
+    <div class="progress-step" data-step="1" onclick="goStep(1)">2. Instruments</div>
+    <div class="progress-step" data-step="2" onclick="goStep(2)">3. Risk & Timing</div>
+    <div class="progress-step" data-step="3" onclick="goStep(3)">4. Review & Save</div>
+  </div>
+
+  <!-- ===================== STEP 1: ACCOUNTS ===================== -->
+  <div class="panel active" id="panel-0">
+    <div class="card">
+      <div class="card-title">🏦 TopstepX Accounts</div>
+      <p style="color:var(--text-muted); font-size:14px; margin-bottom:20px;">
+        Add your funded accounts. One must be the <strong style="color:var(--text)">Leader</strong> — bot tracks position state from it. All <strong style="color:var(--text)">Follower</strong> accounts mirror every trade automatically.
+      </p>
+      <table class="account-table">
+        <thead>
+          <tr>
+            <th>Account ID</th>
+            <th>Label</th>
+            <th>Enabled</th>
+            <th>Leader</th>
+            <th>Follower</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="accountBody"></tbody>
+      </table>
+      <button class="btn-add-account" onclick="addAccount()">+ Add Account</button>
+    </div>
+    <div class="nav-buttons">
+      <div></div>
+      <button class="btn btn-primary" onclick="goStep(1)">Next → Instruments</button>
+    </div>
+  </div>
+
+  <!-- ===================== STEP 2: INSTRUMENTS ===================== -->
+  <div class="panel" id="panel-1">
+    <div class="card">
+      <div class="card-title">📊 Select Instruments</div>
+      <p style="color:var(--text-muted); font-size:14px; margin-bottom:20px;">
+        Enable the instruments you want to trade. Configure each one independently — contracts, stops, targets. No limits enforced. Your strategy, your risk.
+      </p>
+
+      <div class="section-label">Select instruments to trade</div>
+      <div class="instrument-grid" id="instrumentGrid"></div>
+
+      <div id="instrumentConfigs"></div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goStep(0)">← Back</button>
+      <button class="btn btn-primary" onclick="goStep(2)">Next → Risk & Timing</button>
+    </div>
+  </div>
+
+  <!-- ===================== STEP 3: RISK & TIMING ===================== -->
+  <div class="panel" id="panel-2">
+    <div class="card">
+      <div class="card-title">🛡️ Risk & Timing</div>
+
+      <div class="section-label">End-of-Day Flatten</div>
+      <div class="form-row" style="max-width:400px;">
+        <div class="form-group">
+          <div class="toggle-row">
+            <label class="toggle"><input type="checkbox" id="eodEnabled" checked><span class="toggle-slider"></span></label>
+            <span class="toggle-label">Auto-flatten before market close</span>
+          </div>
+          <p class="help">Closes all positions at the configured time. Recommended — protects your daily drawdown limit.</p>
+        </div>
+        <div class="form-group">
+          <label>Flatten Time (ET)</label>
+          <input type="time" id="eodTime" value="16:10">
+          <p class="help">Default: 4:10 PM ET (10 min before CME close)</p>
+        </div>
+      </div>
+
+      <div class="section-label" style="margin-top:24px;">Notifications</div>
+      <div class="form-row" style="max-width:600px;">
+        <div class="form-group">
+          <div class="toggle-row">
+            <label class="toggle"><input type="checkbox" id="telegramEnabled"><span class="toggle-slider"></span></label>
+            <span class="toggle-label">Telegram Alerts</span>
+          </div>
+          <p class="help">Get notified on entries, trims, stops, and daily P&L.</p>
+        </div>
+        <div class="form-group">
+          <label>Telegram Bot Token</label>
+          <input type="text" id="telegramToken" placeholder="1234567890:ABC...">
+        </div>
+        <div class="form-group">
+          <label>Telegram Chat ID</label>
+          <input type="text" id="telegramChatId" placeholder="-100123456789">
+        </div>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goStep(1)">← Back</button>
+      <button class="btn btn-primary" onclick="goStep(3)">Next → Review</button>
+    </div>
+  </div>
+
+  <!-- ===================== STEP 4: REVIEW ===================== -->
+  <div class="panel" id="panel-3">
+    <div class="success-msg" id="successMsg">✅ Configuration saved! Restart the bot to apply.</div>
+    <div class="card">
+      <div class="card-title">✅ Review & Save</div>
+      <div id="reviewContent"></div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goStep(2)">← Back</button>
+      <button class="btn btn-primary" onclick="saveConfig()">💾 Save Configuration</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// INSTRUMENT DEFINITIONS
+// ============================================================
+const INSTRUMENTS = [
+  { symbol: 'ES',  name: 'E-mini S&P 500',    tickSize: 0.25, tickValue: 12.50, pointValue: 50.00,  defaultStop: 4,  defaultT1: 2,  defaultT2: 4,  defaultRunner: 8  },
+  { symbol: 'NQ',  name: 'E-mini Nasdaq',      tickSize: 0.25, tickValue: 5.00,  pointValue: 20.00,  defaultStop: 8,  defaultT1: 4,  defaultT2: 8,  defaultRunner: 16 },
+  { symbol: 'MES', name: 'Micro E-mini S&P',   tickSize: 0.25, tickValue: 1.25,  pointValue: 5.00,   defaultStop: 9,  defaultT1: 7,  defaultT2: 12, defaultRunner: 20 },
+  { symbol: 'MNQ', name: 'Micro E-mini Nasdaq', tickSize: 0.25, tickValue: 0.50, pointValue: 2.00,   defaultStop: 35, defaultT1: 20, defaultT2: 40, defaultRunner: 60 },
+  { symbol: 'YM',  name: 'E-mini Dow',          tickSize: 1,    tickValue: 5.00,  pointValue: 5.00,   defaultStop: 30, defaultT1: 15, defaultT2: 30, defaultRunner: 60 },
+  { symbol: 'MYM', name: 'Micro Dow',           tickSize: 1,    tickValue: 0.50,  pointValue: 0.50,   defaultStop: 30, defaultT1: 15, defaultT2: 30, defaultRunner: 60 },
+  { symbol: 'RTY', name: 'E-mini Russell 2000', tickSize: 0.10, tickValue: 5.00,  pointValue: 50.00,  defaultStop: 2,  defaultT1: 1,  defaultT2: 2,  defaultRunner: 4  },
+  { symbol: 'M2K', name: 'Micro Russell 2000',  tickSize: 0.10, tickValue: 0.50,  pointValue: 5.00,   defaultStop: 2,  defaultT1: 1,  defaultT2: 2,  defaultRunner: 4  },
+  { symbol: 'CL',  name: 'Crude Oil',           tickSize: 0.01, tickValue: 10.00, pointValue: 1000.00,defaultStop: 0.30,defaultT1:0.15,defaultT2:0.30,defaultRunner: 0.60},
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let state = {
+  accounts: [
+    { id: '', name: 'Account 1', enabled: true, leader: true, follower: false }
+  ],
+  instruments: {},  // symbol -> config object
+  eodEnabled: true,
+  eodTime: '16:10',
+  telegramEnabled: false,
+  telegramToken: '',
+  telegramChatId: ''
+};
+
+// Init instrument state
+INSTRUMENTS.forEach(inst => {
+  state.instruments[inst.symbol] = {
+    enabled: inst.symbol === 'MNQ',
+    contracts: inst.symbol === 'MNQ' ? 5 : 1,
+    stopPoints: inst.defaultStop,
+    t1Contracts: inst.symbol === 'MNQ' ? 3 : 1,
+    t1Points: inst.defaultT1,
+    t2Contracts: 1,
+    t2Points: inst.defaultT2,
+    runnerContracts: 1,
+    runnerPoints: inst.defaultRunner
+  };
+});
+
+let currentStep = 0;
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function goStep(n) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.progress-step').forEach((s, i) => {
+    s.classList.remove('active', 'done');
+    if (i < n) s.classList.add('done');
+    if (i === n) s.classList.add('active');
+  });
+  document.getElementById(`panel-${n}`).classList.add('active');
+  currentStep = n;
+  if (n === 1) renderInstrumentConfigs();
+  if (n === 3) renderReview();
+  window.scrollTo(0, 0);
+}
+
+// ============================================================
+// ACCOUNTS
+// ============================================================
+function renderAccounts() {
+  const tbody = document.getElementById('accountBody');
+  tbody.innerHTML = state.accounts.map((acc, i) => `
+    <tr>
+      <td><input type="text" value="${acc.id}" placeholder="e.g. 23279221"
+        onchange="state.accounts[${i}].id = this.value"></td>
+      <td><input type="text" value="${acc.name}" placeholder="My $50K Account"
+        onchange="state.accounts[${i}].name = this.value"></td>
+      <td style="text-align:center"><input type="checkbox" ${acc.enabled ? 'checked' : ''}
+        onchange="state.accounts[${i}].enabled = this.checked"></td>
+      <td style="text-align:center"><input type="checkbox" ${acc.leader ? 'checked' : ''}
+        onchange="setLeader(${i})"></td>
+      <td style="text-align:center"><input type="checkbox" ${acc.follower ? 'checked' : ''}
+        onchange="state.accounts[${i}].follower = this.checked"></td>
+      <td><button class="btn-remove" onclick="removeAccount(${i})">✕</button></td>
+    </tr>
+  `).join('');
+}
+
+function addAccount() {
+  state.accounts.push({ id: '', name: `Account ${state.accounts.length + 1}`, enabled: true, leader: false, follower: true });
+  renderAccounts();
+}
+function removeAccount(i) {
+  state.accounts.splice(i, 1);
+  renderAccounts();
+}
+function setLeader(i) {
+  state.accounts.forEach((a, j) => { a.leader = (j === i); a.follower = (j !== i); });
+  renderAccounts();
+}
+
+// ============================================================
+// INSTRUMENT GRID
+// ============================================================
+function renderInstrumentGrid() {
+  const grid = document.getElementById('instrumentGrid');
+  grid.innerHTML = INSTRUMENTS.map(inst => `
+    <div class="instrument-tile ${state.instruments[inst.symbol].enabled ? 'active' : ''}"
+      onclick="toggleInstrument('${inst.symbol}')" id="tile-${inst.symbol}">
+      <div class="symbol">${inst.symbol}</div>
+      <div class="name">${inst.name}</div>
+      <div class="tick-val">$${inst.tickValue}/tick</div>
+    </div>
+  `).join('');
+}
+
+function toggleInstrument(symbol) {
+  state.instruments[symbol].enabled = !state.instruments[symbol].enabled;
+  document.getElementById(`tile-${symbol}`).classList.toggle('active', state.instruments[symbol].enabled);
+  document.getElementById(`iconfig-${symbol}`).style.display = state.instruments[symbol].enabled ? 'block' : 'none';
+}
+
+// ============================================================
+// INSTRUMENT CONFIGS
+// ============================================================
+function renderInstrumentConfigs() {
+  renderInstrumentGrid();
+  const container = document.getElementById('instrumentConfigs');
+  container.innerHTML = INSTRUMENTS.map(inst => {
+    const cfg = state.instruments[inst.symbol];
+    return `
+    <div class="instrument-config" id="iconfig-${inst.symbol}"
+      style="display:${cfg.enabled ? 'block' : 'none'};">
+      <div class="instrument-config-header" onclick="toggleConfigBody('${inst.symbol}')">
+        <div class="left">
+          <span class="symbol">${inst.symbol}</span>
+          <span class="meta">${inst.name} · $${inst.pointValue}/pt · $${inst.tickValue}/tick</span>
+        </div>
+        <span class="chevron open" id="chevron-${inst.symbol}">▾</span>
+      </div>
+      <div class="instrument-config-body open" id="ibody-${inst.symbol}">
+        <div class="section-label">Position Size</div>
+        <div class="form-row" style="max-width:320px;">
+          <div class="form-group">
+            <label>Total Contracts</label>
+            <input type="number" min="1" value="${cfg.contracts}" id="${inst.symbol}-contracts"
+              onchange="updateInstrument('${inst.symbol}', 'contracts', this.value); calcRisk('${inst.symbol}')">
+            <p class="help">No limit — your call</p>
+          </div>
+          <div class="form-group">
+            <label>Stop Loss (pts)</label>
+            <input type="number" min="0.01" step="0.01" value="${cfg.stopPoints}" id="${inst.symbol}-stop"
+              onchange="updateInstrument('${inst.symbol}', 'stopPoints', this.value); calcRisk('${inst.symbol}')">
+          </div>
+        </div>
+
+        <div class="section-label" style="margin-top:16px;">Trim Targets</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>T1 Contracts</label>
+            <input type="number" min="0" value="${cfg.t1Contracts}" id="${inst.symbol}-t1c"
+              onchange="updateInstrument('${inst.symbol}', 't1Contracts', this.value); validateMath('${inst.symbol}')">
+          </div>
+          <div class="form-group">
+            <label>T1 Target (pts)</label>
+            <input type="number" min="0.01" step="0.01" value="${cfg.t1Points}" id="${inst.symbol}-t1p"
+              onchange="updateInstrument('${inst.symbol}', 't1Points', this.value)">
+          </div>
+          <div class="form-group">
+            <label>T2 Contracts</label>
+            <input type="number" min="0" value="${cfg.t2Contracts}" id="${inst.symbol}-t2c"
+              onchange="updateInstrument('${inst.symbol}', 't2Contracts', this.value); validateMath('${inst.symbol}')">
+          </div>
+          <div class="form-group">
+            <label>T2 Target (pts)</label>
+            <input type="number" min="0.01" step="0.01" value="${cfg.t2Points}" id="${inst.symbol}-t2p"
+              onchange="updateInstrument('${inst.symbol}', 't2Points', this.value)">
+          </div>
+        </div>
+
+        <div class="section-label" style="margin-top:8px;">Runner</div>
+        <div class="form-row" style="max-width:400px;">
+          <div class="form-group">
+            <label>Runner Contracts</label>
+            <input type="number" min="0" value="${cfg.runnerContracts}" id="${inst.symbol}-rc"
+              onchange="updateInstrument('${inst.symbol}', 'runnerContracts', this.value); validateMath('${inst.symbol}')">
+          </div>
+          <div class="form-group">
+            <label>Runner Auto-Close (pts)</label>
+            <input type="number" min="0.01" step="0.01" value="${cfg.runnerPoints}" id="${inst.symbol}-rp"
+              onchange="updateInstrument('${inst.symbol}', 'runnerPoints', this.value)">
+          </div>
+        </div>
+
+        <!-- Risk preview -->
+        <div class="risk-preview" id="risk-${inst.symbol}"></div>
+
+        <!-- Warnings -->
+        <div class="warning-box" id="warn-${inst.symbol}"></div>
+        <div class="error-box" id="err-${inst.symbol}"></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Calc risk for all enabled instruments
+  INSTRUMENTS.forEach(inst => {
+    if (state.instruments[inst.symbol].enabled) {
+      calcRisk(inst.symbol);
+      validateMath(inst.symbol);
+    }
+  });
+}
+
+function toggleConfigBody(symbol) {
+  const body = document.getElementById(`ibody-${symbol}`);
+  const chevron = document.getElementById(`chevron-${symbol}`);
+  body.classList.toggle('open');
+  chevron.classList.toggle('open');
+}
+
+function updateInstrument(symbol, key, value) {
+  const numVal = parseFloat(value);
+  state.instruments[symbol][key] = isNaN(numVal) ? value : numVal;
+}
+
+function calcRisk(symbol) {
+  const inst = INSTRUMENTS.find(i => i.symbol === symbol);
+  const cfg = state.instruments[symbol];
+  const contracts = parseFloat(document.getElementById(`${symbol}-contracts`)?.value) || 0;
+  const stop = parseFloat(document.getElementById(`${symbol}-stop`)?.value) || 0;
+  const maxRisk = contracts * stop * inst.pointValue;
+  const t1pts = parseFloat(document.getElementById(`${symbol}-t1p`)?.value) || 0;
+  const t1c = parseFloat(document.getElementById(`${symbol}-t1c`)?.value) || 0;
+  const t2pts = parseFloat(document.getElementById(`${symbol}-t2p`)?.value) || 0;
+  const t2c = parseFloat(document.getElementById(`${symbol}-t2c`)?.value) || 0;
+  const rpts = parseFloat(document.getElementById(`${symbol}-rp`)?.value) || 0;
+  const rc = parseFloat(document.getElementById(`${symbol}-rc`)?.value) || 0;
+
+  const t1profit = t1c * t1pts * inst.pointValue;
+  const t2profit = t2c * t2pts * inst.pointValue;
+  const rprofit = rc * rpts * inst.pointValue;
+
+  const riskEl = document.getElementById(`risk-${symbol}`);
+  const warnEl = document.getElementById(`warn-${symbol}`);
+
+  if (riskEl) {
+    riskEl.innerHTML = `
+      <div class="risk-row"><span class="risk-label">Max risk (full stop):</span>
+        <span class="risk-value ${maxRisk > 1000 ? 'warn' : 'ok'}">-$${maxRisk.toFixed(2)}</span></div>
+      <div class="risk-row"><span class="risk-label">Max profit (all targets hit):</span>
+        <span class="risk-value ok">+$${(t1profit + t2profit + rprofit).toFixed(2)}</span></div>
+      <div class="risk-row"><span class="risk-label">R:R ratio:</span>
+        <span class="risk-value">${maxRisk > 0 ? ((t1profit + t2profit + rprofit) / maxRisk).toFixed(2) : '—'}:1</span></div>
+    `;
+  }
+
+  if (warnEl) {
+    if (maxRisk > 2000) {
+      warnEl.textContent = `⚠️ High risk — full stop loss on this position is $${maxRisk.toFixed(0)}. Make sure this fits your account's daily loss limit.`;
+      warnEl.classList.add('show');
+    } else if (maxRisk > 500) {
+      warnEl.textContent = `⚠️ Max risk per signal: $${maxRisk.toFixed(0)}. Confirm this aligns with your risk tolerance.`;
+      warnEl.classList.add('show');
+    } else {
+      warnEl.classList.remove('show');
+    }
+  }
+}
+
+function validateMath(symbol) {
+  const contracts = parseFloat(document.getElementById(`${symbol}-contracts`)?.value) || 0;
+  const t1c = parseFloat(document.getElementById(`${symbol}-t1c`)?.value) || 0;
+  const t2c = parseFloat(document.getElementById(`${symbol}-t2c`)?.value) || 0;
+  const rc = parseFloat(document.getElementById(`${symbol}-rc`)?.value) || 0;
+  const errEl = document.getElementById(`err-${symbol}`);
+
+  if (errEl) {
+    if ((t1c + t2c + rc) > contracts && contracts > 0) {
+      errEl.textContent = `🔴 Math error: T1 (${t1c}) + T2 (${t2c}) + Runner (${rc}) = ${t1c + t2c + rc} exceeds total contracts (${contracts}). Fix before saving.`;
+      errEl.classList.add('show');
+    } else {
+      errEl.classList.remove('show');
+    }
+  }
+}
+
+// ============================================================
+// REVIEW
+// ============================================================
+function renderReview() {
+  const enabledInstruments = INSTRUMENTS.filter(i => state.instruments[i.symbol].enabled);
+  const enabledAccounts = state.accounts.filter(a => a.enabled && a.id);
+
+  let html = '';
+
+  // Accounts
+  html += `<div class="review-section"><h3>Accounts (${enabledAccounts.length})</h3>`;
+  enabledAccounts.forEach(acc => {
+    html += `<div class="review-row">
+      <span class="label">${acc.name || acc.id}</span>
+      <span class="value">${acc.leader ? '👑 Leader' : '📋 Follower'}</span>
+    </div>`;
+  });
+  html += '</div>';
+
+  // Instruments
+  html += `<div class="review-section"><h3>Instruments (${enabledInstruments.length})</h3>`;
+  enabledInstruments.forEach(inst => {
+    const cfg = state.instruments[inst.symbol];
+    html += `<div class="review-row">
+      <span class="label">${inst.symbol} — ${cfg.contracts} contracts, -${cfg.stopPoints}pt stop</span>
+      <span class="value">T1 ${cfg.t1Contracts}c@+${cfg.t1Points}pt · T2 ${cfg.t2Contracts}c@+${cfg.t2Points}pt · Runner ${cfg.runnerContracts}c@+${cfg.runnerPoints}pt</span>
+    </div>`;
+  });
+  html += '</div>';
+
+  // Risk & Timing
+  html += `<div class="review-section"><h3>Risk & Timing</h3>
+    <div class="review-row"><span class="label">EOD Flatten</span>
+      <span class="value">${document.getElementById('eodEnabled').checked ? document.getElementById('eodTime').value + ' ET' : 'Disabled'}</span></div>
+    <div class="review-row"><span class="label">Telegram</span>
+      <span class="value">${document.getElementById('telegramEnabled').checked ? 'Enabled' : 'Disabled'}</span></div>
+  </div>`;
+
+  document.getElementById('reviewContent').innerHTML = html;
+}
+
+// ============================================================
+// BUILD CONFIG
+// ============================================================
+function buildConfig() {
+  const eodTime = document.getElementById('eodTime').value.split(':');
+  const enabledInstruments = {};
+
+  INSTRUMENTS.forEach(inst => {
+    const cfg = state.instruments[inst.symbol];
+    enabledInstruments[inst.symbol] = {
+      enabled: cfg.enabled,
+      contracts: cfg.contracts,
+      tick_size: inst.tickSize,
+      tick_value: inst.tickValue,
+      point_value: inst.pointValue,
+      stop_points: cfg.stopPoints,
+      t1: { contracts: cfg.t1Contracts, points: cfg.t1Points },
+      t2: { contracts: cfg.t2Contracts, points: cfg.t2Points },
+      runner: { contracts: cfg.runnerContracts, auto_close_points: cfg.runnerPoints }
+    };
+  });
+
+  return {
+    server: { port: 5555, host: "localhost" },
+    brokers: {
+      projectx: {
+        enabled: true,
+        base_url: "https://api.topstepx.com",
+        credentials_file: "~/.config/projectx/credentials.json",
+        accounts: state.accounts.filter(a => a.id).map(a => ({
+          id: a.id,
+          name: a.name,
+          enabled: a.enabled,
+          leader: a.leader,
+          follower: a.follower
+        }))
+      }
+    },
+    instruments: enabledInstruments,
+    strategy: {
+      test_mode: false,
+      eod_flatten: {
+        enabled: document.getElementById('eodEnabled').checked,
+        hour: parseInt(eodTime[0]),
+        minute: parseInt(eodTime[1])
+      }
+    },
+    alerts: { max_age_seconds: 45, rate_limit_seconds: 0.1 },
+    notifications: {
+      telegram: {
+        enabled: document.getElementById('telegramEnabled').checked,
+        token: document.getElementById('telegramToken').value,
+        chat_id: document.getElementById('telegramChatId').value
+      }
+    }
+  };
+}
+
+// ============================================================
+// SAVE
+// ============================================================
+async function saveConfig() {
+  // Validate math before saving
+  let hasError = false;
+  INSTRUMENTS.forEach(inst => {
+    if (!state.instruments[inst.symbol].enabled) return;
+    const cfg = state.instruments[inst.symbol];
+    if ((cfg.t1Contracts + cfg.t2Contracts + cfg.runnerContracts) > cfg.contracts && cfg.contracts > 0) {
+      hasError = true;
+    }
+  });
+
+  if (hasError) {
+    alert('Fix math errors in your instrument configuration before saving.');
+    goStep(1);
+    return;
+  }
+
+  const config = buildConfig();
+  try {
+    const res = await fetch('/api/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config)
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('successMsg').classList.add('show');
+      window.scrollTo(0, 0);
+    } else {
+      alert('Save failed: ' + (data.error || 'Unknown error'));
+    }
+  } catch (e) {
+    alert('Save failed: ' + e.message);
+  }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+renderAccounts();
+renderInstrumentGrid();
+</script>
+</body>
+</html>
