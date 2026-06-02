@@ -33,6 +33,16 @@ app.use('/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 app.use(express.static('public', { extensions: ['html'] }));
 
+// Download redirects — generic URL → versioned file
+app.get('/downloads/PropTradeBot.dmg', (req, res) => {
+  res.redirect(301, '/downloads/PropTradeBot-v1.0-notarized.dmg');
+});
+
+// Friendly routes → Clerk handles auth client-side
+app.get('/sign-up', (req, res) => res.redirect('/?action=sign-up'));
+app.get('/login', (req, res) => res.redirect('/?action=sign-in'));
+app.get('/sign-in', (req, res) => res.redirect('/?action=sign-in'));
+
 // Helper: get email from Clerk (session claims first, then API fallback)
 async function getClerkEmail(auth) {
   // Try session claims first
@@ -119,9 +129,21 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
-// Protected routes - require Clerk auth
-app.use('/api/user', ClerkExpressRequireAuth());
-app.use('/api/accounts', ClerkExpressRequireAuth());
+// Protected routes - require Clerk auth (with proper 401 instead of 500)
+function clerkAuth(req, res, next) {
+  ClerkExpressRequireAuth()(req, res, (err) => {
+    if (err) {
+      return res.status(401).json({
+        success: false,
+        error: 'Authentication required. Please sign in at https://proptradebot.com/dashboard',
+        code: 'UNAUTHORIZED'
+      });
+    }
+    next();
+  });
+}
+app.use('/api/user', clerkAuth);
+app.use('/api/accounts', clerkAuth);
 
 // Bot gateway routes use API key auth (below), not Clerk
 // app.use('/api/bot', ClerkExpressRequireAuth());  // ← bot routes use requireApiKey instead
@@ -291,7 +313,7 @@ app.put('/api/bot/config', async (req, res) => {
 });
 
 // Create checkout session for subscription
-app.post('/api/checkout', ClerkExpressRequireAuth(), async (req, res) => {
+app.post('/api/checkout', clerkAuth, async (req, res) => {
   try {
     const { priceId } = req.body;
     console.log('🛒 Checkout request — priceId:', priceId);
