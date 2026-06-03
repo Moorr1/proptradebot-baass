@@ -35,7 +35,7 @@ app.use(express.static('public', { extensions: ['html'] }));
 
 // Download redirects — generic URL → versioned file
 app.get('/downloads/PropTradeBot.dmg', (req, res) => {
-  res.redirect(301, '/downloads/PropTradeBot-v1.1-notarized.dmg');
+  res.redirect(301, '/downloads/PropTradeBot-v1.2.0-notarized.dmg');
 });
 
 // Friendly routes → Clerk handles auth client-side
