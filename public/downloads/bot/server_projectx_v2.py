@@ -60,7 +60,7 @@ def log_trade(account_id, instrument, direction, entry_price, exit_price,
         acc_name = APEX_ACCOUNT_NAMES.get(account_id, account_id)
     else:  # Topstep numeric ID
         acc_name = f"Account-{account_id}"
-        for acc in PROJECTX_ACCOUNTS:
+        for acc in ACCOUNTS:
             if acc["id"] == account_id:
                 acc_name = acc.get("name", acc_name)
                 break
@@ -4426,7 +4426,7 @@ class TradingHandler(BaseHTTPRequestHandler):
         html = f"""<!DOCTYPE html>
 <html>
 <head>
-    <title>Richard's Trading Dashboard</title>
+    <title>PropTradeBot — P&L Dashboard</title>
     <meta http-equiv="refresh" content="30">
     <style>
         body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', monospace; margin: 0; padding: 20px; background: #0a0a0a; color: #e0e0e0; }}
