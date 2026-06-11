@@ -772,6 +772,21 @@
         </div>
       </div>
 
+      <div class="ext-box" style="margin-bottom:24px; border-left: 3px solid #22c55e;">
+        <div class="ext-box-title"><span>💡</span> Signal instrument vs. traded instrument</div>
+        <div class="ext-box-body">
+          The instrument in your Discord signal (<b>SPX</b>, <b>ES</b>, <b>MNQ</b>, etc.) is only used to
+          confirm the alert is a real trade — it does <b>not</b> determine what gets executed.
+          <br /><br />
+          What actually trades is set by your <b>contract configuration</b> (MES/ES/MNQ/NQ contracts &gt; 0).
+          <br /><br />
+          <b>Examples:</b><br />
+          • Follow <em>SPX ▲ LONG</em> signals → execute MNQ → set MES=0, MNQ=6<br />
+          • Follow <em>ES SHORT</em> signals → execute ES → set ES contracts &gt; 0, MNQ=0<br />
+          • Follow any signal → execute both MES + MNQ → set both &gt; 0
+        </div>
+      </div>
+
       <a href="/" class="btn btn-blue btn-full">
         Go to Dashboard &nbsp;→
       </a>

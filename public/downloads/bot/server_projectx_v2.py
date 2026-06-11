@@ -4457,7 +4457,13 @@ class TradingHandler(BaseHTTPRequestHandler):
     </style>
 </head>
 <body>
-    <h1>Richard's Trading Dashboard</h1>
+    <h1>PropTradeBot Dashboard</h1>
+    <div style="background:#111;border:1px solid #22c55e33;border-left:3px solid #22c55e;border-radius:6px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:#9ca3af;">
+      💡 <strong style="color:#e0e0e0;">Signal instrument ≠ executed instrument.</strong>
+      The ticker in your Discord alert (SPX, ES, MNQ…) is just a parsing gate — it doesn't control what trades.
+      What fires is determined by your contract config (MES/ES/MNQ/NQ contracts &gt; 0).
+      e.g. SPX signals → trade MNQ: set MES=0, MNQ=6.
+    </div>
     <div class="summary">
         <div class="card">
             <h3>Today's P&L</h3>
