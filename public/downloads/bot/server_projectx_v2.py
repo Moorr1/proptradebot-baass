@@ -15,6 +15,7 @@ import requests
 import logging
 import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
+from socketserver import ThreadingMixIn
 from datetime import datetime, timedelta
 import re
 import os
@@ -1098,7 +1099,7 @@ def get_active_accounts():
     if TEST_MODE:
         logger.info(f"🧪 TEST MODE: Using only practice account {PRACTICE_ACCOUNT}")
         return [PRACTICE_ACCOUNT]
-    return [a["id"] for a in ACCOUNTS if a.get("enabled")]
+    return [a["id"] for a in ACCOUNTS if a.get("enabled", True)]
 
 def get_order_routing_accounts():
     """Return list of accounts the bot may PLACE/MODIFY orders on directly.
@@ -1109,7 +1110,7 @@ def get_order_routing_accounts():
     Added 2026-05-12 after follower-warning incident threw user off."""
     if TEST_MODE:
         return [PRACTICE_ACCOUNT]
-    return [a["id"] for a in ACCOUNTS if a.get("enabled") and not a.get("follower")]
+    return [a["id"] for a in ACCOUNTS if a.get("enabled", True) and not a.get("follower")]
 
 # ================= POSITION VERIFICATION =================
 def verify_broker_position(account_id, expected_direction=None, expected_size=None, contract_id=None):
@@ -4181,6 +4182,15 @@ class TradingHandler(BaseHTTPRequestHandler):
         if self.path == "/api/config":
             self._handle_config_save()
             return
+        if self.path == "/api/setup/validate-key":
+            self._handle_setup_validate_key()
+            return
+        if self.path == "/api/setup/validate-topstep":
+            self._handle_setup_validate_topstep()
+            return
+        if self.path == "/api/setup/complete":
+            self._handle_setup_complete()
+            return
         if self.path != "/alert":
             self.send_response(404)
             self.end_headers()
@@ -4238,6 +4248,154 @@ class TradingHandler(BaseHTTPRequestHandler):
             logger.error(traceback.format_exc())
             self._json_response(500, {"error": str(e)})
     
+    def _is_setup_complete(self):
+        """Check if first-time setup has been completed."""
+        setup_flag = os.path.expanduser("~/.config/proptradebot/.setup_complete")
+        return os.path.exists(setup_flag)
+
+    def _handle_setup_validate_key(self):
+        """Validate PropTradeBot API key against cloud backend."""
+        try:
+            content_length = int(self.headers.get('Content-Length', 0))
+            body = json.loads(self.rfile.read(content_length))
+            api_key = body.get("api_key", "").strip()
+
+            if not api_key or not api_key.startswith("ptb_"):
+                self._json_response(400, {"success": False, "error": "Invalid API key format. Keys start with 'ptb_'"})
+                return
+
+            import requests as _req
+            cloud_url = "https://proptradebot-baass.onrender.com"
+            resp = _req.post(f"{cloud_url}/api/bot/auth",
+                            headers={"X-Api-Key": api_key},
+                            timeout=15)
+            data = resp.json()
+
+            if data.get("success"):
+                user = data.get("user", {})
+                self._json_response(200, {
+                    "success": True,
+                    "email": user.get("email"),
+                    "plan_tier": user.get("plan_tier"),
+                    "subscription_status": user.get("subscription_status")
+                })
+            else:
+                self._json_response(401, {"success": False, "error": data.get("error", "Invalid API key")})
+        except Exception as e:
+            logger.error(f"Setup validate-key error: {e}")
+            self._json_response(500, {"success": False, "error": str(e)})
+
+    def _handle_setup_validate_topstep(self):
+        """Validate Topstep/ProjectX credentials and return available accounts."""
+        try:
+            content_length = int(self.headers.get('Content-Length', 0))
+            body = json.loads(self.rfile.read(content_length))
+            username = body.get("username", "").strip()
+            api_key = body.get("api_key", "").strip()
+
+            if not username or not api_key:
+                self._json_response(400, {"success": False, "error": "Username and API key are required"})
+                return
+
+            import requests as _req
+            resp = _req.post(f"{PROJECTX_BASE_URL}/api/Auth/loginKey",
+                            json={"userName": username, "apiKey": api_key},
+                            timeout=15)
+            data = resp.json()
+
+            if not data.get("success") or not data.get("token"):
+                self._json_response(401, {"success": False, "error": "Invalid Topstep credentials. Check your username and API key."})
+                return
+
+            token = data["token"]
+            headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+            acct_resp = _req.post(f"{PROJECTX_BASE_URL}/api/Account/search",
+                                json={"onlyActiveAccounts": True},
+                                headers=headers, timeout=15)
+            acct_data = acct_resp.json()
+            accounts = acct_data.get("accounts", acct_data if isinstance(acct_data, list) else [])
+
+            account_list = []
+            for acct in accounts:
+                account_list.append({
+                    "id": acct.get("id"),
+                    "name": acct.get("name", ""),
+                    "balance": acct.get("balance"),
+                    "can_trade": acct.get("canTrade", False)
+                })
+
+            self._json_response(200, {"success": True, "accounts": account_list})
+        except Exception as e:
+            logger.error(f"Setup validate-topstep error: {e}")
+            self._json_response(500, {"success": False, "error": str(e)})
+
+    def _handle_setup_complete(self):
+        """Save all setup config and mark ready."""
+        try:
+            content_length = int(self.headers.get('Content-Length', 0))
+            body = json.loads(self.rfile.read(content_length))
+
+            ptb_api_key = body.get("api_key", "").strip()
+            ts_username = body.get("topstep_username", "").strip()
+            ts_api_key = body.get("topstep_api_key", "").strip()
+            account_ids = body.get("accounts", [])
+            account_names = body.get("account_names", {})
+
+            if not ptb_api_key or not ts_username or not ts_api_key:
+                self._json_response(400, {"success": False, "error": "Missing required fields"})
+                return
+
+            # 1. Save ProjectX credentials
+            creds_dir = os.path.expanduser("~/.config/projectx")
+            os.makedirs(creds_dir, exist_ok=True)
+            creds_path = os.path.join(creds_dir, "credentials.json")
+            with open(creds_path, "w") as f:
+                json.dump({"username": ts_username, "api_key": ts_api_key}, f, indent=2)
+            logger.info(f"Setup: ProjectX credentials saved to {creds_path}")
+
+            # 2. Update config with selected accounts
+            from config_loader import ConfigNode, save_config, load_config as _load_cfg
+            cfg = _load_cfg()
+            cfg_dict = cfg.to_dict()
+            cfg_dict["brokers"]["projectx"]["accounts"] = [
+                {"id": int(aid), "name": account_names.get(str(aid), f"Account {i+1}"), "enabled": True}
+                for i, aid in enumerate(account_ids)
+            ]
+            cfg_dict["brokers"]["projectx"]["enabled"] = True
+            cfg_dict["strategy"]["test_mode"] = False
+            save_config(ConfigNode(cfg_dict))
+            logger.info("Setup: Config saved")
+
+            # 3. Save PTB API key
+            env_path = os.path.expanduser("~/.config/proptradebot/env")
+            os.makedirs(os.path.dirname(env_path), exist_ok=True)
+            env_lines = []
+            if os.path.exists(env_path):
+                with open(env_path) as ef:
+                    env_lines = [l for l in ef.readlines() if not l.startswith("PTB_API_KEY=")]
+            env_lines.append(f"PTB_API_KEY={ptb_api_key}\n")
+            with open(env_path, "w") as ef:
+                ef.writelines(env_lines)
+            os.environ["PTB_API_KEY"] = ptb_api_key
+            logger.info("Setup: API key saved")
+
+            # 4. Mark setup complete
+            setup_flag = os.path.expanduser("~/.config/proptradebot/.setup_complete")
+            with open(setup_flag, "w") as sf:
+                sf.write(datetime.now().isoformat())
+
+            self._json_response(200, {
+                "success": True,
+                "message": "Setup complete! Restart the app to begin trading.",
+                "accounts_configured": len(account_ids),
+                "restart_required": True
+            })
+        except Exception as e:
+            logger.error(f"Setup complete error: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
+            self._json_response(500, {"success": False, "error": str(e)})
+
     def _send_setup_wizard(self):
         """Serve the setup wizard HTML."""
         self.send_response(200)
@@ -5122,8 +5280,9 @@ def main():
     
     try:
         import socket
-        class ReusableHTTPServer(HTTPServer):
+        class ReusableHTTPServer(ThreadingMixIn, HTTPServer):
             allow_reuse_address = True
+            daemon_threads = True  # don't block shutdown on open connections
             def server_bind(self):
                 self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                 super().server_bind()
