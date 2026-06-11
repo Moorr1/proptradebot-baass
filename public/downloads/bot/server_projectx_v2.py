@@ -4168,6 +4168,9 @@ class TradingHandler(BaseHTTPRequestHandler):
         if self.path == "/api/config":
             self._send_config_json()
             return
+        if self.path == "/api/alert-format":
+            self._get_alert_format()
+            return
         self.send_response(404)
         self.end_headers()
     
@@ -4190,6 +4193,9 @@ class TradingHandler(BaseHTTPRequestHandler):
             return
         if self.path == "/api/setup/complete":
             self._handle_setup_complete()
+            return
+        if self.path == "/api/alert-format":
+            self._save_alert_format()
             return
         if self.path != "/alert":
             self.send_response(404)
@@ -4248,6 +4254,34 @@ class TradingHandler(BaseHTTPRequestHandler):
             logger.error(traceback.format_exc())
             self._json_response(500, {"error": str(e)})
     
+    def _get_alert_format(self):
+        """GET /api/alert-format — return current alert format config."""
+        try:
+            fmt = _cfg.alert_format.to_dict() if hasattr(_cfg, 'alert_format') else {}
+        except Exception:
+            fmt = {}
+        # Fall back to DEFAULTS if config section is empty
+        if not fmt:
+            from config_loader import DEFAULTS
+            fmt = DEFAULTS.get('alert_format', {})
+        self._json_response(200, fmt)
+
+    def _save_alert_format(self):
+        """POST /api/alert-format — save alert format to config."""
+        try:
+            cl = int(self.headers.get('Content-Length', 0))
+            fmt = json.loads(self.rfile.read(cl))
+            from config_loader import ConfigNode, save_config, load_config as _lcfg, init_config
+            cfg = _lcfg()
+            d = cfg.to_dict()
+            d['alert_format'] = fmt
+            save_config(ConfigNode(d))
+            init_config()  # hot-reload the global _cfg singleton
+            self._json_response(200, {'success': True})
+        except Exception as e:
+            logger.error(f'save_alert_format error: {e}')
+            self._json_response(500, {'success': False, 'error': str(e)})
+
     def _is_setup_complete(self):
         """Check if first-time setup has been completed."""
         setup_flag = os.path.expanduser("~/.config/proptradebot/.setup_complete")
