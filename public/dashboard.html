@@ -23,6 +23,9 @@
     .status-active { background: #166534; color: #86efac; }
     .status-trialing { background: #7c3aed; color: #d8b4fe; }
     .status-inactive { background: #7f1d1d; color: #fca5a5; }
+    .status-cancelled { background: #374151; color: #9ca3af; }
+    .status-canceled { background: #374151; color: #9ca3af; }
+    .status-past_due { background: #92400e; color: #fcd34d; }
     .btn { display: inline-block; padding: 10px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
     .btn-primary { background: #0ea5e9; color: #fff; }
     .btn-primary:hover { background: #0284c7; }
@@ -81,6 +84,10 @@
             <button class="btn btn-primary" id="btn-pro" disabled>Loading...</button>
             <span style="color:#64748b; font-size:13px;">7-day free trial · Cancel anytime</span>
           </div>
+        </div>
+        <div id="billing-section" style="margin-top:16px; display:none;">
+          <button class="btn" id="btn-manage-billing" onclick="manageBilling()" style="background:#1e293b; border:1px solid #334155; color:#94a3b8;">Manage Billing →</button>
+          <span style="color:#64748b; font-size:12px; margin-left:12px;">Cancel, update card, view invoices</span>
         </div>
       </div>
 
@@ -263,14 +270,42 @@ http://localhost:5555/setup</pre>
         badge.className = 'status-badge status-' + u.subscription_status;
 
         const subscribeSection = document.getElementById('subscribe-section');
-        if (u.subscription_status === 'active' || u.subscription_status === 'trialing') {
+        const billingSection = document.getElementById('billing-section');
+        const isActive = u.subscription_status === 'active' || u.subscription_status === 'trialing';
+        if (isActive) {
           subscribeSection.style.display = 'none';
+          billingSection.style.display = 'block';
           document.getElementById('plan-status').textContent = 'Your subscription is active';
         } else {
           subscribeSection.style.display = 'block';
-          document.getElementById('plan-status').textContent = 'Subscribe to activate your bot';
+          billingSection.style.display = 'none';
+          const statusMsg = u.subscription_status === 'cancelled' || u.subscription_status === 'canceled'
+            ? 'Your subscription has been cancelled'
+            : 'Subscribe to activate your bot';
+          document.getElementById('plan-status').textContent = statusMsg;
         }
       } catch (e) { console.error('loadProfile error:', e); }
+    }
+
+    // ─── Billing Portal ───
+    async function manageBilling() {
+      const btn = document.getElementById('btn-manage-billing');
+      btn.textContent = 'Opening...';
+      btn.disabled = true;
+      try {
+        const data = await apiPost('/api/user/billing-portal', {});
+        if (data.success && data.url) {
+          window.location.href = data.url;
+        } else {
+          showAlert('Could not open billing portal: ' + (data.error || 'Unknown error'), 'error');
+          btn.textContent = 'Manage Billing →';
+          btn.disabled = false;
+        }
+      } catch (e) {
+        showAlert('Billing portal error: ' + e.message, 'error');
+        btn.textContent = 'Manage Billing →';
+        btn.disabled = false;
+      }
     }
 
     // ─── Checkout ───

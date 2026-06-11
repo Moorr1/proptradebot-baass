@@ -938,6 +938,65 @@ app.get('/api/user/bot-status', ClerkExpressRequireAuth(), async (req, res) => {
   }
 });
 
+// POST /api/user/billing-portal — Redirect to Stripe billing portal (cancel, update card, etc.)
+app.post('/api/user/billing-portal', ClerkExpressRequireAuth(), async (req, res) => {
+  try {
+    const clerkId = req.auth.userId;
+    const result = await pool.query(
+      'SELECT stripe_customer_id FROM users WHERE clerk_id = $1',
+      [clerkId]
+    );
+    if (result.rows.length === 0) return res.status(404).json({ success: false, error: 'User not found' });
+
+    const customerId = result.rows[0].stripe_customer_id;
+    if (!customerId) return res.status(400).json({ success: false, error: 'No billing account found. Please subscribe first.' });
+
+    const session = await stripe.billingPortal.sessions.create({
+      customer: customerId,
+      return_url: `${process.env.FRONTEND_URL || 'https://proptradebot.com'}/dashboard.html`,
+    });
+
+    res.json({ success: true, url: session.url });
+  } catch (error) {
+    console.error('Billing portal error:', error.message);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// GET /api/user/subscription — Get current subscription status
+app.get('/api/user/subscription', ClerkExpressRequireAuth(), async (req, res) => {
+  try {
+    const clerkId = req.auth.userId;
+    const result = await pool.query(
+      `SELECT plan_tier, subscription_status, stripe_subscription_id, stripe_customer_id
+       FROM users WHERE clerk_id = $1`,
+      [clerkId]
+    );
+    if (result.rows.length === 0) return res.status(404).json({ success: false, error: 'User not found' });
+
+    const user = result.rows[0];
+    let stripeSubscription = null;
+
+    if (user.stripe_subscription_id) {
+      try {
+        stripeSubscription = await stripe.subscriptions.retrieve(user.stripe_subscription_id);
+      } catch (e) {
+        // test-mode sub looked up with live key — ignore, use DB
+      }
+    }
+
+    res.json({
+      success: true,
+      plan_tier: user.plan_tier,
+      subscription_status: user.subscription_status,
+      cancel_at_period_end: stripeSubscription?.cancel_at_period_end || false,
+      current_period_end: stripeSubscription?.current_period_end || null,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/health`);
