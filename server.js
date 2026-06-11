@@ -502,15 +502,16 @@ app.post('/webhook', async (req, res) => {
             const fingerprint = pm.card.fingerprint;
             console.log('💳 Card fingerprint:', fingerprint);
             
-            // Check if this fingerprint was used for a previous trial
+            // Check if this fingerprint was used for a previous trial by a DIFFERENT user
             const existingFingerprint = await pool.query(
               `SELECT u.email, u.created_at 
                FROM trial_fingerprints tf
                JOIN users u ON tf.user_id = u.id
                WHERE tf.fingerprint = $1
                  AND tf.fingerprint_type = 'card'
-                 AND tf.created_at > now() - interval '90 days'`,
-              [fingerprint]
+                 AND tf.created_at > now() - interval '90 days'
+                 AND tf.user_id != $2`,
+              [fingerprint, session.metadata?.user_id]
             );
             
             if (existingFingerprint.rows.length > 0) {
