@@ -16,6 +16,16 @@ from typing import Any, Dict, List, Optional
 
 DEFAULT_CONFIG_PATH = os.path.expanduser("~/.config/proptradebot/config.json")
 
+# Dollar value per point for each supported instrument
+POINT_VALUES = {
+    "MES":  0.50,   # Micro E-mini S&P 500
+    "ES":   50.00,  # E-mini S&P 500
+    "MNQ":  2.00,   # Micro E-mini Nasdaq
+    "NQ":   20.00,  # E-mini Nasdaq
+    "MGC":  10.00,  # Micro Gold (10 troy oz)
+    "GC":   100.00, # Gold (100 troy oz)
+}
+
 # =============================================================================
 # DEFAULTS — used when config.json is missing or values are absent
 # =============================================================================
@@ -27,7 +37,7 @@ DEFAULTS = {
     },
     "brokers": {
         "projectx": {
-            "enabled": True,
+            "enabled": False,  # setup wizard enables this after onboarding
             "base_url": "https://api.topstepx.com",
             "credentials_file": "~/.config/projectx/credentials.json",
             "accounts": []
@@ -50,14 +60,34 @@ DEFAULTS = {
     },
     "contracts": {
         "mes": {
+            "instrument": "MES",
             "search_text": "MES",
             "tradovate_name": "MESM6",
             "rithmic_name": "MESM6"
         },
         "mnq": {
+            "instrument": "MNQ",
             "search_text": "MNQ",
             "tradovate_name": "MNQM6",
             "rithmic_name": "MNQM6"
+        },
+        "nq": {
+            "instrument": "NQ",
+            "search_text": "NQ",
+            "tradovate_name": "NQM6",
+            "rithmic_name": "NQM6"
+        },
+        "gc": {
+            "instrument": "GC",
+            "search_text": "GC",
+            "tradovate_name": "GCQ6",
+            "rithmic_name": "GCQ6"
+        },
+        "mgc": {
+            "instrument": "MGC",
+            "search_text": "MGC",
+            "tradovate_name": "MGCQ6",
+            "rithmic_name": "MGCQ6"
         }
     },
     "strategy": {
@@ -93,6 +123,58 @@ DEFAULTS = {
             "t1_points": 20,
             "t2_points": 40
         },
+        "es": {
+            "contracts": 0,
+            "trailing_stop_points": 9,
+            "first_trim_stop_points": 0,
+            "first_trim_contracts": 0,
+            "second_trim_contracts": 0,
+            "runner_contracts": 0,
+            "runner_auto_close_points": 20,
+            "runner_breakeven_offset": 3,
+            "tp_points": 7,
+            "t1_points": 7,
+            "t2_points": 12
+        },
+        "nq": {
+            "contracts": 0,
+            "trailing_stop_points": 35,
+            "first_trim_stop_points": 0,
+            "first_trim_contracts": 0,
+            "second_trim_contracts": 0,
+            "runner_contracts": 0,
+            "runner_auto_close_points": 60,
+            "runner_breakeven_offset": 18,
+            "tp_points": 33,
+            "t1_points": 20,
+            "t2_points": 40
+        },
+        "gc": {
+            "contracts": 0,
+            "trailing_stop_points": 10,
+            "first_trim_stop_points": 0,
+            "first_trim_contracts": 0,
+            "second_trim_contracts": 0,
+            "runner_contracts": 0,
+            "runner_auto_close_points": 20,
+            "runner_breakeven_offset": 5,
+            "tp_points": 10,
+            "t1_points": 10,
+            "t2_points": 20
+        },
+        "mgc": {
+            "contracts": 0,
+            "trailing_stop_points": 10,
+            "first_trim_stop_points": 0,
+            "first_trim_contracts": 0,
+            "second_trim_contracts": 0,
+            "runner_contracts": 0,
+            "runner_auto_close_points": 20,
+            "runner_breakeven_offset": 5,
+            "tp_points": 10,
+            "t1_points": 10,
+            "t2_points": 20
+        },
         "eod_flatten": {
             "enabled": True,
             "hour": 16,
@@ -109,6 +191,16 @@ DEFAULTS = {
         "max_age_seconds": 45,
         "rate_limit_seconds": 0.1
     },
+    "alert_format": {
+        "long_keywords":   ["LONG", "BUY", "BULL"],
+        "short_keywords":  ["SHORT", "SELL", "BEAR"],
+        "exit_keywords":   ["EXIT RUNNER", "CLOSE RUNNER", "RUNNER OUT"],
+        "close_keywords":  ["CLOSE ALL", "EXIT ALL", "FLATTEN", "EMERGENCY"],
+        "instrument_prefix_required": True,
+        "price_required": True,
+        "price_min": 100,
+        "price_max": 100000
+    },
     "notifications": {
         "telegram": {
             "enabled": False,
@@ -117,9 +209,9 @@ DEFAULTS = {
     },
     "logging": {
         "log_file": "~/trading_bot.log",
-        "trade_log_file": "~/Desktop/discord-trading-alerts/trades.jsonl",
-        "position_state_file": "~/position_state.json",
-        "notification_file": "~/trade_notifications.jsonl"
+        "trade_log_file": "~/Library/Application Support/PropTradeBot/trades.jsonl",
+        "position_state_file": "~/Library/Application Support/PropTradeBot/position_state.json",
+        "notification_file": "~/Library/Application Support/PropTradeBot/trade_notifications.jsonl"
     }
 }
 
@@ -188,7 +280,7 @@ def _expand_paths(data: Dict[str, Any]) -> Dict[str, Any]:
     return result
 
 
-def _validate_config(data: Dict[str, Any]) -> List[str]:
+def _validate_config(data: Dict[str, Any], skip_account_check: bool = False) -> List[str]:
     """Validate config and return list of error messages. Empty = valid."""
     errors = []
 
@@ -201,7 +293,7 @@ def _validate_config(data: Dict[str, Any]) -> List[str]:
     # Brokers
     brokers = data.get("brokers", {})
     px = brokers.get("projectx", {})
-    if px.get("enabled"):
+    if px.get("enabled") and not skip_account_check:
         accounts = px.get("accounts", [])
         if not accounts:
             errors.append("brokers.projectx.accounts is empty but projectx is enabled")
@@ -263,22 +355,30 @@ def load_config(path: Optional[str] = None) -> ConfigNode:
     # Start with defaults
     merged = dict(DEFAULTS)
 
+    # Track whether this is a first-run (no config file yet)
+    first_run = not os.path.exists(config_path)
+
     # Load user config if exists
-    if os.path.exists(config_path):
+    if not first_run:
         with open(config_path, "r") as f:
             user_config = json.load(f)
         merged = _deep_merge(merged, user_config)
     else:
-        # No config file — use defaults and create it
+        # No config file — use defaults only; setup wizard will write it
         os.makedirs(os.path.dirname(config_path), exist_ok=True)
-        with open(config_path, "w") as f:
-            json.dump(merged, f, indent=2)
+
+    # Auto-derive search_text from instrument so contract search uses the correct symbol
+    try:
+        merged["contracts"]["mes"]["search_text"] = merged["contracts"]["mes"]["instrument"]
+        merged["contracts"]["mnq"]["search_text"] = merged["contracts"]["mnq"]["instrument"]
+    except KeyError:
+        pass
 
     # Expand ~ paths
     merged = _expand_paths(merged)
 
-    # Validate
-    errors = _validate_config(merged)
+    # Validate — skip strict account checks on first run (setup wizard handles onboarding)
+    errors = _validate_config(merged, skip_account_check=first_run)
     if errors:
         raise ValueError("Config validation failed:\n  - " + "\n  - ".join(errors))
 
