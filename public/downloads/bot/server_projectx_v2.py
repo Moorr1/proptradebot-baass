@@ -2609,42 +2609,38 @@ def parse_alert(text):
         logger.info(f"Detected RUNNER EXIT alert")
         return {"type": "exit_runner", "text": cleaned}
     
-    # JMoney entry patterns — STRICT: must contain the "ES" instrument prefix.
-    # The previous loose patterns ("LONG <price>" / "SHORT <price>" anywhere) caused
-    # the 2026-05-12 10:20 false entry on JMoney commentary text:
-    #   "charm flip short 7418 is a valid setup"
-    # That phrase contained "short 7418" without the ES prefix — it was a trade IDEA,
-    # not an entry signal. Real JMoney entries look like:
-    #   "ES Long 7407: C Stop: 5m close 7399"
-    #   "ES Short 7418 @ ..."
-    # All entry patterns now REQUIRE the ES token adjacent to LONG/SHORT.
+    # Entry patterns — instrument prefix required to avoid acting on trade commentary.
+    # Supported instruments: SPX, ES, MES, MNQ, NQ, GC, MGC
+    # [^\w]* between instrument and direction tolerates any emoji/arrow/symbol
+    # that alert services insert (e.g. "SPX ▲ LONG", "ES 🔴 SHORT", "MNQ→LONG").
+    # Price range covers all supported instruments:
+    #   ES/MES/SPX ~1000–10000, MNQ/NQ ~10000–30000, GC/MGC ~1000–5000
+    _instr = r'(?:SPX|ES|MES|MNQ|NQ|GC|MGC)'
     patterns = [
-        r'\bES\s+(LONG|SHORT)\s*[:@]?\s*(\d+(?:\.\d+)?)',  # ES Long 7407 | ES Short: 7418 | ES Long @ 7407
-        r'\b(LONG|SHORT)\s+ES\s*[:@]?\s*(\d+(?:\.\d+)?)',  # Long ES 7407
-        r'\b(LONG|SHORT)\s*[:@]?\s*(\d+(?:\.\d+)?)\s+ES\b',  # Long 7407 ES
+        rf'\b{_instr}[^\w]*(LONG|SHORT)\s*[:@]?\s*(\d+(?:\.\d+)?)',  # SPX ▲ LONG 7407 | ES Long 7407
+        rf'\b(LONG|SHORT)\s+{_instr}\s*[:@]?\s*(\d+(?:\.\d+)?)',     # Long ES 7407
+        rf'\b(LONG|SHORT)\s*[:@]?\s*(\d+(?:\.\d+)?)\s+{_instr}\b',  # Long 7407 ES
     ]
-    
+
     for pattern in patterns:
         match = re.search(pattern, text_upper)
         if match:
             direction, price = match.groups()
             direction = direction.lower()
             price = float(price)
-            if price < 1000 or price > 10000:
+            if price < 100 or price > 100000:
                 logger.warning(f"⚠️ Suspicious price: {price}. Ignoring.")
                 return None
             logger.info(f"Detected ENTRY: {direction.upper()} @ {price}")
             return {"type": "entry", "direction": direction, "price": price, "text": cleaned}
-    
-    # Diagnostic: if text mentions long/short + a 4-digit price but the ES token
-    # never appears nearby (within ~30 chars of the direction word), log it so we
-    # can spot future format drift without acting on it.
-    loose_match = re.search(r'\b(LONG|SHORT)\s+\d{4}', text_upper)
+
+    # Diagnostic: direction + price found but no recognised instrument prefix nearby.
+    loose_match = re.search(r'\b(LONG|SHORT)\s+\d+', text_upper)
     if loose_match:
         window_start = max(0, loose_match.start() - 30)
         window_end = min(len(text_upper), loose_match.end() + 30)
-        if not re.search(r'\bES\b', text_upper[window_start:window_end]):
-            logger.warning(f"🚫 Ignored possible entry WITHOUT ES prefix (commentary / trade idea): {text_upper[:120]}")
+        if not re.search(rf'\b{_instr}\b', text_upper[window_start:window_end]):
+            logger.warning(f"🚫 Ignored — direction found but no instrument prefix (commentary / trade idea): {text_upper[:120]}")
             return None
     
     logger.warning(f"⚠️ Could not parse alert: {text_upper[:100]}...")
