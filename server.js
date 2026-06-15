@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { ClerkExpressRequireAuth, clerkClient } = require('@clerk/clerk-sdk-node');
 const { Pool } = require('pg');
+const { Webhook } = require('standardwebhooks');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -27,8 +28,9 @@ pool.query('SELECT NOW()', (err, res) => {
 // Middleware
 app.use(cors());
 
-// Raw body for Stripe webhooks — MUST be before express.json()
+// Raw body for Stripe + Whop webhooks — MUST be before express.json()
 app.use('/webhook', express.raw({ type: 'application/json' }));
+app.use('/whop-webhook', express.raw({ type: 'application/json' }));
 
 app.use(express.json());
 app.use(express.static('public', { extensions: ['html'] }));
@@ -156,16 +158,16 @@ app.get('/api/user/profile', async (req, res) => {
     
     // Check if user exists
     let result = await pool.query(
-      'SELECT * FROM users WHERE clerk_id = $1',
+      'SELECT *, COALESCE(billing_source, \'stripe\') as billing_source FROM users WHERE clerk_id = $1',
       [clerkId]
     );
     
     if (result.rows.length === 0) {
       // Create user
       result = await pool.query(
-        `INSERT INTO users (clerk_id, email, name, plan_tier, subscription_status)
-         VALUES ($1, $2, $3, 'none', 'inactive')
-         RETURNING *`,
+        `INSERT INTO users (clerk_id, email, name, plan_tier, subscription_status, billing_source)
+         VALUES ($1, $2, $3, 'none', 'inactive', 'stripe')
+         RETURNING *, COALESCE(billing_source, 'stripe') as billing_source`,
         [clerkId, email, email]
       );
     }
@@ -644,6 +646,7 @@ async function requireApiKey(req, res, next) {
     const result = await pool.query(
       `SELECT id, clerk_id, email, plan_tier, subscription_status,
               stripe_customer_id, stripe_subscription_id, name,
+              billing_source, whop_membership_id, whop_user_id,
               created_at as user_created_at
        FROM users WHERE api_key = $1`,
       [apiKey]
@@ -693,7 +696,8 @@ app.post('/api/bot/auth', requireApiKey, async (req, res) => {
     );
 
     let subscription = null;
-    if (user.stripe_subscription_id) {
+    // Only fetch Stripe sub for Stripe-billed users
+    if (user.billing_source !== 'whop' && user.stripe_subscription_id) {
       try {
         subscription = await stripe.subscriptions.retrieve(user.stripe_subscription_id);
       } catch (e) {
@@ -709,6 +713,7 @@ app.post('/api/bot/auth', requireApiKey, async (req, res) => {
         name: user.name,
         plan_tier: user.plan_tier,
         subscription_status: user.subscription_status,
+        billing_source: user.billing_source || 'stripe',
         created_at: user.user_created_at
       },
       config: configResult.rows[0] || null,
@@ -996,6 +1001,228 @@ app.get('/api/user/subscription', ClerkExpressRequireAuth(), async (req, res) =>
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
+});
+
+// =============================================================================
+// WHOP WEBHOOK — membership lifecycle events
+// =============================================================================
+
+// Helper: provision API key for a Whop member (idempotent)
+async function provisionWhopUser({ whopMembershipId, whopUserId, email, username }) {
+  // Upsert user by whop_membership_id
+  const apiKey = 'ptb_' + crypto.randomBytes(32).toString('hex');
+
+  // Try to find existing user by whop_membership_id first
+  let result = await pool.query(
+    'SELECT id, api_key FROM users WHERE whop_membership_id = $1',
+    [whopMembershipId]
+  );
+
+  if (result.rows.length > 0) {
+    // Existing user — reactivate
+    await pool.query(
+      `UPDATE users
+         SET subscription_status = 'active',
+             plan_tier            = 'pro',
+             whop_user_id         = $2
+       WHERE whop_membership_id = $1`,
+      [whopMembershipId, whopUserId]
+    );
+    console.log('✅ Whop user reactivated:', whopMembershipId);
+    return result.rows[0];
+  }
+
+  // New user — create with generated API key
+  // email may be null if Whop doesn't share it; fall back to username
+  const userEmail = email || (username ? `${username}@whop.user` : `${whopMembershipId}@whop.user`);
+
+  result = await pool.query(
+    `INSERT INTO users
+       (clerk_id, email, name, plan_tier, subscription_status,
+        api_key, api_key_created_at, billing_source, whop_membership_id, whop_user_id)
+     VALUES
+       ($1, $2, $3, 'pro', 'active',
+        $4, NOW(), 'whop', $5, $6)
+     ON CONFLICT (whop_membership_id) DO UPDATE
+       SET subscription_status = 'active',
+           plan_tier            = 'pro',
+           whop_user_id         = EXCLUDED.whop_user_id
+     RETURNING id, api_key`,
+    [
+      'whop_' + whopMembershipId,  // synthetic clerk_id to satisfy NOT NULL
+      userEmail,
+      username || whopMembershipId,
+      apiKey,
+      whopMembershipId,
+      whopUserId
+    ]
+  );
+
+  console.log('✅ Whop user provisioned:', userEmail, whopMembershipId);
+  return result.rows[0];
+}
+
+// Helper: revoke access for a Whop member
+async function revokeWhopUser(whopMembershipId) {
+  await pool.query(
+    `UPDATE users
+       SET subscription_status = 'cancelled',
+           plan_tier            = 'none'
+     WHERE whop_membership_id = $1`,
+    [whopMembershipId]
+  );
+  console.log('🚫 Whop user access revoked:', whopMembershipId);
+}
+
+app.post('/whop-webhook', async (req, res) => {
+  // Verify signature using Standard Webhooks
+  const secret = process.env.WHOP_WEBHOOK_SECRET;
+  if (!secret) {
+    console.error('❌ WHOP_WEBHOOK_SECRET not set');
+    return res.status(500).json({ error: 'Webhook secret not configured' });
+  }
+
+  let event;
+  try {
+    const wh = new Webhook(Buffer.from(secret).toString('base64'));
+    const bodyStr = req.body.toString('utf8');
+    event = wh.verify(bodyStr, req.headers);
+    event = JSON.parse(bodyStr);  // parse again after verify
+  } catch (err) {
+    console.log('❌ Whop webhook signature invalid:', err.message);
+    return res.status(400).json({ error: 'Invalid signature' });
+  }
+
+  // Log event
+  try {
+    await pool.query(
+      `INSERT INTO whop_events (whop_event_id, event_type, membership_id, user_id, payload)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (whop_event_id) DO NOTHING`,
+      [
+        event.id || event.data?.id || crypto.randomUUID(),
+        event.type,
+        event.data?.membership_id || event.data?.id,
+        event.data?.user_id,
+        event.data
+      ]
+    );
+  } catch (e) {
+    console.error('Failed to log Whop event:', e.message);
+  }
+
+  console.log('📨 Whop webhook:', event.type, event.data?.id);
+
+  try {
+    switch (event.type) {
+      case 'membership.went_valid':
+      case 'membership.activated': {
+        // Member subscribed or renewed — grant access
+        const mem = event.data;
+        const whopMembershipId = mem.id;
+        const whopUserId = mem.user_id;
+        const email    = mem.user?.email;
+        const username = mem.user?.username || mem.user?.name;
+
+        await provisionWhopUser({ whopMembershipId, whopUserId, email, username });
+        break;
+      }
+
+      case 'membership.went_invalid':
+      case 'membership.cancelled':
+      case 'membership.expired': {
+        // Member cancelled or payment failed — revoke access
+        const whopMembershipId = event.data?.id;
+        if (whopMembershipId) await revokeWhopUser(whopMembershipId);
+        break;
+      }
+
+      case 'payment.succeeded': {
+        // Payment received — ensure user is active (belt-and-suspenders)
+        const membershipId = event.data?.membership_id;
+        if (membershipId) {
+          await pool.query(
+            `UPDATE users SET subscription_status = 'active' WHERE whop_membership_id = $1`,
+            [membershipId]
+          );
+        }
+        break;
+      }
+
+      case 'payment.failed': {
+        const membershipId = event.data?.membership_id;
+        if (membershipId) {
+          await pool.query(
+            `UPDATE users SET subscription_status = 'past_due' WHERE whop_membership_id = $1`,
+            [membershipId]
+          );
+        }
+        break;
+      }
+
+      default:
+        console.log('Unhandled Whop event:', event.type);
+    }
+  } catch (e) {
+    console.error('Whop webhook handler error:', e.message);
+    // Still return 200 — Whop will retry on non-2xx
+  }
+
+  res.json({ received: true });
+});
+
+// GET /whop-success — Landing page after Whop checkout
+// Whop redirects here; user gets their API key instructions
+app.get('/whop-success', async (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Welcome to PropTradeBot!</title>
+      <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #0a0e1a; color: #e2e8f0; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 16px; box-sizing: border-box; }
+        .card { background: #111827; border: 1px solid #1e293b; border-radius: 16px; padding: 40px 48px; max-width: 520px; width: 100%; }
+        .icon { font-size: 56px; margin-bottom: 16px; }
+        h1 { margin: 0 0 8px; font-size: 26px; color: #f1f5f9; }
+        p { color: #94a3b8; margin: 0 0 20px; line-height: 1.6; }
+        .steps { background: #0f172a; border-radius: 10px; padding: 20px 24px; margin-bottom: 24px; }
+        .step { display: flex; gap: 12px; margin-bottom: 14px; align-items: flex-start; }
+        .step:last-child { margin-bottom: 0; }
+        .step-num { background: #3b82f6; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+        .step-text { color: #cbd5e1; font-size: 14px; line-height: 1.5; }
+        .step-text strong { color: #f1f5f9; }
+        .btn { background: #3b82f6; color: white; padding: 12px 28px; border-radius: 8px; text-decoration: none; display: inline-block; font-weight: 600; font-size: 15px; }
+        .btn:hover { background: #2563eb; }
+        .note { font-size: 13px; color: #64748b; margin-top: 16px; }
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <div class="icon">🎉</div>
+        <h1>You're in! Welcome to PropTradeBot.</h1>
+        <p>Your subscription is active. Here's how to get your bot running in under 10 minutes:</p>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-text"><strong>Download PropTradeBot</strong> — grab the Mac app from the link below and install it.</div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-text"><strong>Get your API key</strong> — go to <a href="/dashboard" style="color:#60a5fa">proptradebot.com/dashboard</a>, sign in, and generate your key.</div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-text"><strong>Run the setup wizard</strong> — open PropTradeBot, paste your API key, connect your Topstep account, and you're live.</div>
+          </div>
+        </div>
+        <a href="/downloads/PropTradeBot.dmg" class="btn">⬇ Download PropTradeBot for Mac</a>
+        <p class="note">Need help? Visit <a href="/support" style="color:#60a5fa">proptradebot.com/support</a> or email support@proptradebot.com</p>
+      </div>
+    </body>
+    </html>
+  `);
 });
 
 app.listen(PORT, () => {

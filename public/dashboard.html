@@ -81,12 +81,18 @@
         <div id="subscribe-section" style="margin-top:16px;">
           <p>Subscribe to activate your bot:</p>
           <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:12px; align-items:center;">
-            <button class="btn btn-primary" id="btn-pro" disabled>Loading...</button>
+            <!-- Stripe checkout (legacy / direct users) -->
+            <button class="btn btn-primary" id="btn-pro" style="display:none;" disabled>Loading...</button>
+            <!-- Whop checkout (primary) -->
+            <a href="https://whop.com/proptradebot/" class="btn btn-primary" id="btn-whop-subscribe" style="text-decoration:none;">Start Free Trial — $149/mo</a>
             <span style="color:#64748b; font-size:13px;">7-day free trial · Cancel anytime</span>
           </div>
         </div>
         <div id="billing-section" style="margin-top:16px; display:none;">
-          <button class="btn" id="btn-manage-billing" onclick="manageBilling()" style="background:#1e293b; border:1px solid #334155; color:#94a3b8;">Manage Billing →</button>
+          <!-- Stripe billing portal (for Stripe users) -->
+          <button class="btn" id="btn-manage-billing" onclick="manageBilling()" style="background:#1e293b; border:1px solid #334155; color:#94a3b8; display:none;">Manage Billing →</button>
+          <!-- Whop member hub (for Whop users) -->
+          <a href="https://whop.com/hub/" target="_blank" id="btn-manage-whop" class="btn" style="background:#1e293b; border:1px solid #334155; color:#94a3b8; text-decoration:none; display:none;">Manage on Whop →</a>
           <span style="color:#64748b; font-size:12px; margin-left:12px;">Cancel, update card, view invoices</span>
         </div>
       </div>
@@ -272,16 +278,24 @@ http://localhost:5555/setup</pre>
         const subscribeSection = document.getElementById('subscribe-section');
         const billingSection = document.getElementById('billing-section');
         const isActive = u.subscription_status === 'active' || u.subscription_status === 'trialing';
+        const isWhop = u.billing_source === 'whop';
+
         if (isActive) {
           subscribeSection.style.display = 'none';
           billingSection.style.display = 'block';
           document.getElementById('plan-status').textContent = 'Your subscription is active';
+          // Show correct billing button
+          document.getElementById('btn-manage-billing').style.display = isWhop ? 'none' : 'inline-block';
+          document.getElementById('btn-manage-whop').style.display   = isWhop ? 'inline-block' : 'none';
         } else {
           subscribeSection.style.display = 'block';
           billingSection.style.display = 'none';
+          // Always send new subscribers to Whop
+          document.getElementById('btn-whop-subscribe').style.display = 'inline-block';
+          document.getElementById('btn-pro').style.display = 'none';
           const statusMsg = u.subscription_status === 'cancelled' || u.subscription_status === 'canceled'
-            ? 'Your subscription has been cancelled'
-            : 'Subscribe to activate your bot';
+            ? 'Your subscription has been cancelled. Resubscribe below:'
+            : 'Subscribe to activate your bot:';
           document.getElementById('plan-status').textContent = statusMsg;
         }
       } catch (e) { console.error('loadProfile error:', e); }
