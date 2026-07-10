@@ -37,7 +37,7 @@ app.use(express.static('public', { extensions: ['html'] }));
 
 // Download redirects — generic URL → versioned file
 app.get('/downloads/PropTradeBot.dmg', (req, res) => {
-  res.redirect(301, '/downloads/PropTradeBot-v1.3.0-notarized.dmg');
+  res.redirect(301, '/downloads/PropTradeBot-v1.4.0-notarized.dmg');
 });
 
 // Friendly routes → Clerk handles auth client-side
@@ -852,6 +852,131 @@ app.put('/api/bot/config', requireApiKey, async (req, res) => {
 
     res.json({ success: true, config: result.rows[0] });
   } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// GET /api/bot/summary — Read-only account + P&L summary (drives daily/EOD reports)
+// Auth: same x-api-key as other bot routes. Pure SELECTs, no writes.
+// Query params:
+//   date=YYYY-MM-DD  (optional) the trading day to report, in US/Eastern. Defaults to today ET.
+//   days=N           (optional) trailing window size for the period rollup. Default 7, clamped 1..90.
+// NOTE on P&L: trades.realized_pnl and trades.commission are stored separately.
+//   We report realized_pnl and commission as summed from the DB, and define
+//   net_pnl = realized_pnl - commission. If the bot already books realized_pnl net of
+//   commission, treat `realized_pnl` as the figure of record and ignore net_pnl.
+app.get('/api/bot/summary', requireApiKey, async (req, res) => {
+  try {
+    const user = req.botUser;
+
+    // Resolve the reporting date in US/Eastern (the market day).
+    const etToday = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' }).format(new Date()); // YYYY-MM-DD
+    let date = etToday;
+    if (req.query.date) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(req.query.date)) {
+        return res.status(400).json({ success: false, error: 'date must be YYYY-MM-DD' });
+      }
+      date = req.query.date;
+    }
+
+    let days = parseInt(req.query.days, 10);
+    if (!Number.isFinite(days)) days = 7;
+    days = Math.min(90, Math.max(1, days));
+
+    const [accountsRes, dayRes, periodRes, openRes, snapRes] = await Promise.all([
+      pool.query(
+        `SELECT id, prop_firm, account_number, platform, status,
+                starting_balance, current_balance, daily_loss_limit, max_drawdown, updated_at
+         FROM accounts WHERE user_id = $1 ORDER BY created_at`,
+        [user.id]
+      ),
+      pool.query(
+        `SELECT COUNT(*)::int AS total_trades,
+                COUNT(*) FILTER (WHERE realized_pnl > 0)::int AS winning_trades,
+                COUNT(*) FILTER (WHERE realized_pnl < 0)::int AS losing_trades,
+                COALESCE(SUM(realized_pnl), 0)::float AS realized_pnl,
+                COALESCE(SUM(commission), 0)::float AS commission
+         FROM trades
+         WHERE user_id = $1 AND status = 'closed'
+           AND (closed_at AT TIME ZONE 'America/New_York')::date = $2::date`,
+        [user.id, date]
+      ),
+      pool.query(
+        `SELECT COUNT(*)::int AS total_trades,
+                COUNT(*) FILTER (WHERE realized_pnl > 0)::int AS winning_trades,
+                COUNT(*) FILTER (WHERE realized_pnl < 0)::int AS losing_trades,
+                COALESCE(SUM(realized_pnl), 0)::float AS realized_pnl,
+                COALESCE(SUM(commission), 0)::float AS commission
+         FROM trades
+         WHERE user_id = $1 AND status = 'closed'
+           AND (closed_at AT TIME ZONE 'America/New_York')::date >  ($2::date - $3::int)
+           AND (closed_at AT TIME ZONE 'America/New_York')::date <= $2::date`,
+        [user.id, date, days]
+      ),
+      pool.query(
+        `SELECT COUNT(*)::int AS open_positions
+         FROM trades WHERE user_id = $1 AND status = 'open'`,
+        [user.id]
+      ),
+      pool.query(
+        `SELECT account_id, total_trades, winning_trades, losing_trades,
+                gross_pnl, net_pnl, max_drawdown, equity
+         FROM performance_snapshots WHERE user_id = $1 AND date = $2::date`,
+        [user.id, date]
+      )
+    ]);
+
+    const num = (v) => (v == null ? null : Number(v));
+    const winRate = (w, t) => (t > 0 ? Math.round((w / t) * 1000) / 10 : null);
+
+    // Annotate accounts with a derived trailing-drawdown buffer where computable.
+    const accounts = accountsRes.rows.map((a) => {
+      const bal = num(a.current_balance);
+      const floor = num(a.max_drawdown); // interpreted as the max-loss-limit floor if present
+      const buffer = (bal != null && floor != null) ? Math.round((bal - floor) * 100) / 100 : null;
+      return { ...a, drawdown_buffer: buffer };
+    });
+
+    const day = dayRes.rows[0];
+    const period = periodRes.rows[0];
+
+    res.json({
+      success: true,
+      generated_at: new Date().toISOString(),
+      timezone: 'America/New_York',
+      user: {
+        email: user.email,
+        plan_tier: user.plan_tier,
+        subscription_status: user.subscription_status,
+        billing_source: user.billing_source || 'stripe'
+      },
+      accounts,
+      open_positions: openRes.rows[0].open_positions,
+      day: {
+        date,
+        total_trades: day.total_trades,
+        winning_trades: day.winning_trades,
+        losing_trades: day.losing_trades,
+        win_rate_pct: winRate(day.winning_trades, day.total_trades),
+        realized_pnl: day.realized_pnl,
+        commission: day.commission,
+        net_pnl: Math.round((day.realized_pnl - day.commission) * 100) / 100
+      },
+      period: {
+        days,
+        end_date: date,
+        total_trades: period.total_trades,
+        winning_trades: period.winning_trades,
+        losing_trades: period.losing_trades,
+        win_rate_pct: winRate(period.winning_trades, period.total_trades),
+        realized_pnl: period.realized_pnl,
+        commission: period.commission,
+        net_pnl: Math.round((period.realized_pnl - period.commission) * 100) / 100
+      },
+      performance_snapshots: snapRes.rows
+    });
+  } catch (error) {
+    console.error('summary error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
