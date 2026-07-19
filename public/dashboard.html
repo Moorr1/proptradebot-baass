@@ -118,6 +118,33 @@ http://localhost:5555/setup</pre>
         </div>
       </div>
 
+      <!-- TradingView Strategy -->
+      <div class="card">
+        <h2>📈 TradingView Strategy</h2>
+        <p>Run your own TradingView strategy through PropTradeBot's execution engine. Generate your webhook, paste it into a TradingView alert, and your signals fire the ladder automatically — with prop-firm safety.</p>
+        <div id="tv-section">
+          <button id="btn-tv-generate" class="btn btn-primary" onclick="generateTvWebhook()">Generate Webhook</button>
+        </div>
+        <div id="tv-details" style="margin-top:16px; display:none;">
+          <label style="display:block; color:#94a3b8; font-size:13px; margin-bottom:4px;">Webhook URL</label>
+          <div class="api-key-box">
+            <div id="tv-url" class="api-key-display"></div>
+            <button class="btn btn-secondary" onclick="copyTv('tv-url')">Copy</button>
+          </div>
+          <label style="display:block; color:#94a3b8; font-size:13px; margin:12px 0 4px;">Passphrase</label>
+          <div class="api-key-box">
+            <div id="tv-pass" class="api-key-display"></div>
+            <button class="btn btn-secondary" onclick="copyTv('tv-pass')">Copy</button>
+          </div>
+          <p style="margin-top:16px;"><strong>In TradingView:</strong> create an alert on your strategy → Notifications → paste the Webhook URL above → in Message, paste this exactly:</p>
+          <div class="api-key-box">
+            <pre id="tv-template" style="flex:1; margin:0; white-space:pre; overflow-x:auto;"></pre>
+            <button class="btn btn-secondary" onclick="copyTv('tv-template')">Copy</button>
+          </div>
+          <p style="margin-top:12px; color:#94a3b8; font-size:13px;">Symbols like MES1!, MNQ1!, ES, NQ are auto-detected. <code>{{strategy.order.action}}</code> auto-fills buy/sell; for indicator alerts, replace it with a literal "buy" / "sell" / "flat".</p>
+        </div>
+      </div>
+
       <!-- Bot Status -->
       <div class="card">
         <h2>🤖 Bot Status</h2>
@@ -241,6 +268,7 @@ http://localhost:5555/setup</pre>
       await loadProfile();
       await loadApiKey();
       await loadBotStatus();
+      await loadTvWebhook();
     }
 
     // ─── API Helpers ───
@@ -258,6 +286,59 @@ http://localhost:5555/setup</pre>
         body: JSON.stringify(body)
       });
       return r.json();
+    }
+
+    // ─── TradingView Webhook ───
+    let tvUrl = '', tvPass = '';
+
+    function tvTemplate(pass) {
+      return '{\n'
+        + '  "passphrase": "' + pass + '",\n'
+        + '  "ticker": "{{ticker}}",\n'
+        + '  "action": "{{strategy.order.action}}",\n'
+        + '  "price": {{close}}\n'
+        + '}';
+    }
+
+    function tvShow(url, pass) {
+      tvUrl = url; tvPass = pass;
+      document.getElementById('tv-url').textContent = url;
+      document.getElementById('tv-pass').textContent = pass;
+      document.getElementById('tv-template').textContent = tvTemplate(pass);
+      document.getElementById('tv-details').style.display = 'block';
+      document.getElementById('btn-tv-generate').textContent = 'Regenerate Webhook';
+    }
+
+    async function loadTvWebhook() {
+      try {
+        const data = await apiGet('/api/user/tv-webhook');
+        if (data && data.success && data.configured && data.webhook_url) {
+          tvShow(data.webhook_url, data.passphrase || '');
+        }
+      } catch (e) { console.error('loadTvWebhook error:', e); }
+    }
+
+    async function generateTvWebhook() {
+      const btn = document.getElementById('btn-tv-generate');
+      btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+      try {
+        const data = await apiPost('/api/user/tv-webhook', {});
+        if (data.success) {
+          tvShow(data.webhook_url, data.passphrase);
+          showAlert('TradingView webhook generated! Paste the URL + message into your alert.', 'success');
+        } else {
+          showAlert(data.error || 'Failed to generate webhook', 'error');
+        }
+      } catch (e) {
+        showAlert('Error: ' + e.message, 'error');
+      } finally { btn.disabled = false; }
+    }
+
+    function copyTv(id) {
+      const el = document.getElementById(id);
+      const text = el ? el.textContent : '';
+      if (!text) return;
+      navigator.clipboard.writeText(text).then(() => showAlert('Copied to clipboard!', 'success'));
     }
 
     // ─── Load Profile ───
