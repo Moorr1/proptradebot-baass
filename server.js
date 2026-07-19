@@ -31,6 +31,7 @@ app.use(cors());
 // Raw body for Stripe + Whop webhooks — MUST be before express.json()
 app.use('/webhook', express.raw({ type: 'application/json' }));
 app.use('/whop-webhook', express.raw({ type: 'application/json' }));
+app.use('/tv', express.text({ type: '*/*', limit: '16kb' }));  // TradingView webhook raw body
 
 app.use(express.json());
 app.use(express.static('public', { extensions: ['html'] }));
@@ -986,6 +987,111 @@ app.get('/api/bot/summary', requireApiKey, async (req, res) => {
 // =============================================================================
 
 // POST /api/user/api-key — Generate/regenerate API key
+// ============================================================================
+// TradingView webhook relay (BYO strategy) — added 2026-07-19
+// TV posts to /tv/:token (token in URL + passphrase in body); we queue the alert;
+// the customer's bot polls GET /api/bot/alerts and executes it locally.
+// ============================================================================
+const TV_ALERT_MAX_AGE_SEC = 60;
+
+// Public receiver — TradingView cannot send an API key, so auth = token(URL) + passphrase(body)
+app.post('/tv/:token', async (req, res) => {
+  try {
+    const token = req.params.token || '';
+    if (token.length < 16) return res.status(400).json({ success: false, error: 'bad token' });
+
+    let body;
+    try { body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {}); }
+    catch (e) { return res.status(400).json({ success: false, error: 'body must be JSON' }); }
+
+    const found = await pool.query(
+      'SELECT id, tv_passphrase, subscription_status FROM users WHERE tv_token = $1',
+      [token]
+    );
+    if (found.rows.length === 0) return res.status(404).json({ success: false, error: 'unknown webhook token' });
+    const u = found.rows[0];
+
+    const provided = String(body.passphrase || body.secret || '');
+    if (!u.tv_passphrase || provided !== u.tv_passphrase) {
+      return res.status(401).json({ success: false, error: 'invalid passphrase' });
+    }
+    if (!['active', 'trialing'].includes(u.subscription_status)) {
+      return res.status(403).json({ success: false, error: 'subscription inactive' });
+    }
+
+    const payload = { ...body };
+    delete payload.passphrase; delete payload.secret;
+    await pool.query(
+      'INSERT INTO pending_alerts (user_id, payload, source) VALUES ($1, $2, $3)',
+      [u.id, JSON.stringify(payload), 'tradingview']
+    );
+    res.json({ success: true, queued: true });
+  } catch (error) {
+    console.error('TV webhook error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Bot poll — atomically claims this user's pending alerts (no double-deliver), drops stale ones
+app.get('/api/bot/alerts', requireApiKey, async (req, res) => {
+  try {
+    const user = req.botUser;
+    const maxAge = String(TV_ALERT_MAX_AGE_SEC);
+    const claimed = await pool.query(
+      `UPDATE pending_alerts SET delivered_at = now()
+        WHERE id IN (
+          SELECT id FROM pending_alerts
+           WHERE user_id = $1 AND delivered_at IS NULL
+             AND created_at > now() - ($2 || ' seconds')::interval
+           ORDER BY created_at ASC LIMIT 20
+        )
+      RETURNING id, payload, source, created_at`,
+      [user.id, maxAge]
+    );
+    await pool.query(
+      `UPDATE pending_alerts SET delivered_at = now()
+        WHERE user_id = $1 AND delivered_at IS NULL
+          AND created_at <= now() - ($2 || ' seconds')::interval`,
+      [user.id, maxAge]
+    );
+    res.json({ success: true, alerts: claimed.rows });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Generate/rotate the user's TradingView webhook token + passphrase
+app.post('/api/user/tv-webhook', ClerkExpressRequireAuth(), async (req, res) => {
+  try {
+    const clerkId = req.auth.userId;
+    const tvToken = crypto.randomBytes(24).toString('hex');
+    const tvPass = 'ptv_' + crypto.randomBytes(12).toString('hex');
+    const result = await pool.query(
+      'UPDATE users SET tv_token = $1, tv_passphrase = $2 WHERE clerk_id = $3 RETURNING tv_token, tv_passphrase',
+      [tvToken, tvPass, clerkId]
+    );
+    if (result.rows.length === 0) return res.status(404).json({ success: false, error: 'User not found' });
+    const base = process.env.PUBLIC_BASE_URL || 'https://proptradebot-baass.onrender.com';
+    res.json({ success: true, webhook_url: `${base}/tv/${result.rows[0].tv_token}`, passphrase: result.rows[0].tv_passphrase });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Retrieve the user's current TradingView webhook url + passphrase
+app.get('/api/user/tv-webhook', ClerkExpressRequireAuth(), async (req, res) => {
+  try {
+    const clerkId = req.auth.userId;
+    const result = await pool.query('SELECT tv_token, tv_passphrase FROM users WHERE clerk_id = $1', [clerkId]);
+    if (result.rows.length === 0) return res.status(404).json({ success: false, error: 'User not found' });
+    const row = result.rows[0];
+    const base = process.env.PUBLIC_BASE_URL || 'https://proptradebot-baass.onrender.com';
+    res.json({ success: true, configured: !!row.tv_token, webhook_url: row.tv_token ? `${base}/tv/${row.tv_token}` : null, passphrase: row.tv_passphrase || null });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 app.post('/api/user/api-key', ClerkExpressRequireAuth(), async (req, res) => {
   try {
     const clerkId = req.auth.userId;
