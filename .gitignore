@@ -20,6 +20,10 @@ npm-debug.log*
 dist/
 build/
 
+# Local pre-change backups (server.js.bak_pre_*, *.dmg.bak_*, etc.)
+*.bak
+*.bak_*
+
 .projects/cache
 .projects/vault
 .projects/state.test.json
