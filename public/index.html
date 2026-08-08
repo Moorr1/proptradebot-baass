@@ -3,15 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PropTradeBot — Your TradingView strategy, executed on your prop account</title>
-  <meta name="description" content="Connect a TradingView alert or trade with one click. PropTradeBot executes laddered, rule-safe trades across your prop accounts — trims, stops, EOD flatten, all automatic. Built for funded-account rules.">
-  <meta property="og:title" content="PropTradeBot — Your Edge, Executed">
-  <meta property="og:description" content="One click fires your full trade plan across all your prop accounts — entries, trims, breakeven, EOD flatten. Your edge, executed. 7-day free trial.">
+  <title>PropTradeBot — An edge you can audit, executed automatically</title>
+  <meta name="description" content="Signals published before they resolve, in a ledger you can verify. PropTradeBot executes the full managed trade across every prop account — or bring your own.">
+  <meta property="og:title" content="PropTradeBot — An edge you can audit">
+  <meta property="og:description" content="Every signal posts before it fills, hash-chained so it cannot be edited after the fact — then executed across all your prop accounts. 7-day free trial.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://proptradebot.com">
+  <meta property="og:image" content="https://proptradebot.com/PropTradeBot_Poster.png">
+  <meta property="og:image:alt" content="PropTradeBot — automated prop-account trade execution">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="PropTradeBot — Your Edge, Executed">
-  <meta name="twitter:description" content="Execute your trade plan on one click across all your prop accounts — trims, breakeven, EOD flatten, automatic. 7-day free trial.">
+  <meta name="twitter:title" content="PropTradeBot — An edge you can audit">
+  <meta name="twitter:description" content="Every signal posts before it fills, hash-chained so it cannot be edited after the fact — then executed across all your prop accounts. 7-day free trial.">
+  <meta name="twitter:image" content="https://proptradebot.com/PropTradeBot_Poster.png">
   <script async crossorigin="anonymous" data-clerk-publishable-key="pk_live_Y2xlcmsucHJvcHRyYWRlYm90LmNvbSQ" src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5/dist/clerk.browser.js" type="text/javascript"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -223,35 +226,7 @@
     </div>
   </section>
 
-  <!-- FBD-PERFORMANCE:START -->
-  <section class="features" id="performance" style="background:#0a0e1a;">
-    <div class="container">
-      <h2 class="section-title">Every signal, published before the outcome</h2>
-      <p class="section-subtitle">Our FBD signals post to Discord the moment they arm &mdash;
-      before they fill, before they win or lose &mdash; and every one is written to an
-      append-only ledger where each record carries the hash of the record before it.
-      Nothing can be edited or quietly removed after the fact.</p>
-
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-top:40px">
-        <div style="background:#0f172a;border:1px solid #1e293b;border-radius:14px;padding:20px 22px"><div style="color:#94a3b8;font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Signals published</div><b style="display:block;font-size:30px;font-weight:700;letter-spacing:-.03em">—</b></div><div style="background:#0f172a;border:1px solid #1e293b;border-radius:14px;padding:20px 22px"><div style="color:#94a3b8;font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Avg max gain (pts)</div><b style="display:block;font-size:30px;font-weight:700;letter-spacing:-.03em">—</b></div><div style="background:#0f172a;border:1px solid #1e293b;border-radius:14px;padding:20px 22px"><div style="color:#94a3b8;font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Avg drawdown (pts)</div><b style="display:block;font-size:30px;font-weight:700;letter-spacing:-.03em">—</b></div><div style="background:#0f172a;border:1px solid #1e293b;border-radius:14px;padding:20px 22px"><div style="color:#94a3b8;font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Total edge (pts)</div><b style="display:block;font-size:30px;font-weight:700;letter-spacing:-.03em">—</b></div>
-      </div>
-      <p style="color:#64748b;font-size:14px;margin-top:18px;text-align:center">Live tracking has just begun — this fills in as signals resolve.</p>
-
-      <div style="margin:26px 0 0;padding:16px 20px;background:rgba(234,179,8,.07);border:1px solid rgba(234,179,8,.35);border-radius:12px;color:#fde68a;font-size:14px;line-height:1.65">
-        <b style="color:#fbbf24">Read this first.</b> These signals execute on a
-        <b style="color:#fbbf24">practice account</b>. The signals, the market and the order
-        routing are real, and every one was published in advance and hash-chained. But the
-        fills are simulated, so this is not a record of real money. It sits between a backtest
-        and a live track record, and we would rather you heard that from us.
-      </div>
-
-      <p style="text-align:center;margin-top:28px">
-        <a href="/performance" class="btn btn-primary" style="text-decoration:none">
-          See the full record &rarr;</a>
-      </p>
-    </div>
-  </section>
-<!-- FBD-PERFORMANCE:END -->
+  
 
   <section class="video-demo" style="padding: 60px 0; background: #0f172a;">
     <div class="container" style="text-align: center;">
@@ -267,6 +242,41 @@
       </div>
     </div>
   </section>
+
+  
+
+  <!-- FBD-PERFORMANCE:START -->
+  <section class="features" id="performance" style="background:#0a0e1a;">
+    <div class="container">
+      <h2 class="section-title">Every signal, published before the outcome</h2>
+      <p class="section-subtitle">Our FBD signals post to Discord the moment they arm &mdash;
+      before they fill, before they win or lose &mdash; and every one is written to an
+      append-only ledger where each record carries the hash of the record before it.
+      Nothing can be edited or quietly removed after the fact.</p>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-top:40px">
+        <div style="background:#0f172a;border:1px solid #1e293b;border-radius:14px;padding:20px 22px"><div style="color:#94a3b8;font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Signals published</div><b style="display:block;font-size:30px;font-weight:700;letter-spacing:-.03em">—</b></div><div style="background:#0f172a;border:1px solid #1e293b;border-radius:14px;padding:20px 22px"><div style="color:#94a3b8;font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Avg max gain (pts)</div><b style="display:block;font-size:30px;font-weight:700;letter-spacing:-.03em">—</b></div><div style="background:#0f172a;border:1px solid #1e293b;border-radius:14px;padding:20px 22px"><div style="color:#94a3b8;font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Avg drawdown (pts)</div><b style="display:block;font-size:30px;font-weight:700;letter-spacing:-.03em">—</b></div><div style="background:#0f172a;border:1px solid #1e293b;border-radius:14px;padding:20px 22px"><div style="color:#94a3b8;font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Total edge (pts)</div><b style="display:block;font-size:30px;font-weight:700;letter-spacing:-.03em">—</b></div>
+      </div>
+      <p style="color:#64748b;font-size:14px;margin-top:18px;text-align:center">Tracking has just begun — this fills in as signals resolve.</p>
+
+      <p style="margin:30px auto 0;max-width:860px;color:#475569;font-size:12.5px;line-height:1.7;text-align:left">
+        <b style="color:#64748b">Disclaimer.</b> Past performance is not indicative of future
+        results. Signal performance reflects tracked results based on maximum favourable
+        excursion (MFE) and maximum adverse excursion (MAE) analysis with the specified stop
+        loss applied. These are not live trading results and do not account for slippage,
+        commissions, or execution timing. Trading futures involves substantial risk of loss and
+        is not suitable for all investors. This data is provided for informational and
+        educational purposes only and should not be construed as investment advice or a
+        recommendation to buy or sell any security.
+      </p>
+
+      <p style="text-align:center;margin-top:28px">
+        <a href="/performance" class="btn btn-primary" style="text-decoration:none">
+          See the full record &rarr;</a>
+      </p>
+    </div>
+  </section>
+<!-- FBD-PERFORMANCE:END -->
 
   <section class="features">
     <div class="container">
