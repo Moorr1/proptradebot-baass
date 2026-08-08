@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang=en><head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>Signal Performance · PropTradeBot</title>
+<meta name=description content="FBD signal performance — every signal published to Discord before its outcome was known, recorded in a hash-chained ledger.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0e1a;color:#e2e8f0;font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.wrap{max-width:1080px;margin:0 auto;padding:48px 24px 64px}
+.eyebrow{color:#22c55e;font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase}
+h1{font-size:38px;font-weight:700;letter-spacing:-.025em;margin:10px 0 12px}
+.lede{color:#94a3b8;max-width:640px;font-size:16px}
+.disclose{margin:26px 0 0;padding:16px 20px;background:rgba(234,179,8,.07);border:1px solid rgba(234,179,8,.35);border-radius:12px;color:#fde68a;font-size:14px;line-height:1.65}
+.disclose b{color:#fbbf24}
+.sel{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:34px 0 20px}
+.sel span{color:#94a3b8;font-size:13px;margin-right:4px}
+.sel button{background:#111827;border:1px solid #1f2937;color:#cbd5e1;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:.12s}
+.sel button:hover{border-color:#374151}
+.sel button.on{background:rgba(34,197,94,.14);border-color:#22c55e;color:#4ade80}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:34px}
+.tile{background:#0f172a;border:1px solid #1e293b;border-radius:14px;padding:20px 22px}
+.tile b{display:block;font-size:32px;font-weight:700;letter-spacing:-.03em;line-height:1.15}
+.tile .k{color:#94a3b8;font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.tile .s{color:#64748b;font-size:12px;margin-top:5px}
+.pos{color:#4ade80}.neg{color:#f87171}
+.tabs{display:flex;gap:6px;border-bottom:1px solid #1e293b;margin-bottom:22px}
+.tabs button{background:none;border:0;border-bottom:2px solid transparent;color:#64748b;padding:11px 18px;font-size:14px;font-weight:600;cursor:pointer}
+.tabs button.on{color:#22c55e;border-bottom-color:#22c55e}
+.nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.nav h2{font-size:19px;font-weight:600}
+.nav button{background:#111827;border:1px solid #1f2937;color:#cbd5e1;width:34px;height:34px;border-radius:9px;cursor:pointer;font-size:15px}
+.nav button:disabled{opacity:.3;cursor:default}
+.mtot{font-size:18px;font-weight:700}
+.dow{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:6px}
+.dow i{text-align:center;font-style:normal;font-size:11px;color:#64748b;letter-spacing:.05em}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.c{aspect-ratio:1.4;border-radius:9px;padding:8px;display:flex;flex-direction:column;justify-content:space-between;border:1px solid transparent}
+.c.off{background:#0d1420;border-color:#151d2b}
+.c.off .dn{color:#334155}
+.dn{font-size:11px;color:rgba(255,255,255,.6)}
+.dv{font-size:17px;font-weight:700;letter-spacing:-.02em}
+.dc{font-size:10px;color:rgba(255,255,255,.55)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:.07em;font-weight:600;padding-bottom:10px}
+td{padding:11px 0;border-top:1px solid #1a2433}
+th:last-child,td:last-child{text-align:right}
+.muted{color:#94a3b8}
+.empty{color:#64748b;padding:44px 0;text-align:center}
+footer{margin-top:46px;padding-top:22px;border-top:1px solid #1e293b;color:#64748b;font-size:12.5px;line-height:1.75}
+code{font-family:ui-monospace,SFMono-Regular,monospace;font-size:11.5px;color:#94a3b8;word-break:break-all}
+a{color:#22c55e}
+</style></head><body><div class=wrap>
+
+<div class=eyebrow>Signal performance</div>
+<h1>Every signal, published before the outcome.</h1>
+<p class=lede>FBD failed-breakdown signals on MES. Each one posts to Discord at
+the moment it arms — before it fills, before it wins or loses — and is written to
+an append-only ledger where every record carries the hash of the one before it.</p>
+
+<div class=disclose>
+<b>Read this first.</b> These signals are executed on a <b>practice account</b>.
+The signals, the market and the order routing are real, and every one was
+published in advance and hash-chained so it cannot be edited or removed after
+the fact. But the fills are simulated, so this is not a record of real money.
+It sits between a backtest and a live track record, and we would rather you knew
+that from us than worked it out later.
+</div>
+
+<div class=sel>
+  <span>Stop loss</span>
+  <button data-s=5>5</button><button data-s=10>10</button>
+  <button data-s=15>15</button><button data-s=20 class=on>20</button>
+  <button data-s=0>Off</button>
+  <span>pts</span>
+</div>
+
+<div class=tiles>
+  <div class=tile><div class=k>Signals</div><b id=t1>—</b><div class=s>published since launch</div></div>
+  <div class=tile><div class=k>Avg max gain</div><b id=t2 class=pos>—</b><div class=s>pts per signal</div></div>
+  <div class=tile><div class=k>Avg drawdown</div><b id=t3 class=neg>—</b><div class=s>pts of adverse excursion</div></div>
+  <div class=tile><div class=k>Total edge</div><b id=t4>—</b><div class=s>pts, stop applied</div></div>
+</div>
+
+<div class=tabs>
+  <button id=tabCal class=on>Calendar</button>
+  <button id=tabTop>Top trades</button>
+</div>
+
+<p class='empty'>No resolved signals with excursion data yet. This page is generated from the published ledger and fills in as signals resolve — it is new, not broken.</p>
+<div id=cal>
+  <div class=nav><button id=prev>&lsaquo;</button><h2 id=mlabel></h2>
+    <span class=mtot id=mtot></span><button id=next>&rsaquo;</button></div>
+  <div class=dow><i>MON</i><i>TUE</i><i>WED</i><i>THU</i><i>FRI</i></div>
+  <div class=grid id=grid></div>
+</div>
+<div id=top style="display:none"></div>
+
+<footer>
+Performance is measured by maximum favourable and adverse excursion with the
+selected stop applied, in points per contract. Position sizing is yours;
+we publish points so the figures do not depend on a contract count you did not
+choose.<br><br>
+Fills are on a practice account and do not account for slippage, commissions or
+execution timing on a funded account. Past performance does not indicate future
+results. Futures trading carries substantial risk of loss and is not suitable for
+every investor. Nothing here is investment advice.<br><br>
+Ledger head: <code>0003507bf022594a7b32aa1d0023225581b428f55b2666fe722df249245b8998</code>
+
+</footer>
+</div>
+<script>
+const D=[];
+const MON=["January","February","March","April","May","June","July","August","September","October","November","December"];
+let STOP=20;
+
+function edge(t){
+  // Stop applied: if adverse excursion breached the stop, the trade is taken as
+  // a loss of exactly the stop. Otherwise it is credited its favourable
+  // excursion. Same convention monkeyBOT uses.
+  if(STOP>0 && t.mae<=-STOP) return -STOP;
+  return t.mfe;
+}
+
+function stats(){
+  const n=D.length;
+  document.getElementById('t1').textContent=n||'—';
+  if(!n){['t2','t3','t4'].forEach(i=>document.getElementById(i).textContent='—');return;}
+  const mg=D.reduce((a,t)=>a+t.mfe,0)/n;
+  const dd=D.reduce((a,t)=>a+Math.abs(t.mae),0)/n;
+  const te=D.reduce((a,t)=>a+edge(t),0);
+  document.getElementById('t2').textContent='+'+mg.toFixed(1);
+  document.getElementById('t3').textContent='-'+dd.toFixed(1);
+  const e=document.getElementById('t4');
+  e.textContent=(te>=0?'+':'')+te.toFixed(0);
+  e.className=te>=0?'pos':'neg';
+}
+
+const byDay={};
+function rebuildDays(){
+  for(const k in byDay) delete byDay[k];
+  D.forEach(t=>{ if(!t.d)return; (byDay[t.d]=byDay[t.d]||{p:0,n:0}); byDay[t.d].p+=edge(t); byDay[t.d].n++; });
+}
+let months=[],mi=0;
+function rebuildMonths(){
+  months=[...new Set(Object.keys(byDay).map(k=>k.slice(0,7)))].sort();
+  mi=months.length-1;
+}
+
+function calendar(){
+  if(!months.length){document.getElementById('grid').innerHTML='';
+    document.getElementById('mlabel').textContent='—';
+    document.getElementById('mtot').textContent='';return;}
+  const ym=months[mi],[y,m]=ym.split('-').map(Number);
+  document.getElementById('mlabel').textContent=MON[m-1]+' '+y;
+  const dd=Object.keys(byDay).filter(k=>k.startsWith(ym));
+  const tot=dd.reduce((a,k)=>a+byDay[k].p,0);
+  const te=document.getElementById('mtot');
+  te.textContent=(tot>=0?'+':'')+tot.toFixed(0)+' pts';
+  te.className='mtot '+(tot>=0?'pos':'neg');
+  const hi=Math.max(...dd.map(k=>Math.abs(byDay[k].p)),1);
+  let pad=new Date(y,m-1,1).getDay()-1; if(pad<0||pad>4)pad=0;
+  let h='';
+  for(let i=0;i<pad;i++)h+="<div class='c'></div>";
+  const last=new Date(y,m,0).getDate();
+  for(let d=1;d<=last;d++){
+    const dt=new Date(y,m-1,d); if(dt.getDay()===0||dt.getDay()===6)continue;
+    const k=ym+'-'+String(d).padStart(2,'0'),v=byDay[k];
+    if(!v){h+="<div class='c off'><span class=dn>"+d+"</span></div>";continue;}
+    const a=(0.16+0.66*Math.min(1,Math.abs(v.p)/hi)).toFixed(2);
+    const bg=v.p>0?'rgba(34,197,94,'+a+')':v.p<0?'rgba(248,113,113,'+a+')':'rgba(148,163,184,.18)';
+    h+="<div class='c' style='background:"+bg+"'><span class=dn>"+d+"</span><div><div class=dv>"+
+       (v.p>0?'+':'')+v.p.toFixed(0)+"</div><div class=dc>"+v.n+(v.n===1?' signal':' signals')+"</div></div></div>";
+  }
+  document.getElementById('grid').innerHTML=h;
+  document.getElementById('prev').disabled=mi===0;
+  document.getElementById('next').disabled=mi===months.length-1;
+}
+
+function topTrades(){
+  const s=[...D].sort((a,b)=>edge(b)-edge(a)).slice(0,10);
+  document.getElementById('top').innerHTML = s.length
+    ? "<table><tr><th>Date</th><th>Setup</th><th>Side</th><th>Outcome</th><th>Edge (pts)</th></tr>"+
+      s.map(t=>"<tr><td class=muted>"+t.d+"</td><td class=muted>"+(t.setup||'—')+
+        "</td><td>"+(t.side||'—')+"</td><td>"+t.outcome+"</td><td class='"+
+        (edge(t)>=0?'pos':'neg')+"'>"+(edge(t)>=0?'+':'')+edge(t).toFixed(1)+
+        "</td></tr>").join('')+"</table>"
+    : "<p class=empty>No resolved signals yet.</p>";
+}
+
+function all(){rebuildDays();rebuildMonths();stats();calendar();topTrades();}
+
+document.querySelectorAll('.sel button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.sel button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); STOP=+b.dataset.s; all();
+});
+document.getElementById('prev').onclick=()=>{if(mi>0){mi--;calendar();}};
+document.getElementById('next').onclick=()=>{if(mi<months.length-1){mi++;calendar();}};
+document.getElementById('tabCal').onclick=()=>{
+  document.getElementById('tabCal').classList.add('on');
+  document.getElementById('tabTop').classList.remove('on');
+  document.getElementById('cal').style.display='';document.getElementById('top').style.display='none';};
+document.getElementById('tabTop').onclick=()=>{
+  document.getElementById('tabTop').classList.add('on');
+  document.getElementById('tabCal').classList.remove('on');
+  document.getElementById('top').style.display='';document.getElementById('cal').style.display='none';};
+all();
+</script></body></html>
