@@ -1,0 +1,51 @@
+PropTradeBot signal ledger — how to verify it yourself
+
+WHAT THIS FILE IS
+  ledger.jsonl is the complete record of every signal published, one JSON
+  object per line, in the order it happened. Nothing is filtered out. Signals
+  that never filled are in here, so are losses.
+
+WHY YOU CAN TRUST THE ORDER WASN'T CHANGED
+  Every record carries the SHA-256 of the record before it, in "prev". Its own
+  hash is in "hash". The first record's "prev" is 64 zeros.
+
+  Change any past record, delete one, or reorder them, and every hash after
+  that point stops matching. There is no way to quietly rewrite history.
+
+VERIFY IT WITHOUT RUNNING OUR CODE
+  Any language will do. The hash covers the record with "hash" and "prev"
+  removed, serialised as compact JSON with sorted keys, concatenated with the
+  previous record's hash.
+
+  Python, no dependencies:
+
+    import json, hashlib
+    prev = "0" * 64
+    for i, line in enumerate(open("ledger.jsonl"), 1):
+        r = json.loads(line)
+        body = {k: v for k, v in r.items() if k not in ("hash", "prev")}
+        blob = json.dumps(body, sort_keys=True, separators=(",", ":")) + prev
+        want = hashlib.sha256(blob.encode()).hexdigest()
+        assert r["prev"] == prev,  f"line {i}: prev mismatch"
+        assert r["hash"] == want,  f"line {i}: content altered"
+        assert r["seq"] == i,      f"line {i}: sequence gap, a row was removed"
+        prev = r["hash"]
+    print("chain OK,", i, "records, head", prev)
+
+WHAT THE FIELDS MEAN
+  type=signal   published at the moment the setup armed, before it filled
+  type=outcome  the resolution, "ref" points at the signal's seq
+  pts           points per contract, so it does not depend on position size
+  mfe / mae     maximum favourable and adverse excursion, in points
+  NO_FILL       armed and never triggered. These are kept deliberately; a
+                record showing only filled trades is a highlight reel.
+
+WHAT THIS DOES NOT PROVE
+  It proves the record has not been altered since each row was written. It does
+  not prove the prices were achievable, and fills are on a practice account, so
+  it is not a record of real money. Slippage, commissions and execution timing
+  are not accounted for.
+
+  Published 2026-08-10 13:43 ET
+  Head hash 408351e6c1dc5b5c8b40928502966370da80bfbe8e4759ad10743cbeea80a77d
+  Records   4
