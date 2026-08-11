@@ -1032,6 +1032,106 @@ app.post('/tv/:token', async (req, res) => {
   }
 });
 
+// ============================================================================
+// POST /api/signals — first-party signal fan-out
+// ============================================================================
+// Until 2026-08-11 the only writer to pending_alerts was the TradingView relay
+// above, which means our OWN FBD signals had no server-side route to customers
+// at all. They went to Discord, and a Chrome extension scraping the page was
+// the only thing that could turn them into a trade. Delivery therefore depended
+// on a browser being open on the right site, and one Discord markup change
+// would have stopped every subscriber simultaneously with no error anywhere.
+//
+// This endpoint takes a signal from our publisher and writes it into every
+// active subscriber's queue. The customer's bot already polls that queue, so
+// nothing ships on the client.
+//
+// AUTH is a shared publisher secret, not a user API key — the caller is us, not
+// a customer. Compared in constant time so the endpoint cannot be used as an
+// oracle to recover the secret a byte at a time.
+//
+// IDEMPOTENCY is on the ledger seq. A retried dispatch must never open a second
+// position in somebody's account; that is real money, not a duplicate row.
+function safeEqual(a, b) {
+  const A = Buffer.from(String(a));
+  const B = Buffer.from(String(b));
+  if (A.length !== B.length) return false;
+  return crypto.timingSafeEqual(A, B);
+}
+
+app.post('/api/signals', async (req, res) => {
+  try {
+    const secret = process.env.SIGNAL_PUBLISHER_KEY;
+    if (!secret) {
+      console.error('SIGNAL_PUBLISHER_KEY is not set — refusing to fan out');
+      return res.status(503).json({ success: false, error: 'publisher not configured' });
+    }
+    const provided = req.headers['x-publisher-key'] || '';
+    if (!provided || !safeEqual(provided, secret)) {
+      return res.status(401).json({ success: false, error: 'bad publisher key' });
+    }
+
+    const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
+    const seq = Number(body.seq);
+    const text = String(body.text || '').trim();
+    if (!Number.isInteger(seq) || seq <= 0) {
+      return res.status(400).json({ success: false, error: 'seq must be a positive integer' });
+    }
+    if (!text) {
+      return res.status(400).json({ success: false, error: 'text is required' });
+    }
+
+    // Every subscriber who is entitled to real-time signals.
+    const subs = await pool.query(
+      `SELECT id FROM users WHERE subscription_status IN ('active','trialing')`
+    );
+
+    // The payload the bot will normalise. `text` is what its parser reads; the
+    // rest is carried for the audit trail and for future use once the client
+    // can honour our ladder rather than only its own.
+    const payload = {
+      text,
+      source: 'fbd',
+      fbd_seq: seq,
+      fbd_hash: body.hash || null,
+      sym: body.sym || null,
+      side: body.side || null,
+      entry: body.entry ?? null,
+      stop: body.stop ?? null,
+      t1: body.t1 ?? null,
+      t2: body.t2 ?? null,
+      setup: body.setup || null,
+      signal_ts: body.ts || null
+    };
+
+    let delivered = 0, skipped = 0;
+    for (const u of subs.rows) {
+      // Dedupe per user on the ledger seq. Cheap at this scale and it needs no
+      // migration; if the subscriber count ever makes this hurt, add a unique
+      // index on (user_id, (payload->>'fbd_seq')) instead.
+      const dup = await pool.query(
+        `SELECT 1 FROM pending_alerts
+          WHERE user_id = $1 AND source = 'fbd' AND payload->>'fbd_seq' = $2
+          LIMIT 1`,
+        [u.id, String(seq)]
+      );
+      if (dup.rows.length) { skipped++; continue; }
+
+      await pool.query(
+        'INSERT INTO pending_alerts (user_id, payload, source) VALUES ($1, $2, $3)',
+        [u.id, JSON.stringify(payload), 'fbd']
+      );
+      delivered++;
+    }
+
+    console.log(`FBD signal #${seq} fanned out: ${delivered} delivered, ${skipped} already queued`);
+    res.json({ success: true, seq, delivered, skipped });
+  } catch (error) {
+    console.error('signal fan-out error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Bot poll — atomically claims this user's pending alerts (no double-deliver), drops stale ones
 app.get('/api/bot/alerts', requireApiKey, async (req, res) => {
   try {
