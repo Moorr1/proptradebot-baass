@@ -37,8 +37,16 @@ app.use(express.json());
 app.use(express.static('public', { extensions: ['html'] }));
 
 // Download redirects — generic URL → versioned file
+// The stable download URL. Every page, email and Discord message points here,
+// so a release is only actually SHIPPED once this line moves.
+//
+// v1.6.4 and v1.6.6 were both built, signed, notarized and then left on disk
+// while this still said an older version. Nothing compared the two, so from the
+// outside everything looked fine and customers quietly kept downloading a build
+// with known bugs in it. fbd_preflight.py now fails when the newest local build
+// is ahead of what lives in public/downloads.
 app.get('/downloads/PropTradeBot.dmg', (req, res) => {
-  res.redirect(302, '/downloads/PropTradeBot-v1.6.5-notarized.dmg');
+  res.redirect(302, '/downloads/PropTradeBot-v1.6.7-notarized.dmg');
 });
 
 // Friendly routes → Clerk handles auth client-side
@@ -1093,21 +1101,21 @@ app.post('/api/signals', async (req, res) => {
       const all = await pool.query(
         `SELECT email, subscription_status, billing_source,
                 (api_key IS NOT NULL) AS has_key,
-                (email LIKE '%@proptradebot.local'
-                 OR email LIKE 'test@%' OR email LIKE 'tvtest@%') AS is_fixture
+                (whop_membership_id IS NOT NULL
+                 OR stripe_subscription_id IS NOT NULL) AS has_paid
            FROM users
           WHERE subscription_status IN ('active','trialing')
           ORDER BY created_at`
       );
-      const eligible = all.rows.filter(r => r.has_key && !r.is_fixture);
+      const eligible = all.rows.filter(r => r.has_key && r.has_paid);
       return res.json({
         success: true, selftest: true,
         would_deliver: eligible.length,
         status_active: all.rows.length,
         recipients: eligible.map(r => r.email),
-        excluded: all.rows.filter(r => !(r.has_key && !r.is_fixture)).map(r => ({
+        excluded: all.rows.filter(r => !(r.has_key && r.has_paid)).map(r => ({
           email: r.email,
-          why: r.is_fixture ? 'test fixture' : 'no api key'
+          why: !r.has_paid ? 'no billing record (never paid)' : 'no api key'
         })),
         note: 'auth ok, nothing queued'
       });
@@ -1131,17 +1139,23 @@ app.post('/api/signals', async (req, res) => {
     // from customers — and the payload here is a trade instruction, not a
     // newsletter.
     //
-    // Two additional conditions, both cheap:
-    //   api_key IS NOT NULL — no key means no bot can poll, so queueing for
-    //   them is writing rows nobody will ever read.
-    //   email NOT LIKE test fixtures — belt and braces for the seeded accounts.
+    // The first attempt at fixing this filtered on email patterns, and it was
+    // wrong within minutes: it caught test@proptradebot.com and sailed straight
+    // past e2e-test@proptradebot.com and ptbtest2026@mailinator.com. Guessing
+    // from a string is not a basis for deciding whose account receives a trade.
+    //
+    // The real question is not "does this look like a test address" but "did
+    // this person actually buy something". A billing record cannot be created
+    // by a seed script, so it separates customers from fixtures by construction
+    // rather than by pattern, and needs no maintenance as new fixtures appear.
+    //
+    // api_key IS NOT NULL stays: no key means no bot can poll, so queueing for
+    // them writes rows nobody will ever read.
     const subs = await pool.query(
       `SELECT id, email FROM users
         WHERE subscription_status IN ('active','trialing')
           AND api_key IS NOT NULL
-          AND email NOT LIKE '%@proptradebot.local'
-          AND email NOT LIKE 'test@%'
-          AND email NOT LIKE 'tvtest@%'`
+          AND (whop_membership_id IS NOT NULL OR stripe_subscription_id IS NOT NULL)`
     );
 
     // The payload the bot will normalise. `text` is what its parser reads; the
