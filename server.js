@@ -1080,12 +1080,35 @@ app.post('/api/signals', async (req, res) => {
     // connectivity check has no business inserting rows that represent trade
     // instructions. Short-circuit here instead.
     if (body.selftest === true) {
-      const n = await pool.query(
+      // Report BOTH numbers. The gap between "status says subscribed" and
+      // "would actually receive a signal" is the thing worth seeing — if they
+      // ever diverge unexpectedly, something is wrong with entitlement.
+      const raw = await pool.query(
         `SELECT count(*)::int AS n FROM users WHERE subscription_status IN ('active','trialing')`
       );
+      // Return WHO, not just how many. A count cannot be audited; a list can.
+      // This endpoint already requires the publisher secret, so it is no more
+      // exposed than the fan-out itself, and knowing exactly whose account a
+      // trade instruction would land in is the entire point.
+      const all = await pool.query(
+        `SELECT email, subscription_status, billing_source,
+                (api_key IS NOT NULL) AS has_key,
+                (email LIKE '%@proptradebot.local'
+                 OR email LIKE 'test@%' OR email LIKE 'tvtest@%') AS is_fixture
+           FROM users
+          WHERE subscription_status IN ('active','trialing')
+          ORDER BY created_at`
+      );
+      const eligible = all.rows.filter(r => r.has_key && !r.is_fixture);
       return res.json({
         success: true, selftest: true,
-        would_deliver: n.rows[0].n,
+        would_deliver: eligible.length,
+        status_active: all.rows.length,
+        recipients: eligible.map(r => r.email),
+        excluded: all.rows.filter(r => !(r.has_key && !r.is_fixture)).map(r => ({
+          email: r.email,
+          why: r.is_fixture ? 'test fixture' : 'no api key'
+        })),
         note: 'auth ok, nothing queued'
       });
     }
@@ -1099,9 +1122,26 @@ app.post('/api/signals', async (req, res) => {
       return res.status(400).json({ success: false, error: 'text is required' });
     }
 
-    // Every subscriber who is entitled to real-time signals.
+    // Who is entitled to a real-time signal.
+    //
+    // The first version of this was subscription_status IN ('active','trialing')
+    // and nothing else, which on 2026-08-11 resolved to SIX accounts on a
+    // business with one member. create_test_user.js and setup_test_user.js both
+    // insert users with status 'trialing', so fixtures were indistinguishable
+    // from customers — and the payload here is a trade instruction, not a
+    // newsletter.
+    //
+    // Two additional conditions, both cheap:
+    //   api_key IS NOT NULL — no key means no bot can poll, so queueing for
+    //   them is writing rows nobody will ever read.
+    //   email NOT LIKE test fixtures — belt and braces for the seeded accounts.
     const subs = await pool.query(
-      `SELECT id FROM users WHERE subscription_status IN ('active','trialing')`
+      `SELECT id, email FROM users
+        WHERE subscription_status IN ('active','trialing')
+          AND api_key IS NOT NULL
+          AND email NOT LIKE '%@proptradebot.local'
+          AND email NOT LIKE 'test@%'
+          AND email NOT LIKE 'tvtest@%'`
     );
 
     // The payload the bot will normalise. `text` is what its parser reads; the
@@ -1142,7 +1182,10 @@ app.post('/api/signals', async (req, res) => {
       delivered++;
     }
 
-    console.log(`FBD signal #${seq} fanned out: ${delivered} delivered, ${skipped} already queued`);
+    // Log WHO, not just how many. When a customer says they never got a signal,
+    // this is the difference between checking a log line and guessing.
+    console.log(`FBD signal #${seq} fan-out: ${delivered} delivered, ${skipped} already queued, ` +
+                `recipients=[${subs.rows.map(r => r.email).join(', ')}]`);
     res.json({ success: true, seq, delivered, skipped });
   } catch (error) {
     console.error('signal fan-out error:', error);
