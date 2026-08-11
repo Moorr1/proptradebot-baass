@@ -1072,6 +1072,24 @@ app.post('/api/signals', async (req, res) => {
     }
 
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
+
+    // Selftest: prove auth and reachability WITHOUT queueing anything.
+    // The first version of this sent seq 0 and relied on a price below the
+    // app's sanity floor to stop anyone trading it. That is two guards deep for
+    // something that should simply not write to customer queues at all — a
+    // connectivity check has no business inserting rows that represent trade
+    // instructions. Short-circuit here instead.
+    if (body.selftest === true) {
+      const n = await pool.query(
+        `SELECT count(*)::int AS n FROM users WHERE subscription_status IN ('active','trialing')`
+      );
+      return res.json({
+        success: true, selftest: true,
+        would_deliver: n.rows[0].n,
+        note: 'auth ok, nothing queued'
+      });
+    }
+
     const seq = Number(body.seq);
     const text = String(body.text || '').trim();
     if (!Number.isInteger(seq) || seq <= 0) {
