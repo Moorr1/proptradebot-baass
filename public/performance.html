@@ -17,7 +17,11 @@ h1{font-size:38px;font-weight:700;letter-spacing:-.025em;margin:10px 0 12px}
 .sel button{background:#111827;border:1px solid #1f2937;color:#cbd5e1;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:.12s}
 .sel button:hover{border-color:#374151}
 .sel button.on{background:rgba(34,197,94,.14);border-color:#22c55e;color:#4ade80}
-.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:34px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:12px}
+/* Sits directly under the tiles, deliberately not styled as fine print. The
+   sample size is context the reader needs to interpret the number above it,
+   not a disclaimer to be skimmed past. */
+.nnote{color:#94a3b8;font-size:13px;line-height:1.6;margin:0 0 34px;max-width:70ch}
 .tile{background:#0f172a;border:1px solid #1e293b;border-radius:14px;padding:20px 22px}
 .tile b{display:block;font-size:32px;font-weight:700;letter-spacing:-.03em;line-height:1.15}
 .tile .k{color:#94a3b8;font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
@@ -78,10 +82,11 @@ investment advice or a recommendation to buy or sell any security.
 
 <div class=tiles>
   <div class=tile><div class=k>Signals</div><b id=t1>—</b><div class=s>published since launch</div></div>
-  <div class=tile><div class=k>Avg max gain</div><b id=t2 class=pos>—</b><div class=s>pts per signal</div></div>
+  <div class=tile><div class=k>Avg offered</div><b id=t2 class=pos>—</b><div class=s>pts at best tick, not taken</div></div>
   <div class=tile><div class=k>Avg drawdown</div><b id=t3 class=neg>—</b><div class=s>pts of adverse excursion</div></div>
-  <div class=tile><div class=k>Total edge</div><b id=t4>—</b><div class=s>pts, stop applied</div></div>
+  <div class=tile><div class=k>Realised edge</div><b id=t4>—</b><div class=s>pts actually closed</div></div>
 </div>
+<p id=nnote class=nnote></p>
 
 <div class=tabs>
   <button id=tabCal class=on>Calendar</button>
@@ -98,10 +103,25 @@ investment advice or a recommendation to buy or sell any security.
 <div id=top style="display:none"></div>
 
 <footer>
-Performance is measured by maximum favourable and adverse excursion with the
-selected stop applied, in points per contract. Position sizing is yours;
-we publish points so the figures do not depend on a contract count you did not
-choose.<br><br>
+Headline edge and every calendar figure are <b>realised</b> points per contract
+&mdash; what the trade actually closed for, taken straight from the
+<code>pts</code> field of the published ledger, so you can sum the file yourself
+and get the same number.<br><br>
+
+Realised means realised <i>on the ladder the signal published</i>: first target
+7 points, second target 10 points, half the position at each, structural stop.
+Those targets are printed in the alert itself, before the trade fills, so the
+figure is reproducible rather than a setting we chose after the fact. Run
+different targets and you will get a different number &mdash; that is your
+deviation from the instruction, not a gap in the record.<br><br>
+
+Maximum favourable excursion is shown separately as &ldquo;offered&rdquo;: what
+the move was worth at its best tick if you had held for it. It is context for
+anyone considering a different ladder. It is never added into the edge, because
+nobody exits at the high.<br><br>
+
+Position sizing is yours, we publish points so the figures do not depend on a
+contract count you did not choose.<br><br>
 Fills are on a practice account and do not account for slippage, commissions or
 execution timing on a funded account. Past performance does not indicate future
 results. Futures trading carries substantial risk of loss and is not suitable for
@@ -116,9 +136,28 @@ const MON=["January","February","March","April","May","June","July","August","Se
 let STOP=20;
 
 function edge(t){
-  // Stop applied: if adverse excursion breached the stop, the trade is taken as
-  // a loss of exactly the stop. Otherwise it is credited its favourable
-  // excursion. Same convention monkeyBOT uses.
+  // REALISED points. Not maximum favourable excursion.
+  //
+  // This used to return t.mfe — "the same convention monkeyBOT uses" — which
+  // meant the headline and every calendar square showed what the trade was
+  // worth at its best tick rather than what it actually made. On the first
+  // resolved signal that was +16 published against +8.50 realised: a 1.94x
+  // overstatement, on a page whose headline is "An edge you can audit".
+  //
+  // It is self-detonating in a way an ordinary exaggeration is not. We publish
+  // ledger.jsonl and a verify.txt inviting people to check our arithmetic. The
+  // realised figure is right there in the file as `pts`. Anyone who accepts
+  // that invitation — exactly the sceptical reader this pitch is built for —
+  // sums pts, gets a different number, and stops reading.
+  //
+  // MFE still has a legitimate job: showing what the setup offered. It just
+  // cannot be the number labelled "edge".
+  return t.pts;
+}
+
+function offered(t){
+  // What the move gave you at its best, with the stop applied. Context, shown
+  // in its own clearly-labelled tile — never summed into the headline.
   if(STOP>0 && t.mae<=-STOP) return -STOP;
   return t.mfe;
 }
@@ -127,14 +166,28 @@ function stats(){
   const n=D.length;
   document.getElementById('t1').textContent=n||'—';
   if(!n){['t2','t3','t4'].forEach(i=>document.getElementById(i).textContent='—');return;}
-  const mg=D.reduce((a,t)=>a+t.mfe,0)/n;
+  const mg=D.reduce((a,t)=>a+offered(t),0)/n;
   const dd=D.reduce((a,t)=>a+Math.abs(t.mae),0)/n;
   const te=D.reduce((a,t)=>a+edge(t),0);
-  document.getElementById('t2').textContent='+'+mg.toFixed(1);
+  document.getElementById('t2').textContent=(mg>=0?'+':'')+mg.toFixed(1);
   document.getElementById('t3').textContent='-'+dd.toFixed(1);
   const e=document.getElementById('t4');
-  e.textContent=(te>=0?'+':'')+te.toFixed(0);
+  // .toFixed(1), not .toFixed(0). At .0f JavaScript and Python both turned
+  // +16.5 into +16 — the headline silently shed half a point on a one-trade
+  // sample. Points are quoted to a quarter in this market; rounding the
+  // headline to whole numbers throws away real precision to no benefit.
+  e.textContent=(te>=0?'+':'')+te.toFixed(1);
   e.className=te>=0?'pos':'neg';
+
+  // Sample-size honesty. A four-tile dashboard computed from one trade looks
+  // like statistics. Saying n out loud, next to the number, is the cheapest
+  // possible defence against reading it as one.
+  const sn=document.getElementById('nnote');
+  if(sn) sn.textContent = n<20
+    ? 'Based on '+n+' resolved signal'+(n===1?'':'s')+'. Too few to be '
+      + 'statistically meaningful — this is a record being built in public, '
+      + 'not a performance claim.'
+    : 'Based on '+n+' resolved signals.';
 }
 
 const byDay={};

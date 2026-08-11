@@ -1433,19 +1433,27 @@ app.get('/whop-success', async (req, res) => {
       <div class="card">
         <div class="icon">🎉</div>
         <h1>You're in! Welcome to PropTradeBot.</h1>
-        <p>Your subscription is active. Here's how to get your bot running in under 10 minutes:</p>
+        <p>Your subscription is active. Three steps, about ten minutes:</p>
         <div class="steps">
+          <!-- DISCORD GOES FIRST, DELIBERATELY.
+               This page used to open with "download the Mac app" and never
+               mentioned Discord at all — on a product whose primary thing is
+               real-time signals posted to Discord. Worse, this redirect pulls
+               the buyer off Whop the instant they pay, which is where the
+               Discord link lives. Someone who does not go back never joins the
+               channel they just paid for, and churns in week one blaming us
+               for sending nothing. -->
           <div class="step">
             <div class="step-num">1</div>
-            <div class="step-text"><strong>Download PropTradeBot</strong> — grab the Mac app from the link below and install it.</div>
+            <div class="step-text"><strong>Join the Discord</strong> — this is where signals post in real time. Head back to your Whop account at <a href="https://whop.com/hub" style="color:#60a5fa">whop.com/hub</a> and open the Discord app to link it. Do this first, it is the part you are paying for.</div>
           </div>
           <div class="step">
             <div class="step-num">2</div>
-            <div class="step-text"><strong>Get your API key</strong> — go to <a href="/dashboard" style="color:#60a5fa">proptradebot.com/dashboard</a>, sign in, and generate your key.</div>
+            <div class="step-text"><strong>Get your API key</strong> — go to <a href="/dashboard" style="color:#60a5fa">proptradebot.com/dashboard</a> and sign in <strong>with the same email you used on Whop</strong>. A different email will not see your subscription. Generate your key there.</div>
           </div>
           <div class="step">
             <div class="step-num">3</div>
-            <div class="step-text"><strong>Run the setup wizard</strong> — open PropTradeBot, paste your API key, connect your Topstep account, and you're live.</div>
+            <div class="step-text"><strong>Install and run the wizard</strong> — download below, drag PropTradeBot to Applications, paste your API key, then pick your prop firm and connect it. Topstep, Tradeify, Lucid, Take Profit Trader, MyFundedFutures and Bulenox are all supported.</div>
           </div>
         </div>
         <a href="/downloads/PropTradeBot.dmg" class="btn">⬇ Download PropTradeBot for Mac</a>
