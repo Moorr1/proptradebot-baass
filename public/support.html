@@ -92,13 +92,13 @@
 
     <div class="faq">
       <div class="faq-item">
-        <h4>How do I install the Chrome extension?</h4>
-        <p>Install the <a href="https://chromewebstore.google.com/detail/proptradebot-connector/bnhoehenkhohknaplajfgkahlnfmajjb" target="_blank">PropTradeBot Connector</a> from the Chrome Web Store. Click "Add to Chrome" and you're done. The extension automatically detects trading signals in Discord and Telegram. Prefer TradingView? Point a TradingView alert at your PropTradeBot webhook instead — no extension needed.</p>
+        <h4>Do I need a browser extension?</h4>
+        <p>No. Signals are delivered from our servers directly to your bot, which checks for them every few seconds. Nothing needs to be open in a browser. Earlier versions used a Chrome extension that read signals off the Discord page — that is no longer used or required, and you can remove it if you installed it.</p>
       </div>
 
       <div class="faq-item">
         <h4>The bot says "Not connected" — what's wrong?</h4>
-        <p>Make sure PropTradeBot is running on your Mac and the server URL in the extension matches (usually http://localhost:5555).</p>
+        <p>Check that PropTradeBot is running on your Mac, then open <a href="http://localhost:5555/status">http://localhost:5555/status</a>. If <code>cloud.error</code> says your API key was rejected, paste a fresh key from your <a href="/dashboard">dashboard</a> into <a href="http://localhost:5555/setup">the setup page</a>.</p>
       </div>
 
       <div class="faq-item">
