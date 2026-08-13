@@ -46,7 +46,7 @@ app.use(express.static('public', { extensions: ['html'] }));
 // with known bugs in it. fbd_preflight.py now fails when the newest local build
 // is ahead of what lives in public/downloads.
 app.get('/downloads/PropTradeBot.dmg', (req, res) => {
-  res.redirect(302, '/downloads/PropTradeBot-v1.6.8-notarized.dmg');
+  res.redirect(302, '/downloads/PropTradeBot-v1.6.9-notarized.dmg');
 });
 
 // Friendly routes → Clerk handles auth client-side
@@ -1311,7 +1311,22 @@ app.get('/api/user/api-key', ClerkExpressRequireAuth(), async (req, res) => {
     res.json({
       success: true,
       has_key: !!key,
+      // Masked, for DISPLAY only.
       api_key: key ? key.substring(0, 8) + '...' + key.substring(key.length - 4) : null,
+      // The real key, for the Copy button.
+      //
+      // Until 2026-08-13 only the masked form was returned, and the dashboard's
+      // Copy button copied THAT — so the clipboard received the literal string
+      // "ptb_1b7a...9fdf", ellipsis included. Every customer following the
+      // documented setup ("paste this key into the wizard") stored a key that
+      // could never authenticate. Because an invalid key made the app exit, and
+      // the wizard is served by the app, they were then stuck with no way to
+      // correct it.
+      //
+      // This route is already behind ClerkExpressRequireAuth and the key belongs
+      // to the caller, so returning it to them is no more exposed than the
+      // regenerate flow that already shows it in full.
+      api_key_full: key || null,
       created_at: result.rows[0].api_key_created_at
     });
   } catch (error) {

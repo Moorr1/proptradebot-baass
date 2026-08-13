@@ -434,7 +434,11 @@ http://localhost:5555/setup</pre>
         const instructions = document.getElementById('api-key-instructions');
 
         if (data.has_key && data.api_key) {
-          currentApiKey = data.api_key; // masked
+          // DISPLAY the mask, COPY the real key. These must not be the same
+          // value: until 2026-08-13 currentApiKey held the masked string, so
+          // the Copy button put "ptb_1b7a...9fdf" on the clipboard and every
+          // customer stored a key that could not authenticate.
+          currentApiKey = data.api_key_full || null;
           display.textContent = data.api_key;
           display.classList.remove('hidden');
           btnGen.textContent = 'Regenerate Key';
@@ -476,9 +480,16 @@ http://localhost:5555/setup</pre>
     }
 
     function copyKey() {
-      if (!currentApiKey) return;
+      // Refuse rather than copy something wrong. A silent bad copy is what
+      // caused the original bug; a visible failure is recoverable.
+      if (!currentApiKey || currentApiKey.includes('...')) {
+        showAlert('Could not read your key — reload the page and try again.', 'error');
+        return;
+      }
       navigator.clipboard.writeText(currentApiKey).then(() => {
-        showAlert('API key copied to clipboard!', 'success');
+        showAlert('API key copied. Paste it into the PropTradeBot setup wizard.', 'success');
+      }).catch(() => {
+        showAlert('Clipboard blocked by the browser — select the key and copy manually.', 'error');
       });
     }
 
