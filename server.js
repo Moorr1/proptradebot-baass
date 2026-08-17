@@ -46,7 +46,7 @@ app.use(express.static('public', { extensions: ['html'] }));
 // with known bugs in it. fbd_preflight.py now fails when the newest local build
 // is ahead of what lives in public/downloads.
 app.get('/downloads/PropTradeBot.dmg', (req, res) => {
-  res.redirect(302, '/downloads/PropTradeBot-v1.6.9-notarized.dmg');
+  res.redirect(302, '/downloads/PropTradeBot-v1.6.10-notarized.dmg');
 });
 
 // Friendly routes → Clerk handles auth client-side
