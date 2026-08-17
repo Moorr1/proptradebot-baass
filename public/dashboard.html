@@ -123,8 +123,21 @@ http://localhost:5555/setup</pre>
         </div>
       </div>
 
-      <!-- TradingView Strategy -->
-      <div class="card">
+      <!-- TradingView Strategy — RETIRED FROM THE PRODUCT 2026-08-17.
+           PropTradeBot sells our FBD signals, executed. Letting customers pipe
+           their own strategies through our server made us an execution venue for
+           edges we did not write, could not support and could not stand behind.
+
+           HIDDEN, NOT DELETED. The /tv/:token relay stays live on the server so
+           anyone who already generated a webhook keeps working — pulling it
+           would silently stop their trades with no warning and no way to tell
+           why. This block simply stops being offered to anyone new.
+
+           NOTE: this is the SERVER-side relay (TradingView -> proptradebot.com
+           -> pending_alerts). It is NOT the local /alert endpoint on Richard's
+           own Mac that the Chrome extension posts JMoney alerts to. Those are
+           separate paths; this change does not touch his setup. -->
+      <div class="card" id="tv-card" style="display:none">
         <h2>📈 TradingView Strategy</h2>
         <p>Run your own TradingView strategy through PropTradeBot's execution engine. Generate your webhook, paste it into a TradingView alert, and your signals fire the ladder automatically — with prop-firm safety.</p>
         <div id="tv-section">
@@ -318,6 +331,13 @@ http://localhost:5555/setup</pre>
       try {
         const data = await apiGet('/api/user/tv-webhook');
         if (data && data.success && data.configured && data.webhook_url) {
+          // Retired for new users (the card ships hidden), but anyone who ALREADY
+          // generated a webhook still needs to see their URL and passphrase — they
+          // may need to re-paste it into TradingView, and a relay they cannot look
+          // up is worse than one they cannot create. Same rule as the wizard's
+          // hidden instruments: hide the offer, never strand an existing user.
+          const card = document.getElementById('tv-card');
+          if (card) card.style.display = '';
           tvShow(data.webhook_url, data.passphrase || '');
         }
       } catch (e) { console.error('loadTvWebhook error:', e); }
