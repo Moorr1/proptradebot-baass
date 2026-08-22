@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PropTradeBot — An edge you can audit, executed automatically</title>
-  <meta name="description" content="Signals published before they resolve, in a ledger you can verify. PropTradeBot executes the full managed trade across every prop account you own.">
-  <meta property="og:title" content="PropTradeBot — An edge you can audit">
+  <title>PropTradeBot — Execution that keeps you funded</title>
+  <meta name="description" content="Signals published before they resolve, in a ledger you can verify. PropTradeBot executes the full managed trade across every prop account — or bring your own.">
+  <meta property="og:title" content="PropTradeBot — Execution that keeps you funded">
   <meta property="og:description" content="Every signal posts before its outcome is known, hash-chained so it cannot be edited after the fact — then executed across all your prop accounts. 7-day free trial.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://proptradebot.com">
   <meta property="og:image" content="https://proptradebot.com/PropTradeBot_Poster.png">
   <meta property="og:image:alt" content="PropTradeBot — automated prop-account trade execution">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="PropTradeBot — An edge you can audit">
+  <meta name="twitter:title" content="PropTradeBot — Execution that keeps you funded">
   <meta name="twitter:description" content="Every signal posts before its outcome is known, hash-chained so it cannot be edited after the fact — then executed across all your prop accounts. 7-day free trial.">
   <meta name="twitter:image" content="https://proptradebot.com/PropTradeBot_Poster.png">
   <script async crossorigin="anonymous" data-clerk-publishable-key="pk_live_Y2xlcmsucHJvcHRyYWRlYm90LmNvbSQ" src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5/dist/clerk.browser.js" type="text/javascript"></script>
@@ -217,11 +217,11 @@
 
   <section class="hero">
     <div class="container">
-      <h1>An edge you can audit.</h1>
-      <p>Our FBD signals post the moment they fill — before they win or lose — and every one is written to a hash-chained ledger that cannot be edited after the fact. PropTradeBot then runs the whole managed trade across every prop account you own: laddered entries, T1/T2 trims, adaptive stops, flat before the close. Already have a strategy? Connect it instead. Same execution engine either way.</p>
+      <h1>Execution that keeps you funded.</h1>
+      <p>Connect TradingView, Telegram or Discord — or trade with one click. PropTradeBot runs the whole managed trade across every prop account you own: laddered entries, T1/T2 trims, adaptive stops, flat before the close. The same trade, the same size, every time, whether or not you are at the screen.</p>
       <div class="hero-cta">
         <a href="https://whop.com/proptradebot/proptradebot-pro" class="btn btn-primary btn-lg" style="text-decoration:none;">Start Free Trial</a>
-        <button class="btn btn-outline btn-lg" onclick="document.getElementById('performance').scrollIntoView({behavior:'smooth'})">See the record</button>
+        <button class="btn btn-outline btn-lg" onclick="document.getElementById('how-it-works').scrollIntoView({behavior:'smooth'})">See how it works</button>
       </div>
     </div>
   </section>
@@ -232,7 +232,7 @@
     <div class="container" style="text-align: center;">
       <h2 style="color: #38bdf8; font-size: 28px; margin-bottom: 16px;">See It In Action</h2>
       <p style="color: #94a3b8; margin-bottom: 32px; max-width: 600px; margin-left: auto; margin-right: auto;">
-        Watch a single FBD signal fire a fully managed trade: entry, laddered trims, breakeven stop, flat by the close, across every account.
+        Watch a single alert — from TradingView, Telegram, or Discord — fire a fully managed trade: entry, laddered trims, breakeven stop, flat by the close, across every account.
       </p>
       <div style="max-width: 900px; margin: 0 auto; border-radius: 12px; overflow: hidden; border: 2px solid #1e293b; background: #111827;">
         <video controls preload="metadata" playsinline poster="/PropTradeBot_Demo_thumb.png" style="width: 100%; display: block;">
@@ -245,53 +245,21 @@
 
   
 
-  <!-- FBD-PERFORMANCE:START -->
-  <section class="features" id="performance" style="background:#0a0e1a;">
-    <div class="container">
-      <h2 class="section-title">Every signal, published before the outcome</h2>
-      <p class="section-subtitle">Our FBD signals post to Discord the moment they fill &mdash;
-      before they win or lose &mdash; and every one is written to an
-      append-only ledger where each record carries the hash of the record before it.
-      Nothing can be edited or quietly removed after the fact.</p>
-
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-top:40px">
-        <div style="background:#0f172a;border:1px solid #1e293b;border-radius:14px;padding:20px 22px"><div style="color:#94a3b8;font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Signals published</div><b style="display:block;font-size:30px;font-weight:700;letter-spacing:-.03em">1</b></div><div style="background:#0f172a;border:1px solid #1e293b;border-radius:14px;padding:20px 22px"><div style="color:#94a3b8;font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Avg offered (pts)</div><b style="display:block;font-size:30px;font-weight:700;letter-spacing:-.03em">+16.5</b></div><div style="background:#0f172a;border:1px solid #1e293b;border-radius:14px;padding:20px 22px"><div style="color:#94a3b8;font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Avg drawdown (pts)</div><b style="display:block;font-size:30px;font-weight:700;letter-spacing:-.03em">-3.0</b></div><div style="background:#0f172a;border:1px solid #1e293b;border-radius:14px;padding:20px 22px"><div style="color:#94a3b8;font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Realised edge (pts)</div><b style="display:block;font-size:30px;font-weight:700;letter-spacing:-.03em">+8.5</b></div>
-      </div>
-      
-
-      <p style="margin:30px auto 0;max-width:860px;color:#475569;font-size:12.5px;line-height:1.7;text-align:left">
-        <b style="color:#64748b">Disclaimer.</b> Past performance is not indicative of future
-        results. Signal performance reflects tracked results based on maximum favourable
-        excursion (MFE) and maximum adverse excursion (MAE) analysis with the specified stop
-        loss applied. These are not live trading results and do not account for slippage,
-        commissions, or execution timing. Trading futures involves substantial risk of loss and
-        is not suitable for all investors. This data is provided for informational and
-        educational purposes only and should not be construed as investment advice or a
-        recommendation to buy or sell any security.
-      </p>
-
-      <p style="text-align:center;margin-top:28px">
-        <a href="/performance" class="btn btn-primary" style="text-decoration:none">
-          See the full record &rarr;</a>
-      </p>
-    </div>
-  </section>
-<!-- FBD-PERFORMANCE:END -->
 
   <section class="features">
     <div class="container">
-      <h2 class="section-title">Execution that keeps you funded</h2>
-      <p class="section-subtitle">The signal is half of it. The other half is being at the screen when it fires, sizing it the same way every time, and not breaking a prop firm rule at 3:58pm. That part is the machine's job.</p>
+      <h2 class="section-title">Or bring your own strategy</h2>
+      <p class="section-subtitle">Already have an edge? Paste one webhook URL into a TradingView alert, or trade with one click. Same execution engine, same prop-rule safety — sized, laddered, stopped and flattened by the close, across every account.</p>
       <div class="feature-grid">
         <div class="feature-card">
           <div class="feature-icon">⚡</div>
-          <h3>Fires While You Work</h3>
-          <p>The signal arrives and the position is on in seconds — entry, stop and both targets — whether or not you are at the screen. No chasing, no hesitating, no missing it because you were in a meeting.</p>
+          <h3>TradingView Automation</h3>
+          <p>One webhook connects your strategy. Signals execute in seconds with your preset sizing, trims, and stops — whether you are at the screen or not.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">🎯</div>
-          <h3>The Same Trade Every Time</h3>
-          <p>Your sizing, your trims, your stop — applied identically on every signal. The discipline that is easy on trade one and hard on trade forty.</p>
+          <h3>One-Click Manual Mode</h3>
+          <p>No strategy feed? Hit Buy or Sell and the full managed position fires across every account in under a second. Same ladder, same discipline.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">🏦</div>
@@ -317,7 +285,7 @@
     </div>
   </section>
 
-  <section class="how-it-works">
+  <section class="how-it-works" id="how-it-works">
     <div class="container">
       <h2 class="section-title">How It Works</h2>
       <p class="section-subtitle">From your call to a fully managed position in 4 steps.</p>
@@ -334,8 +302,8 @@
         </div>
         <div class="step">
           <div class="step-number">3</div>
-          <h3>Signals Arrive On Their Own</h3>
-          <p>FBD signals are delivered straight from our servers to your bot. Nothing to connect, nothing to keep open in a browser, no extension.</p>
+          <h3>Connect Your Signal</h3>
+          <p>Paste your PropTradeBot webhook into a TradingView alert — or skip it and trade with one click. Telegram and Discord alert feeds supported too.</p>
         </div>
         <div class="step">
           <div class="step-number">4</div>
@@ -359,12 +327,12 @@
           <div class="price">$149<span>/month</span></div>
           <p style="color:#64748b; margin-bottom:16px;">Disciplined execution for serious prop firm traders.</p>
           <ul>
-            <li>FBD signals, published before the outcome is known</li>
-            <li>Executed automatically on every funded account you own</li>
+            <li>Multiple funded accounts across supported firms</li>
+            <li>TradingView webhook automation</li>
+            <li>One-click manual execution</li>
             <li>Auto ladder: trims, stops, runner rules</li>
             <li>Eval-saving safety: EOD flatten, cutoffs, loss limits</li>
             <li>Real-time P&L dashboard</li>
-            <li>The full public record, hash-chained and verifiable</li>
             <li>Priority support</li>
           </ul>
           <a href="https://whop.com/proptradebot/proptradebot-pro" class="btn btn-primary" style="text-decoration:none;">Start Free Trial</a>
