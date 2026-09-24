@@ -1,0 +1,227 @@
+{
+  "_meta": {
+    "purpose": "Firm registry for PropTradeBot 'pick your firm' setup. Maps each prop firm to the execution rail(s) it exposes AND whether the firm PERMITS automated API execution (which is what PropTradeBot does). The setup wizard reads this so the customer never touches an endpoint URL.",
+    "as_of": "2026-07-24",
+    "landscape_note": "ProjectX ended third-party prop licensing and went Topstep-exclusive in Feb 2026; every other firm rebuilt on Tradovate and/or Rithmic. TWO independent gates decide whether we can run on a firm: (1) RAIL \u2014 does the firm actually expose a native Tradovate brokerage account (Tradovate API key works) or is its 'Tradovate' just a Rithmic front-end (needs the Rithmic rail); and (2) AUTOMATION POLICY \u2014 does the firm permit unattended API/algo execution, or only monitored 'semi-automation'. A firm can offer Tradovate as a UI yet PROHIBIT API automation. Only list a firm for automated execution when BOTH gates pass.",
+    "automation_field": "api_automation_ok = true means the firm exposes a usable API on a rail we support AND permits automated execution. false means either no usable API rail or automation is prohibited/monitored-only \u2014 do NOT advertise automated execution there (customer account-ban risk).",
+    "verify_flag": "verified=true means confirmed against the firm's own current help center / official rules as of as_of. Confirm again before major releases; prop-firm rules change frequently.",
+    "important_caveat": "Automation policies change often and some are ambiguous. Where a firm's policy is cautious or vendor-gated, the customer should confirm their specific bot with the firm's support before running it."
+  },
+  "rails": {
+    "projectx": {
+      "shared_endpoint": false,
+      "note": "Per-firm base_url. Topstep-exclusive as of Feb 2026.",
+      "auth": "loginKey (username + API key)"
+    },
+    "tradovate": {
+      "shared_endpoint": true,
+      "live_url": "https://live.tradovateapi.com/v1",
+      "demo_url": "https://demo.tradovateapi.com/v1",
+      "note": "ONE API for ALL NATIVE Tradovate accounts. Only works when the firm issues a real Tradovate/CQG brokerage account (not a Rithmic-backed Tradovate front-end). User supplies firm-issued Tradovate credentials + API app key (cid/secret).",
+      "auth": "accesstokenrequest (name/password + cid/sec app key)",
+      "verified_live": "2026-07-24 \u2014 14/14 order-lifecycle test on demo account 59334820 (entry/stop/limit/cancel/flatten)"
+    },
+    "rithmic": {
+      "shared_endpoint": false,
+      "note": "Per-firm gateway + system-name. Each firm's Rithmic connection params differ, and connecting with the wrong system_name fails (or silently misroutes). NEVER hardcode one firm's system_name for another \u2014 take it from the firm entry below.",
+      "auth": "user/password + firm gateway + system name",
+      "fields": {
+        "rithmic_system_name": "exact string the customer picks in R|Trader Pro's System dropdown",
+        "rithmic_gateway": "server location, e.g. Chicago",
+        "rithmic_market_data": "R|Trader Pro Market Data toggle \u2014 firm-specific, and it differs between firms"
+      }
+    }
+  },
+  "firms": [
+    {
+      "id": "topstep",
+      "name": "Topstep",
+      "rails": [
+        "projectx"
+      ],
+      "default_rail": "projectx",
+      "projectx_base_url": "https://api.topstepx.com",
+      "automation_policy": "api_permitted",
+      "api_automation_ok": true,
+      "verified": true,
+      "notes": "TopstepX API (ProjectX-powered): self-serve API key via ProjectX API Access (~$29/mo). Automated strategies explicitly permitted. HARD RULE: must run on your personal device \u2014 VPS/VPN prohibited (can cause suspension). Our proven rail (live).",
+      "sources": [
+        "help.topstep.com/en/articles/11187768-topstepx-api-access"
+      ]
+    },
+    {
+      "id": "tradeify",
+      "name": "Tradeify",
+      "rails": [
+        "tradovate",
+        "rithmic"
+      ],
+      "default_rail": "tradovate",
+      "automation_policy": "api_permitted",
+      "api_automation_ok": true,
+      "verified": true,
+      "notes": "Native Tradovate (primary platform). Owned, non-HFT bots explicitly allowed; may require proof of sole ownership (video enabling code on your own PC). Microscalping rule: >50% of trades AND profit must be from holds >10s. Same Tradovate connection works eval -> funded -> live. Best Tradovate-API fit of the group.",
+      "sources": [
+        "help.tradeify.co/en/articles/10468318-guidelines-for-traders",
+        "blog.traderspost.io/article/automate-tradeify-with-traderspost"
+      ]
+    },
+    {
+      "id": "lucid",
+      "name": "Lucid Trading",
+      "rails": [
+        "tradovate",
+        "rithmic"
+      ],
+      "default_rail": "tradovate",
+      "automation_policy": "api_permitted",
+      "api_automation_ok": true,
+      "verified": true,
+      "notes": "Native Tradovate (via CQG). Official 'Permitted Activities': automated systems, API strategies and trade copiers permitted (trader responsible for errors). No HFT, no microscalping (>50% profit from <=5s holds), no hedging/martingale. CONFIRM WITH SUPPORT: Lucid permits automation but does not publicly document a self-serve Tradovate app-key (cid/secret) flow \u2014 verify key provisioning before relying on raw API.",
+      "sources": [
+        "support.lucidtrading.com/en/articles/11404728-permitted-activities",
+        "support.lucidtrading.com/en/articles/11404614-supported-platforms"
+      ]
+    },
+    {
+      "id": "takeprofittrader",
+      "name": "Take Profit Trader (TPT)",
+      "rails": [
+        "tradovate",
+        "rithmic"
+      ],
+      "default_rail": "tradovate",
+      "automation_policy": "api_permitted_restricted",
+      "api_automation_ok": true,
+      "verified": true,
+      "notes": "Choose the Tradovate/CQG data feed at purchase for a NATIVE Tradovate account (the Rithmic-feed option will NOT work with the Tradovate API). Copiers/automation acknowledged 'at the trader's full responsibility', BUT ToS says it wants discretionary traders and PROHIBITS sub-second HFT algos. Suitable for slower/semi-automated only; confirm your bot with support. Flat by 5:00 PM ET; news-flatten on funded; eval consistency <=50%/day.",
+      "sources": [
+        "takeprofittrader.com/terms",
+        "blog.traderspost.io/article/automate-take-profit-trader-with-traderspost"
+      ]
+    },
+    {
+      "id": "myfundedfutures",
+      "name": "MyFundedFutures (MFFU)",
+      "rails": [],
+      "default_rail": null,
+      "automation_policy": "permitted_but_no_api",
+      "api_automation_ok": false,
+      "verified": true,
+      "notes": "PERMANENTLY EXCLUDED - NO API. Settled 2026-07-28 by MFFU Support (Nihar, staff): \"Unfortunately, we do not provide access to API.\" That is the end of the question. MFFU DOES permit algo trading on all plans (evaluation, sim-funded and live) per the same reply and their Fair Play page - no HFT, live accounts must follow CME rules - but permission is irrelevant to us: they expose no programmatic interface to connect to. Automation at MFFU means running a strategy inside a supported PLATFORM (NinjaTrader, Quantower, TradingView, ATAS), not a third party executing via API. PropTradeBot executes via direct broker API, so there is nothing for it to attach to. This is an ARCHITECTURE mismatch, not a policy one, and no further follow-up will change it. Do not re-add MFFU on the strength of headlines saying 'MFFU now allows algo trading' - that is true and still does not give us a rail. Prior history for context: earlier revisions of this file guessed Tradovate, then Rithmic; both were unverified and both were wrong. A 2026-05-21 support enquiry answered only the policy question. The 2026-07-28 reply answered the connectivity one. (If MFFU ever ships an API, the hedging rule matters: hedging is prohibited BY UNDERLYING - E-mini NQ and Micro NQ count as the same underlying - so MNQ and NQ must never run together on one MFFU account.)",
+      "sources": [
+        "MFFU Support email reply, Nihar (staff), 2026-07-28: 'we do not provide access to API'",
+        "help.myfundedfutures.com/en/articles/8444599-fair-play-and-prohibited-trading-practices",
+        "help.myfundedfutures.com/en/articles/8528335-overview-of-supported-platforms-at-mffu"
+      ]
+    },
+    {
+      "id": "bulenox",
+      "name": "Bulenox",
+      "rails": [
+        "rithmic"
+      ],
+      "default_rail": "rithmic",
+      "rithmic_system_name": "Rithmic Paper Trading",
+      "rithmic_gateway": "Chicago",
+      "rithmic_gateway_options": [
+        "Chicago",
+        "Europe",
+        "Frankfurt",
+        "Tokyo",
+        "Singapore"
+      ],
+      "rithmic_market_data": true,
+      "automation_policy": "api_permitted",
+      "api_automation_ok": true,
+      "verified": true,
+      "notes": "Rithmic-exclusive \u2014 no native Tradovate account. System name and gateway confirmed verbatim from Bulenox's own connection doc: System = 'Rithmic Paper Trading', Gateway = 'Chicago' (Europe/Frankfurt/Tokyo/Singapore alternates). Market Data ON and Allow Plugins ON (note: this is the OPPOSITE of Apex's guidance). Automation explicitly permitted (bots, EAs, copiers). 40% single-day consistency rule at payout; flat by 4:00 PM CT. Bulenox documents one connection procedure for all account stages; whether funded uses a different system is undocumented, not confirmed false.",
+      "sources": [
+        "bulenox.com/help/connection/",
+        "bulenox.tawk.help/article/ninjatrader-connection-guide",
+        "blog.pickmytrade.io/bulenox-futures-trading-success/"
+      ]
+    },
+    {
+      "id": "apex",
+      "name": "Apex Trader Funding",
+      "rails": [
+        "rithmic",
+        "tradovate"
+      ],
+      "default_rail": "rithmic",
+      "rithmic_system_name": "APEX",
+      "rithmic_gateway": "Chicago",
+      "rithmic_market_data": false,
+      "automation_policy": "semi_auto_only",
+      "api_automation_ok": false,
+      "verified": true,
+      "notes": "Rithmic params confirmed from Apex's own setup doc (System = APEX; Gateway = area closest to you; Market Data OFF unless you have the Rithmic 2nd Login Session add-on). Apex usernames with a hyphen are Rithmic-based, with an underscore are Tradovate-based. NOT offered in the picker regardless: offers Rithmic + Tradovate, but NO self-serve trading API key; automation is vendor-gated (TradersPost/PickMyTrade webhooks). FULL automation is PROHIBITED on funded (PA)/live accounts \u2014 only monitored semi-automation permitted. As of Mar 2026 every order must carry an attached stop-loss + take-profit (naked orders rejected). DO NOT advertise unattended automated execution on Apex funded accounts. (Eval-phase tolerance is reported but not firm-confirmed.)",
+      "sources": [
+        "quantvps.com/blog/apex-trader-funding-automated-trading-bots",
+        "blog.pickmytrade.trade/automate-apex-trader-funding-tradovate/"
+      ]
+    },
+    {
+      "id": "alphafutures",
+      "name": "Alpha Futures",
+      "rails": [
+        "tradovate"
+      ],
+      "default_rail": "tradovate",
+      "automation_policy": "semi_auto_only",
+      "api_automation_ok": false,
+      "verified": true,
+      "notes": "Offers Tradovate as a UI but PROHIBITS full automation: official Prohibited Practices (updated 2025-10-30) bans 'AI, bots, and other automated trading mechanisms across all account types' and any 'full automation'. Only semi-automated (alert generates, user manually places/manages). Do NOT advertise automated execution. Classic 'Tradovate platform but no API automation' trap.",
+      "sources": [
+        "help.alpha-futures.com/en/articles/9508585-prohibited-trading-practices"
+      ]
+    },
+    {
+      "id": "phidias",
+      "name": "Phidias Prop Firm",
+      "rails": [
+        "tradovate",
+        "rithmic"
+      ],
+      "default_rail": "tradovate",
+      "automation_policy": "semi_auto_only",
+      "api_automation_ok": false,
+      "verified": true,
+      "notes": "Relaunched 'Phidias 2.0' Apr 2026 (live cleared via Dorman Trading). Offers Tradovate/NinjaTrader/TradingView, but PROHIBITS automated/HFT trading \u2014 only semi-automated strategies you actively monitor (DCA ok). No self-serve trading API advertised. Do NOT advertise automated execution.",
+      "sources": [
+        "damnpropfirms.com/futures-prop-firms/phidias-prop-firm/",
+        "phidiaspropfirm.com/education/rithmic-vs-tradovate"
+      ]
+    },
+    {
+      "id": "tradeday",
+      "name": "TradeDay",
+      "rails": [
+        "tradovate",
+        "rithmic"
+      ],
+      "default_rail": "tradovate",
+      "automation_policy": "no_api",
+      "api_automation_ok": false,
+      "verified": true,
+      "notes": "Offers Tradovate/NinjaTrader/TradingView but its own help center states verbatim it does NOT expose the Tradovate API to traders and does NOT make platform APIs available. ATS allowed only inside a supported platform (e.g. NinjaScript), monitored; third-party/purchased bots forbidden; copy/mirror flagged for shutdown. External programmatic order placement is not possible. Do NOT list for automated execution.",
+      "sources": [
+        "tradeday.freshdesk.com/en/support/solutions/articles/103000085101-automated-algo-and-bot-trading",
+        "tradeday.freshdesk.com/en/support/solutions/articles/103000121031-prohibited-trade-practices"
+      ]
+    },
+    {
+      "id": "other_tradovate",
+      "name": "Other (any native Tradovate firm)",
+      "rails": [
+        "tradovate"
+      ],
+      "default_rail": "tradovate",
+      "automation_policy": "unknown_confirm_with_firm",
+      "api_automation_ok": true,
+      "verified": false,
+      "notes": "Catch-all for a firm not listed above that issues a NATIVE Tradovate account with API access. Because Tradovate is one shared API, it works with the customer's own firm-issued Tradovate credentials. The customer MUST confirm their firm (a) issues a native Tradovate account (not a Rithmic front-end) and (b) permits automated API trading on their account type."
+    }
+  ]
+}

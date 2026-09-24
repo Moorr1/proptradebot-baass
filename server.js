@@ -45,8 +45,9 @@ app.use(express.static('public', { extensions: ['html'] }));
 // outside everything looked fine and customers quietly kept downloading a build
 // with known bugs in it. fbd_preflight.py now fails when the newest local build
 // is ahead of what lives in public/downloads.
+const LATEST_APP_VERSION = '1.6.10';   // the onboarding agent reports this too
 app.get('/downloads/PropTradeBot.dmg', (req, res) => {
-  res.redirect(302, '/downloads/PropTradeBot-v1.6.10-notarized.dmg');
+  res.redirect(302, `/downloads/PropTradeBot-v${LATEST_APP_VERSION}-notarized.dmg`);
 });
 
 // Friendly routes → Clerk handles auth client-side
@@ -79,22 +80,8 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Stripe diagnostics (temporary)
-app.get('/api/stripe-diag', async (req, res) => {
-  try {
-    const keyPrefix = process.env.STRIPE_SECRET_KEY?.substring(0, 25) + '...';
-    const acct = await stripe.accounts.retrieve();
-    const prices = await stripe.prices.list({ active: true, limit: 10 });
-    res.json({
-      keyPrefix,
-      accountId: acct.id,
-      accountName: acct.settings?.dashboard?.display_name,
-      prices: prices.data.map(p => ({ id: p.id, amount: p.unit_amount/100 }))
-    });
-  } catch (e) {
-    res.json({ error: e.message });
-  }
-});
+// /api/stripe-diag removed 2026-09-24 (ops #13): it was public and returned
+// the first 25 characters of the live Stripe secret key.
 
 // Get Stripe config (publishable key for frontend)
 app.get('/api/config', (req, res) => {
@@ -154,6 +141,11 @@ function clerkAuth(req, res, next) {
   });
 }
 app.use('/api/user', clerkAuth);
+
+// Onboarding agent (ops #3): chat on the dashboard, read-only tools scoped to the
+// signed-in user. See onboarding_agent.js for the hard lines.
+const { mountOnboarding } = require('./onboarding_agent');
+mountOnboarding(app, pool, { auth: clerkAuth, latestVersion: LATEST_APP_VERSION });
 app.use('/api/accounts', clerkAuth);
 
 // Bot gateway routes use API key auth (below), not Clerk
@@ -248,80 +240,10 @@ app.post('/api/accounts', async (req, res) => {
   }
 });
 
-// Get bot configuration
-app.get('/api/bot/config', async (req, res) => {
-  try {
-    const clerkId = req.auth.userId;
-    
-    // Get user
-    const userResult = await pool.query(
-      'SELECT id FROM users WHERE clerk_id = $1',
-      [clerkId]
-    );
-    
-    if (userResult.rows.length === 0) {
-      return res.status(404).json({ success: false, error: 'User not found' });
-    }
-    
-    const userId = userResult.rows[0].id;
-    
-    // Get or create bot config
-    let result = await pool.query(
-      'SELECT * FROM bot_configs WHERE user_id = $1',
-      [userId]
-    );
-    
-    if (result.rows.length === 0) {
-      result = await pool.query(
-        `INSERT INTO bot_configs (user_id, strategy, contract_count, auto_trading)
-         VALUES ($1, 'auto', 1, false)
-         RETURNING *`,
-        [userId]
-      );
-    }
-    
-    res.json({ success: true, config: result.rows[0] });
-  } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
-  }
-});
-
-// Update bot configuration
-app.put('/api/bot/config', async (req, res) => {
-  try {
-    const clerkId = req.auth.userId;
-    const { strategy, contract_count, auto_trading, stop_loss_ticks, risk_per_trade } = req.body;
-    
-    // Get user
-    const userResult = await pool.query(
-      'SELECT id FROM users WHERE clerk_id = $1',
-      [clerkId]
-    );
-    
-    if (userResult.rows.length === 0) {
-      return res.status(404).json({ success: false, error: 'User not found' });
-    }
-    
-    const userId = userResult.rows[0].id;
-    
-    // Update config
-    const result = await pool.query(
-      `UPDATE bot_configs 
-       SET strategy = COALESCE($2, strategy),
-           contract_count = COALESCE($3, contract_count),
-           auto_trading = COALESCE($4, auto_trading),
-           stop_loss_ticks = COALESCE($5, stop_loss_ticks),
-           risk_per_trade = COALESCE($6, risk_per_trade)
-       WHERE user_id = $1
-       RETURNING *`,
-      [userId, strategy, contract_count, auto_trading, stop_loss_ticks, risk_per_trade]
-    );
-    
-    res.json({ success: true, config: result.rows[0] });
-  } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
-  }
-});
+// The Clerk-auth GET/PUT /api/bot/config routes that lived here were removed
+// 2026-09-24 (ops #13). /api/bot was never behind Clerk, so req.auth was always
+// undefined: they answered every request with a 400 and, being registered first,
+// shadowed the API-key versions below. The app's get_config() never worked.
 
 // Create checkout session for subscription
 app.post('/api/checkout', clerkAuth, async (req, res) => {
@@ -641,7 +563,8 @@ app.post('/webhook', async (req, res) => {
 // =============================================================================
 
 async function requireApiKey(req, res, next) {
-  const apiKey = req.headers['x-api-key'] || req.query.apiKey;
+  // Header only: keys in query strings end up in access logs (ops #13).
+  const apiKey = req.headers['x-api-key'];
 
   if (!apiKey) {
     return res.status(401).json({
@@ -1020,7 +943,7 @@ app.post('/tv/:token', async (req, res) => {
     const u = found.rows[0];
 
     const provided = String(body.passphrase || body.secret || '');
-    if (!u.tv_passphrase || provided !== u.tv_passphrase) {
+    if (!u.tv_passphrase || !safeEqual(provided, u.tv_passphrase)) {
       return res.status(401).json({ success: false, error: 'invalid passphrase' });
     }
     if (!['active', 'trialing'].includes(u.subscription_status)) {
@@ -1029,6 +952,19 @@ app.post('/tv/:token', async (req, res) => {
 
     const payload = { ...body };
     delete payload.passphrase; delete payload.secret;
+
+    // TEST alert (onboarding step 5, ops #3). Proves TradingView reaches us with
+    // the right URL and passphrase WITHOUT writing a trade instruction anywhere:
+    // it is recorded on the user row and never inserted into pending_alerts, so
+    // no app version, old or new, can act on it.
+    if (body.test === true || String(body.test).toLowerCase() === 'true') {
+      await pool.query(
+        'UPDATE users SET last_tv_test_at = now(), last_tv_test_payload = $2 WHERE id = $1',
+        [u.id, JSON.stringify(payload).slice(0, 2000)]
+      );
+      return res.json({ success: true, test: true, queued: false,
+                        message: 'Test received. Nothing was sent to your bot.' });
+    }
     await pool.query(
       'INSERT INTO pending_alerts (user_id, payload, source) VALUES ($1, $2, $3)',
       [u.id, JSON.stringify(payload), 'tradingview']
@@ -1212,8 +1148,10 @@ app.get('/api/bot/alerts', requireApiKey, async (req, res) => {
   try {
     const user = req.botUser;
     const maxAge = String(TV_ALERT_MAX_AGE_SEC);
+    // Record the poll: proves the delivery path is alive without a trade (ops #3).
+    await pool.query('UPDATE users SET last_alert_poll_at = now() WHERE id = $1', [user.id]);
     const claimed = await pool.query(
-      `UPDATE pending_alerts SET delivered_at = now()
+      `UPDATE pending_alerts SET delivered_at = now(), outcome = 'delivered'
         WHERE id IN (
           SELECT id FROM pending_alerts
            WHERE user_id = $1 AND delivered_at IS NULL
@@ -1224,7 +1162,9 @@ app.get('/api/bot/alerts', requireApiKey, async (req, res) => {
       [user.id, maxAge]
     );
     await pool.query(
-      `UPDATE pending_alerts SET delivered_at = now()
+      // Expired alerts used to be marked exactly like deliveries, so "your app
+      // was asleep" and "your app got it" were indistinguishable (ops #13).
+      `UPDATE pending_alerts SET delivered_at = now(), outcome = 'expired'
         WHERE user_id = $1 AND delivered_at IS NULL
           AND created_at <= now() - ($2 || ' seconds')::interval`,
       [user.id, maxAge]
