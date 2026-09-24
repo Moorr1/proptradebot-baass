@@ -25,22 +25,38 @@ const RETENTION_DAYS = 30;
 // Credential detection / redaction
 // ---------------------------------------------------------------------------
 const SECRET_PATTERNS = [
-  /ptb_[0-9a-f]{12,}/i,                    // PropTradeBot API key
-  /ptv_[0-9a-f]{8,}/i,                     // TradingView passphrase we issue
-  /\b[sr]k_(live|test)_[A-Za-z0-9]{8,}/,   // Stripe secret / restricted key
-  /\b[A-Za-z0-9+/]{40,}={1,2}/,            // base64 keys (TopstepX API keys look like this)
-  /\b[0-9]{8,10}:[A-Za-z0-9_-]{30,}/,      // Telegram bot token
-  /\b(password|passwd|pwd|api[_ -]?key|secret|passphrase)\s*[:=]\s*(?=\S*\d)\S{8,}/i,
+  /ptb_\s*[0-9a-f]{12,}/i,                              // PropTradeBot key (also with a stray space)
+  /ptv_[0-9a-f]{8,}/i,                                  // TradingView passphrase we issue
+  /\/tv\/[0-9a-f]{16,}/i,                               // webhook URL token
+  /\b(sk|rk)_(live|test)_[A-Za-z0-9]{8,}/,              // Stripe secret / restricted key
+  /\bwhsec_[A-Za-z0-9+/=]{16,}/,                        // webhook signing secrets
+  /\bsk-ant-[A-Za-z0-9_-]{16,}/,                        // Anthropic keys
+  /\b[0-9a-f]{32,}\b/i,                                 // bare long hex (PTB key without prefix, tokens)
+  /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/i, // UUIDs (Tradovate secrets)
+  /\b[0-9]{8,10}:[A-Za-z0-9_-]{30,}/,                   // Telegram bot token
+  /\b(password|passwd|pwd|pass|pw|api[_ -]?key|apikey|secret|sec|cid|token|passphrase)\b["']?\s*[:=]\s*["']?\S{6,}/i,
+  /\b(my\s+)?(password|passphrase|api\s*key|secret)\s+(is|was)\s+\S{6,}/i,
 ];
 
+// base64 / base64url keys, padded or not (TopstepX keys are 44 chars ending "=").
+// Token-based rather than one regex so long file paths in pasted logs don't trip
+// it: a key has mixed case AND a digit and at most a few slashes.
+function looksLikeKeyToken(tok) {
+  const t = tok.replace(/^["'`({\[<]+|[)"'`,;.}\]>]+$/g, '');
+  if (t.length < 40 || !/^[A-Za-z0-9+/_-]+={0,2}$/.test(t)) return false;
+  if ((t.match(/\//g) || []).length > 3) return false;
+  return /[0-9]/.test(t) && /[A-Z]/.test(t) && /[a-z]/.test(t);
+}
+
 function containsSecret(text) {
-  return SECRET_PATTERNS.some((re) => re.test(String(text || '')));
+  const s = String(text || '');
+  return SECRET_PATTERNS.some((re) => re.test(s)) || s.split(/[\s:=]+/).some(looksLikeKeyToken);
 }
 
 function redact(text) {
   let s = String(text == null ? '' : text);
   for (const re of SECRET_PATTERNS) s = s.replace(new RegExp(re.source, re.flags.includes('g') ? re.flags : re.flags + 'g'), '[redacted]');
-  return s;
+  return s.split(/(\s+)/).map((tok) => (looksLikeKeyToken(tok) ? '[redacted]' : tok)).join('');
 }
 
 const SECRET_REPLY =
@@ -265,6 +281,12 @@ function makeTools(pool, user, ctx) {
     async check_settings(input = {}) { return checkSettings(input); },
     async check_alert_format({ message } = {}) { return checkAlertFormat(message); },
     async escalate_to_human({ reason, summary } = {}) {
+      // One ticket per turn, three per user per day. The summary is written by
+      // the model from customer text, so whoever triages it treats it as data.
+      if (ctx.escalated) return { ticket_id: null, message: 'Already handed to a person in this conversation turn.' };
+      const today = (await pool.query(
+        `SELECT count(*)::int AS n FROM support_tickets WHERE user_id = $1 AND created_at > now() - interval '1 day'`, [uid])).rows[0];
+      if (today && today.n >= 3) { ctx.escalated = true; return { ticket_id: null, message: 'A person already has this customer\'s earlier requests and will reply by email.' }; }
       const r = await pool.query(
         `INSERT INTO support_tickets (user_id, email, source, reason, summary) VALUES ($1, $2, 'onboarding_agent', $3, $4) RETURNING id`,
         [uid, user.email || null, redact(String(reason || '')).slice(0, 200), redact(String(summary || '')).slice(0, 4000)]);
@@ -367,6 +389,12 @@ async function runAgent({ pool, user, history, message, latestVersion, fetchImpl
 function mountOnboarding(app, pool, { auth, latestVersion, fetchImpl }) {
   const doFetch = fetchImpl || ((...a) => fetch(...a));
 
+  // Enforce the 30-day retention for everyone, not only users who chat again.
+  const purge = () => pool.query(
+    `DELETE FROM onboarding_messages WHERE created_at < now() - ($1 || ' days')::interval`, [String(RETENTION_DAYS)]
+  ).catch((e) => console.error('onboarding purge failed:', e.message));
+  if (!fetchImpl) { setTimeout(purge, 60 * 1000).unref(); setInterval(purge, 24 * 3600 * 1000).unref(); }
+
   async function sessionUser(req) {
     const r = await pool.query('SELECT id, email FROM users WHERE clerk_id = $1', [req.auth.userId]);
     return r.rows[0] || null;
@@ -403,13 +431,18 @@ function mountOnboarding(app, pool, { auth, latestVersion, fetchImpl }) {
         return res.json({ success: true, reply: SECRET_REPLY, blocked: 'secret' });
       }
 
-      const today = new Date().toISOString().slice(0, 10);
-      const used = (await pool.query('SELECT turns FROM onboarding_usage WHERE user_id = $1 AND day = $2', [user.id, today])).rows[0];
-      if (used && used.turns >= DAILY_TURNS) {
-        return res.status(429).json({ success: false, error: "You've reached today's limit for the setup assistant. Email support@proptradebot.com and a person will help." });
-      }
       if (!process.env.ANTHROPIC_API_KEY) {
         return res.status(503).json({ success: false, error: 'The setup assistant is not available right now. Email support@proptradebot.com.' });
+      }
+      // Reserve the turn BEFORE calling the model, atomically, so parallel
+      // requests can't all pass a check-then-increment.
+      const today = new Date().toISOString().slice(0, 10);
+      const reserved = (await pool.query(
+        `INSERT INTO onboarding_usage (user_id, day, turns) VALUES ($1, $2, 1)
+         ON CONFLICT (user_id, day) DO UPDATE SET turns = onboarding_usage.turns + 1
+         RETURNING turns`, [user.id, today])).rows[0];
+      if (reserved && reserved.turns > DAILY_TURNS) {
+        return res.status(429).json({ success: false, error: "You've reached today's limit for the setup assistant. Email support@proptradebot.com and a person will help." });
       }
 
       await pool.query(`DELETE FROM onboarding_messages WHERE user_id = $1 AND created_at < now() - ($2 || ' days')::interval`,
@@ -431,9 +464,8 @@ function mountOnboarding(app, pool, { auth, latestVersion, fetchImpl }) {
       await pool.query(`INSERT INTO onboarding_messages (user_id, role, content) VALUES ($1,'user',$2), ($1,'assistant',$3)`,
         [user.id, message, out.reply]);
       await pool.query(
-        `INSERT INTO onboarding_usage (user_id, day, turns, input_tokens, output_tokens) VALUES ($1, $2, 1, $3, $4)
-         ON CONFLICT (user_id, day) DO UPDATE SET turns = onboarding_usage.turns + 1,
-           input_tokens = onboarding_usage.input_tokens + $3, output_tokens = onboarding_usage.output_tokens + $4`,
+        `UPDATE onboarding_usage SET input_tokens = input_tokens + $3, output_tokens = output_tokens + $4
+          WHERE user_id = $1 AND day = $2`,
         [user.id, today, out.usage.input, out.usage.output]);
       console.log(`onboarding: user=${user.id} tools=[${out.toolCalls.join(',')}] in=${out.usage.input} out=${out.usage.output}${out.escalated ? ' ESCALATED' : ''}`);
       res.json({ success: true, reply: out.reply, escalated: out.escalated });

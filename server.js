@@ -735,7 +735,10 @@ app.get('/api/bot/config', requireApiKey, async (req, res) => {
 
     const [configResult, accountsResult] = await Promise.all([
       pool.query('SELECT * FROM bot_configs WHERE user_id = $1', [user.id]),
-      pool.query('SELECT * FROM accounts WHERE user_id = $1', [user.id])
+      pool.query(
+        `SELECT id, prop_firm, account_number, platform, status, starting_balance,
+                current_balance, daily_loss_limit, max_drawdown, created_at, updated_at
+           FROM accounts WHERE user_id = $1`, [user.id])   // never api_key_encrypted
     ]);
 
     res.json({
@@ -748,45 +751,10 @@ app.get('/api/bot/config', requireApiKey, async (req, res) => {
   }
 });
 
-// PUT /api/bot/config — Update bot config (from local bot or dashboard)
-app.put('/api/bot/config', requireApiKey, async (req, res) => {
-  try {
-    const user = req.botUser;
-    const updates = req.body;
-
-    const allowedFields = [
-      'strategy', 'contract_count', 'stop_loss_ticks', 'target_multipliers',
-      'auto_trading', 'risk_per_trade', 'max_daily_trades', 'allowed_symbols'
-    ];
-
-    const fields = [];
-    const values = [];
-    let paramIndex = 1;
-
-    for (const field of allowedFields) {
-      if (updates[field] !== undefined) {
-        fields.push(`${field} = $${paramIndex}`);
-        values.push(updates[field]);
-        paramIndex++;
-      }
-    }
-
-    if (fields.length === 0) {
-      return res.status(400).json({ success: false, error: 'No valid fields to update' });
-    }
-
-    values.push(user.id);
-
-    const result = await pool.query(
-      `UPDATE bot_configs SET ${fields.join(', ')} WHERE user_id = $${paramIndex} RETURNING *`,
-      values
-    );
-
-    res.json({ success: true, config: result.rows[0] });
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
+// PUT /api/bot/config removed 2026-09-24 (ops #13). No app version calls it,
+// and once the shadowing routes above were deleted it would have let any key
+// holder rewrite contract_count and stop_loss_ticks with no bounds, which the
+// app applies at startup via /api/bot/auth. Settings are changed in the app.
 
 // GET /api/bot/summary — Read-only account + P&L summary (drives daily/EOD reports)
 // Auth: same x-api-key as other bot routes. Pure SELECTs, no writes.
@@ -957,7 +925,12 @@ app.post('/tv/:token', async (req, res) => {
     // the right URL and passphrase WITHOUT writing a trade instruction anywhere:
     // it is recorded on the user row and never inserted into pending_alerts, so
     // no app version, old or new, can act on it.
-    if (body.test === true || String(body.test).toLowerCase() === 'true') {
+    // Any "test" value except an explicit false/0/no counts as a test: a typo
+    // like "test": "yes" must never queue a real trade instruction.
+    const tv = body.test;
+    const isTest = tv !== undefined && tv !== null && tv !== false && tv !== 0 &&
+      !['false', '0', 'no', 'off', ''].includes(String(tv).trim().toLowerCase());
+    if (isTest) {
       await pool.query(
         'UPDATE users SET last_tv_test_at = now(), last_tv_test_payload = $2 WHERE id = $1',
         [u.id, JSON.stringify(payload).slice(0, 2000)]
@@ -1148,8 +1121,6 @@ app.get('/api/bot/alerts', requireApiKey, async (req, res) => {
   try {
     const user = req.botUser;
     const maxAge = String(TV_ALERT_MAX_AGE_SEC);
-    // Record the poll: proves the delivery path is alive without a trade (ops #3).
-    await pool.query('UPDATE users SET last_alert_poll_at = now() WHERE id = $1', [user.id]);
     const claimed = await pool.query(
       `UPDATE pending_alerts SET delivered_at = now(), outcome = 'delivered'
         WHERE id IN (
@@ -1170,6 +1141,14 @@ app.get('/api/bot/alerts', requireApiKey, async (req, res) => {
       [user.id, maxAge]
     );
     res.json({ success: true, alerts: claimed.rows });
+    // Record the poll (proves the delivery path without a trade, ops #3). After
+    // the response, never fatal, and at most every 30 s per user: a failure
+    // here must not stop alerts being delivered.
+    pool.query(
+      `UPDATE users SET last_alert_poll_at = now() WHERE id = $1
+         AND (last_alert_poll_at IS NULL OR last_alert_poll_at < now() - interval '30 seconds')`,
+      [user.id]
+    ).catch((e) => console.error('last_alert_poll_at update failed:', e.message));
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }

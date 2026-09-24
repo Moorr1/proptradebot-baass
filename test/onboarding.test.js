@@ -86,8 +86,11 @@ class FakePool {
     if (/^INSERT INTO onboarding_usage/.test(q)) {
       let r = db.onboarding_usage.find((x) => x.user_id === p[0] && x.day === p[1]);
       if (!r) db.onboarding_usage.push(r = { user_id: p[0], day: p[1], turns: 0 });
-      r.turns += 1; return rows([]);
+      r.turns += 1; return rows([{ turns: r.turns }]);
     }
+    if (/^UPDATE onboarding_usage SET input_tokens/.test(q)) return rows([]);
+    if (/SELECT count\(\*\)::int AS n FROM support_tickets/.test(q)) return rows([{ n: db.support_tickets.filter((t) => t.user_id === p[0]).length }]);
+    if (/^DELETE FROM onboarding_messages WHERE created_at/.test(q)) return rows([]);
     if (/FROM bot_configs|FROM accounts/.test(q)) return rows([]);
     throw new Error('FakePool: unhandled query: ' + q.slice(0, 120));
   }
@@ -200,6 +203,41 @@ async function test(name, fn) {
     assert.deepStrictEqual(outcomes, ['delivered', 'expired']);
   });
 
+  await test('PUT /api/bot/config is gone (no remote size/stop changes)', async () => {
+    const r = await req('PUT', '/api/bot/config', { headers: { 'x-api-key': U('u1').api_key }, body: { contract_count: 50 } });
+    assert.ok(r.status === 404, 'status ' + r.status);
+  });
+  await test('GET /api/bot/config never selects api_key_encrypted', async () => {
+    db.queries = [];
+    await req('GET', '/api/bot/config', { headers: { 'x-api-key': U('u1').api_key } });
+    assert.ok(!db.queries.some((x) => /SELECT \* FROM accounts/.test(x.q)));
+  });
+  await test('TV webhook: "test": "yes" / 1 are tests too, "test": false is real', async () => {
+    const before = db.pending_alerts.length;
+    for (const t of ['yes', 1, 'TRUE']) await req('POST', '/tv/' + U('u1').tv_token, { body: { ticker: 'MES1!', action: 'buy', passphrase: U('u1').tv_passphrase, test: t } });
+    assert.strictEqual(db.pending_alerts.length, before);
+    await req('POST', '/tv/' + U('u1').tv_token, { body: { ticker: 'MES1!', action: 'buy', passphrase: U('u1').tv_passphrase, test: false } });
+    assert.strictEqual(db.pending_alerts.length, before + 1);
+    db.pending_alerts.pop();
+  });
+  await test('Poll still delivers when the poll-timestamp write fails', async () => {
+    const orig = FakePool.prototype._q;
+    FakePool.prototype._q = async function (sql, p) { if (/last_alert_poll_at = now\(\)/.test(sql)) throw new Error('column missing'); return orig.call(this, sql, p); };
+    db.pending_alerts.push({ user_id: 'u1', payload: '{}', source: 'tradingview', created_at: new Date(), delivered_at: null, outcome: null });
+    const r = await req('GET', '/api/bot/alerts', { headers: { 'x-api-key': U('u1').api_key } });
+    FakePool.prototype._q = orig;
+    assert.strictEqual(r.status, 200); assert.strictEqual(r.body.alerts.length, 1);
+  });
+  await test('secret detection: reviewer probe set', async () => {
+    for (const s of ['rnyTaYD/ufDFvgTilTduDcvXIr8buHPUjq163jyxEGY', 'rnyTaYD_ufDFvgTilTduDcvXIr8buHPUjq163jyxEGY', 'ptb_ ' + 'ab'.repeat(32), 'ab'.repeat(32),
+      'sec: 3f2504e0-4f89-11d3-9a0c-0305e82c3301', '"passphrase": "MyCustomPass99"', '{"api_key":"abcdef123456"}', 'my password is Hunter2Hunter2',
+      'pass: Tr4d3r!2026', 'password: correcthorsebattery', 'https://x.com/tv/' + 'ab'.repeat(24), 'whsec_abcdefghijklmnop1234', 'sk-ant-api03-abcdefghijklmnopqrst'])
+      assert.ok(T.containsSecret(s), 'missed: ' + s.slice(0, 14));
+    for (const s of ['2026-09-24 10:32:01 INFO /Users/johnsmith/Library/Application Support/PropTradeBot/proptradebot.log opened',
+      'CON.F.US.MES.Z26 order 1234567 filled', 'password reset link please', 'the token expired?'])
+      assert.ok(!T.containsSecret(s), 'false positive: ' + s.slice(0, 30));
+  });
+
   // ---------------- onboarding: unit
   await test('secret detection: catches real key shapes', async () => {
     for (const s of ['ptb_' + '1f'.repeat(20), 'my passphrase is ptv_0123456789abcdef', 'rnyTaYD/ufDFvgTilTduDcvXIr8buHPUjq163jyxEGY=',
@@ -284,6 +322,15 @@ async function test(name, fn) {
     modelCalls = []; modelScript = [use('place_order', { side: 'buy' }), say('I can’t do that.')];
     const r = await req('POST', '/api/onboarding/chat', { headers: alice, body: { message: 'buy 1 MES for me' } });
     assert.strictEqual(r.status, 200); assert.ok(/failed/.test(modelCalls[1].messages.at(-1).content[0].content));
+  });
+  await test('escalation limited to one ticket per turn', async () => {
+    const before = db.support_tickets.length;
+    modelCalls = []; modelScript = [() => ({ stop_reason: 'tool_use', usage: {}, content: [
+      { type: 'tool_use', id: 'a', name: 'escalate_to_human', input: { reason: 'x', summary: 'y' } },
+      { type: 'tool_use', id: 'b', name: 'escalate_to_human', input: { reason: 'x', summary: 'y' } }] }), say('ok')];
+    await req('POST', '/api/onboarding/chat', { headers: alice, body: { message: 'help' } });
+    assert.strictEqual(db.support_tickets.length, before + 1);
+    db.support_tickets.pop();
   });
   await test('escalation writes a redacted ticket for the session user', async () => {
     modelCalls = []; modelScript = [use('escalate_to_human', { reason: 'refund', summary: 'wants refund, key ptb_' + 'f'.repeat(40) }), say('A person will email you.')];

@@ -1,5 +1,7 @@
 -- Security fixes + onboarding agent support (ops #3, #13) — 2026-09-24
 -- Idempotent; safe to run on the live Postgres BEFORE deploying the new server.js.
+-- ALTER TABLE takes a brief exclusive lock on users; give up rather than queue behind traffic.
+SET lock_timeout = '3s';
 
 -- Alert outcome: 'delivered' or 'expired' (NULL = pending, or rows from before this migration)
 ALTER TABLE pending_alerts ADD COLUMN IF NOT EXISTS outcome text;
