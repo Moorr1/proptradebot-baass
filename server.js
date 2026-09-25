@@ -45,7 +45,7 @@ app.use(express.static('public', { extensions: ['html'] }));
 // outside everything looked fine and customers quietly kept downloading a build
 // with known bugs in it. fbd_preflight.py now fails when the newest local build
 // is ahead of what lives in public/downloads.
-const LATEST_APP_VERSION = '1.6.11';   // the onboarding agent reports this too
+const LATEST_APP_VERSION = '1.7.0';   // the onboarding agent reports this too
 app.get('/downloads/PropTradeBot.dmg', (req, res) => {
   res.redirect(302, `/downloads/PropTradeBot-v${LATEST_APP_VERSION}-notarized.dmg`);
 });
