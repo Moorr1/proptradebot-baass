@@ -108,6 +108,9 @@ class FakePool {
       const v = db.settings_versions.filter((x) => x.user_id === p[0]).sort((a, b) => b.version - a.version)[0];
       return rows(v ? [{ ...v }] : []);
     }
+    if (/FROM settings_versions WHERE user_id = \$1 AND version = \$2/.test(q)) {
+      const v = db.settings_versions.find((x) => x.user_id === p[0] && x.version === p[1]); return rows(v ? [{ ...v }] : []);
+    }
     if (/FROM settings_versions WHERE user_id = \$1/.test(q))
       return rows(db.settings_versions.filter((x) => x.user_id === p[0]).sort((a, b) => b.version - a.version).map((x) => ({ ...x })));
     if (/^INSERT INTO settings_versions/.test(q)) {

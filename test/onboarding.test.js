@@ -106,6 +106,9 @@ class FakePool {
       const v = db.settings_versions.filter((x) => x.user_id === p[0]).sort((a, b) => b.version - a.version)[0];
       return rows(v ? [{ ...v }] : []);
     }
+    if (/FROM settings_versions WHERE user_id = \$1 AND version = \$2/.test(q)) {
+      const v = db.settings_versions.find((x) => x.user_id === p[0] && x.version === p[1]); return rows(v ? [{ ...v }] : []);
+    }
     if (/FROM settings_versions WHERE user_id = \$1/.test(q))
       return rows(db.settings_versions.filter((x) => x.user_id === p[0]).sort((a, b) => b.version - a.version).map((x) => ({ ...x })));
     if (/^INSERT INTO settings_versions/.test(q)) {
@@ -485,6 +488,11 @@ async function test(name, fn) {
         if (v.risk.length === 0) assert.deepStrictEqual(r, [], v.name);
         else v.risk.forEach((x) => assert.ok(r.some((y) => y.includes(x)), v.name + ': ' + r.join('; ')));
       }
+      if (v.valid && v.locked) {
+        const l = M.lockedChanges(v.old, v.new);
+        if (v.locked.length === 0) assert.deepStrictEqual(l, [], v.name);
+        else v.locked.forEach((x) => assert.ok(l.some((y) => y.includes(x)), v.name + ' locked: ' + l.join('; ')));
+      }
     }
   });
   const key2 = { 'x-api-key': U('u1').api_key };
@@ -549,10 +557,37 @@ async function test(name, fn) {
     const yes = await req('POST', '/api/agent/settings/import', { headers: key2, body: { settings: edited, local_change: true } });
     assert.strictEqual(yes.body.imported, true); assert.strictEqual(yes.body.version, g.body.version + 1);
   });
+  await test('settings: website cannot switch micro/full size, EOD on/off, or turn the leader off', async () => {
+    const g = await req('GET', '/api/agent/settings', { headers: key2 });
+    const a = clone(g.body.settings); a.legs.sp.instrument = 'ES';
+    const r1 = await req('POST', '/api/user/settings', { headers: alice, body: { settings: a, base_version: g.body.version } });
+    assert.strictEqual(r1.status, 400); assert.ok(r1.body.errors.some((x) => /done in the app/.test(x)), JSON.stringify(r1.body));
+    const b = clone(g.body.settings); b.eod.enabled = !b.eod.enabled;
+    assert.strictEqual((await req('POST', '/api/user/settings', { headers: alice, body: { settings: b, base_version: g.body.version } })).status, 400);
+  });
+  await test('settings: unknown fields stripped, labels masked on import', async () => {
+    const g = await req('GET', '/api/agent/settings', { headers: key2 });
+    const x = clone(g.body.settings); x.legs.sp.evil = 1; x.hack = true; x.accounts[0].label = '50KTC-V2-308812-78426344'; x.legs.sp.stop = 7;
+    const r = await req('POST', '/api/agent/settings/import', { headers: key2, body: { settings: x, local_change: true } });
+    assert.ok(r.body.imported);
+    const g2 = await req('GET', '/api/agent/settings', { headers: key2 });
+    assert.strictEqual(g2.body.settings.hack, undefined); assert.strictEqual(g2.body.settings.legs.sp.evil, undefined);
+    assert.strictEqual(g2.body.settings.accounts[0].label, '50KTC-…6344');
+  });
+  await test('settings: risk judged against the RUNNING version, not a pending one', async () => {
+    const g0 = await req('GET', '/api/agent/settings', { headers: key2 });
+    const hi = clone(g0.body.settings); hi.legs.sp.stop = 12;
+    await req('POST', '/api/agent/settings/import', { headers: key2, body: { settings: hi, local_change: true } });   // latest: stop 12
+    const g = await req('GET', '/api/agent/settings', { headers: key2 });
+    db.agent_status.u1 = { payload: { settings: { running: 2, state: 'in_sync' } }, updated_at: new Date() };   // running v2: stop 8
+    const y = clone(g.body.settings); y.legs.sp.stop = 10;   // less than latest (12), more than running (8)
+    const r = await req('POST', '/api/user/settings', { headers: alice, body: { settings: y, base_version: g.body.version } });
+    assert.strictEqual(r.status, 200, r.text); assert.strictEqual(r.body.needs_approval, true, JSON.stringify(r.body));
+  });
   await test('settings: page shows what the app reports as running', async () => {
     db.agent_status.u1 = { payload: { settings: { running: 2, pending: 4, state: 'needs_approval' } }, updated_at: new Date() };
     const r = await req('GET', '/api/user/settings', { headers: alice });
-    assert.strictEqual(r.body.current.version, 5); assert.strictEqual(r.body.running.state, 'needs_approval'); assert.ok(r.body.history.length >= 5);
+    assert.ok(r.body.current.version >= 7); assert.strictEqual(r.body.running.state, 'needs_approval'); assert.ok(r.body.history.length >= 7);
   });
   await test('settings: model is served to the settings page', async () => {
     const r = await req('GET', '/js/settings_model.js'); assert.strictEqual(r.status, 200); assert.ok(/window.PTBSettings/.test(r.text));

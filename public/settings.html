@@ -52,8 +52,8 @@
       <div id="accounts"></div>
       <div class="grid" style="margin-top:12px;">
         <div><label><input type="checkbox" id="ladder"> Broker ladder (targets sit at the broker)</label></div>
-        <div><label><input type="checkbox" id="eodOn"> EOD flatten</label></div>
-        <div><label for="eodTime">EOD time (ET)</label><input id="eodTime" type="time"></div>
+        <div><label><input type="checkbox" id="eodOn" disabled> EOD flatten (set in the app)</label></div>
+        <div><label for="eodTime">EOD flatten time (ET, 12:00–16:59)</label><input id="eodTime" type="time" min="12:00" max="16:59"></div>
       </div>
     </div>
 
@@ -86,7 +86,7 @@
     ['t1_contracts', 'T1 contracts', 1], ['t1_points', 'T1 target (pts)', 0.25], ['t2_contracts', 'T2 contracts', 1],
     ['t2_points', 'T2 target (pts)', 0.25], ['runner_contracts', 'Runner contracts', 1], ['runner_close', 'Runner close (pts)', 0.25]];
   const LEGS = { sp: ['S&P leg', ['MES', 'ES']], nq: ['Nasdaq leg', ['MNQ', 'NQ']] };
-  let base = null, baseVersion = 0, form = null;
+  let base = null, baseVersion = 0, form = null, runningSettings = null;
   const $ = (id) => document.getElementById(id);
   const money = (x) => '$' + Math.round(x).toLocaleString();
   const text = (el, t, cls) => { const d = document.createElement('div'); d.textContent = t; if (cls) d.className = cls; el.appendChild(d); return d; };
@@ -104,7 +104,8 @@
       const h = document.createElement('h2'); h.textContent = name; h.style.marginTop = '8px'; host.appendChild(h);
       const g = document.createElement('div'); g.className = 'grid'; host.appendChild(g);
       const w = document.createElement('div'); w.innerHTML = `<label for="${k}_instrument">Instrument</label>`;
-      const sel = document.createElement('select'); sel.id = `${k}_instrument`;
+      const sel = document.createElement('select'); sel.id = `${k}_instrument`; sel.disabled = true;
+      sel.title = 'Switching between micro and full-size contracts is done in the app on your computer.';
       insts.forEach((i) => { const o = document.createElement('option'); o.value = i; o.textContent = `${i} ($${M.POINT_VALUE[i]}/pt)`; sel.appendChild(o); });
       w.appendChild(sel); g.appendChild(w);
       for (const [f, lbl, step] of FIELDS) {
@@ -146,14 +147,17 @@
 
   function refresh() {
     form = read();
-    const errs = M.validate(form, { knownRefs: base.accounts.map((a) => a.ref) });
+    const judge = runningSettings || base;          // what the computer is actually running
+    const errs = M.validate(form, { knownRefs: base.accounts.map((a) => a.ref) }).concat(M.lockedChanges(judge, form));
     const p = $('problems'); p.textContent = '';
     errs.forEach((e) => text(p, '⚠ ' + e, 'err'));
     ['sp', 'nq'].forEach((k) => { if (['ES', 'NQ'].includes(form.legs[k].instrument) && form.legs[k].contracts > 0) text(p, `⚠ ${form.legs[k].instrument} is full size: ten times the money per point of the micro.`, 'warn'); });
     if (!errs.length) {
       const t = M.totalRisk(form);
       $('rA').textContent = money(t.perAccount); $('rT').textContent = money(t.total); $('nA').textContent = t.accounts;
-      const r = M.riskIncrease(base, form), note = $('riskNote'); note.textContent = '';
+      const r = M.riskIncrease(judge, form), note = $('riskNote'); note.textContent = '';
+      const d = M.diff(judge, form);
+      if (d.length) { text(note, 'Changes from what your computer is running:', 'muted'); d.forEach((x) => text(note, '• ' + x, 'muted')); }
       if (r.length) { text(note, 'These add risk, so the app on your computer will ask you to approve them:', 'warn'); r.forEach((x) => text(note, '• ' + x, 'warn')); }
     }
     $('save').disabled = errs.length > 0;
@@ -196,7 +200,8 @@
     }
     $('gate').style.display = 'none'; $('form').style.display = 'block';
     if (!base || body.current.version !== baseVersion) { base = body.current.settings; baseVersion = body.current.version; buildLegs(); fill(base); refresh(); }
-    showRunning(body.current, body.running); showHistory(body.history || []);
+    runningSettings = body.running && body.running.settings ? body.running.settings : null;
+    showRunning(body.current, body.running); showHistory(body.history || []); refresh();
   }
 
   $('save').addEventListener('click', async () => {

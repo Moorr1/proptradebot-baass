@@ -8,6 +8,7 @@
 
 const path = require('path');
 const M = require('./settings_model');
+const { _test: { maskIds } } = require('./agent_api');
 
 const MAX_SETTINGS_BYTES = 16 * 1024;
 const HISTORY = 20;
@@ -27,8 +28,9 @@ function mountSettingsApi(app, pool, { requireApiKey, auth }) {
   // so the website starts from what is really running, never from defaults.
   app.post('/api/agent/settings/import', requireApiKey, async (req, res) => {
     try {
-      const s = req.body && req.body.settings;
-      if (JSON.stringify(s || {}).length > MAX_SETTINGS_BYTES) return res.status(413).json({ success: false, error: 'too large' });
+      if (JSON.stringify((req.body && req.body.settings) || {}).length > MAX_SETTINGS_BYTES) return res.status(413).json({ success: false, error: 'too large' });
+      const s = M.sanitize(req.body && req.body.settings);
+      if (s && Array.isArray(s.accounts)) s.accounts.forEach((a) => { if (a && typeof a.label === 'string') a.label = maskIds(a.label).slice(0, 40); });
       const errs = M.validate(s);
       if (errs.length) return res.status(400).json({ success: false, errors: errs });
       // The computer is the authority for what it runs. A version is added when
@@ -76,6 +78,10 @@ function mountSettingsApi(app, pool, { requireApiKey, auth }) {
       const cur = await latest(pool, uid);
       const st = (await pool.query('SELECT payload, updated_at FROM agent_status WHERE user_id = $1', [uid])).rows[0];
       const running = st && st.payload && st.payload.settings ? { ...st.payload.settings, reported_at: st.updated_at } : null;
+      if (running && Number.isInteger(running.running)) {
+        const row = (await pool.query('SELECT settings FROM settings_versions WHERE user_id = $1 AND version = $2', [uid, running.running])).rows[0];
+        running.settings = row ? row.settings : null;
+      }
       res.json({ success: true, current: cur ? { version: cur.version, settings: cur.settings } : null, running, history: hist });
     } catch (e) {
       console.error('user settings error:', e.message);
@@ -87,18 +93,32 @@ function mountSettingsApi(app, pool, { requireApiKey, auth }) {
     try {
       const uid = await sessionUserId(req);
       if (!uid) return res.status(404).json({ success: false, error: 'Open your dashboard once first.' });
-      const { settings, base_version } = req.body || {};
-      if (JSON.stringify(settings || {}).length > MAX_SETTINGS_BYTES) return res.status(413).json({ success: false, error: 'Too large.' });
+      const { base_version } = req.body || {};
+      if (JSON.stringify((req.body && req.body.settings) || {}).length > MAX_SETTINGS_BYTES) return res.status(413).json({ success: false, error: 'Too large.' });
+      const settings = M.sanitize(req.body && req.body.settings);
       const cur = await latest(pool, uid);
       if (!cur) return res.status(409).json({ success: false, error: 'Your app hasn\'t shared its settings yet. Open PropTradeBot 1.8 or later on your computer first.' });
       if (base_version !== cur.version)
         return res.status(409).json({ success: false, error: `Settings changed since you opened this page (now version ${cur.version}). Reload and try again.`, version: cur.version });
       const errs = M.validate(settings, { knownRefs: (cur.settings.accounts || []).map((a) => a.ref) });
       if (errs.length) return res.status(400).json({ success: false, errors: errs });
+      // Judge against what the computer is actually RUNNING when we know it (the
+      // latest version may be rejected or awaiting approval), else the latest.
+      let baseline = cur.settings;
+      try {
+        const st = (await pool.query('SELECT payload FROM agent_status WHERE user_id = $1', [uid])).rows[0];
+        const rv = st && st.payload && st.payload.settings && st.payload.settings.running;
+        if (Number.isInteger(rv) && rv !== cur.version) {
+          const row = (await pool.query('SELECT settings FROM settings_versions WHERE user_id = $1 AND version = $2', [uid, rv])).rows[0];
+          if (row) baseline = row.settings;
+        }
+      } catch (e) { /* fall back to the latest version */ }
+      const locked = M.lockedChanges(baseline, settings);
+      if (locked.length) return res.status(400).json({ success: false, errors: locked });
       // Labels come from the app, never from the browser.
       const labels = new Map((cur.settings.accounts || []).map((a) => [a.ref, a]));
       settings.accounts = settings.accounts.map((a) => ({ ...labels.get(a.ref), enabled: a.enabled }));
-      const reasons = M.riskIncrease(cur.settings, settings);
+      const reasons = M.riskIncrease(baseline, settings);
       const next = cur.version + 1;
       const ins = await pool.query(
         `INSERT INTO settings_versions (user_id, version, settings, source, risk_reasons)
