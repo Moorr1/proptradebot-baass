@@ -612,6 +612,10 @@ async function requireApiKey(req, res, next) {
   }
 }
 
+// Web + Agent step 1: Agent status/events in, dashboard read-out (agent_api.js).
+const { mountAgentApi } = require('./agent_api');
+mountAgentApi(app, pool, { requireApiKey, auth: clerkAuth });
+
 // POST /api/bot/auth — Validate API key, return full config
 app.post('/api/bot/auth', requireApiKey, async (req, res) => {
   try {

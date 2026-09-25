@@ -21,6 +21,8 @@ const db = {
   onboarding_messages: [],
   onboarding_usage: [],
   support_tickets: [],
+  agent_status: {},
+  agent_events: [],
   queries: [],
 };
 const U = (id) => db.users.find((u) => u.id === id);
@@ -91,6 +93,11 @@ class FakePool {
     if (/^UPDATE onboarding_usage SET input_tokens/.test(q)) return rows([]);
     if (/SELECT count\(\*\)::int AS n FROM support_tickets/.test(q)) return rows([{ n: db.support_tickets.filter((t) => t.user_id === p[0]).length }]);
     if (/^DELETE FROM onboarding_messages WHERE created_at/.test(q)) return rows([]);
+    if (/^INSERT INTO agent_status/.test(q)) { db.agent_status[p[0]] = { payload: JSON.parse(p[1]), updated_at: new Date() }; return rows([]); }
+    if (/FROM agent_status WHERE user_id = \$1/.test(q)) { const a = db.agent_status[p[0]]; return rows(a ? [{ ...a }] : []); }
+    if (/^INSERT INTO agent_events/.test(q)) { db.agent_events.push({ user_id: p[0], ts: new Date(p[1]), kind: p[2], payload: JSON.parse(p[3]) }); return rows([]); }
+    if (/FROM agent_events WHERE user_id = \$1/.test(q)) return rows(db.agent_events.filter((e) => e.user_id === p[0]).slice().reverse().map((e) => ({ ...e })));
+    if (/^DELETE FROM agent_events/.test(q)) return rows([]);
     if (/FROM bot_configs|FROM accounts/.test(q)) return rows([]);
     throw new Error('FakePool: unhandled query: ' + q.slice(0, 120));
   }
@@ -366,6 +373,62 @@ async function test(name, fn) {
   await test('another user sees only their own history', async () => {
     const r = await req('GET', '/api/onboarding/history', { headers: { 'x-test-clerk': 'clerk_bob' } });
     assert.strictEqual(r.status, 200); assert.strictEqual(r.body.messages.length, 0);
+  });
+
+  // ---------------- Web + Agent step 1
+  const key1 = { 'x-api-key': U('u1').api_key };
+  const { _test: A } = require('../agent_api');
+  await test('agent: status needs an API key', async () => {
+    const r = await req('POST', '/api/agent/status', { body: { version: '1.7.0' } }); assert.strictEqual(r.status, 401);
+  });
+  await test('agent: status stored, account ids masked, secrets dropped', async () => {
+    const r = await req('POST', '/api/agent/status', { headers: key1, body: {
+      version: '1.7.0', broker_connected: true, api_key: 'ptb_' + 'a'.repeat(64),
+      accounts: [{ label: '50KTC-SKU-V2-DLL-308812-28064472', enabled: true }], positions: [],
+      last_error: 'login failed for key rnyTaYD/ufDFvgTilTduDcvXIr8buHPUjq163jyxEGY=' } });
+    assert.strictEqual(r.status, 200, r.text);
+    const st = db.agent_status.u1.payload;
+    assert.strictEqual(st.api_key, undefined);
+    assert.strictEqual(st.accounts[0].label, '50KTC-…4472');
+    assert.ok(!/rnyTaYD/.test(st.last_error));
+  });
+  await test('agent: oversized status refused', async () => {
+    const r = await req('POST', '/api/agent/status', { headers: key1, body: { junk: 'x'.repeat(40000) } });
+    assert.ok(r.status === 413 || r.status === 400, 'status ' + r.status);
+  });
+  await test('agent: events stored with kind whitelist and batch limit', async () => {
+    const r = await req('POST', '/api/agent/events', { headers: key1, body: { events: [
+      { kind: 'ALERT', ts: new Date().toISOString(), source: 'tradingview', type: 'entry', direction: 'long', acted: false, reason: 'duplicate alert' },
+      { kind: 'rm -rf', message: 'weird' },
+      { kind: 'ENTRY', message: 'LONG 7 MES @ 5000 on 50KTC-V2-308812-78426344, P&L +$64.96' }] } });
+    assert.strictEqual(r.body.stored, 3);
+    assert.deepStrictEqual(db.agent_events.map((e) => e.kind), ['ALERT', 'OTHER', 'ENTRY']);
+    assert.ok(/50KTC-…6344/.test(db.agent_events[2].payload.message));
+    const big = await req('POST', '/api/agent/events', { headers: key1, body: { events: Array(101).fill({ kind: 'OTHER' }) } });
+    assert.strictEqual(big.status, 413);
+  });
+  await test('agent: dashboard read is per signed-in user', async () => {
+    const a = await req('GET', '/api/user/agent', { headers: alice });
+    assert.strictEqual(a.status, 200); assert.ok(a.body.status.online); assert.strictEqual(a.body.events.length, 3);
+    const b = await req('GET', '/api/user/agent', { headers: { 'x-test-clerk': 'clerk_bob' } });
+    assert.strictEqual(b.body.status, null); assert.strictEqual(b.body.events.length, 0);
+  });
+  await test('agent: nothing on the Agent API can send instructions', async () => {
+    for (const path of ['/api/agent/command', '/api/agent/config', '/api/agent/flatten']) {
+      const r = await req('POST', path, { headers: key1, body: {} }); assert.strictEqual(r.status, 404, path);
+    }
+  });
+  await test('assistant: get_bot_status includes live status; get_bot_events strips dollars', async () => {
+    modelCalls = []; modelScript = [use('get_bot_status'), use('get_bot_events', { hours: 2 }), say('ok')];
+    await req('POST', '/api/onboarding/chat', { headers: alice, body: { message: 'did my app get the alert?' } });
+    const st = modelCalls[1].messages.at(-1).content[0].content;
+    assert.ok(/"live_status":\{/.test(st) && /"broker_connected":true/.test(st), st.slice(0, 300));
+    const ev = modelCalls[2].messages.at(-1).content[0].content;
+    assert.ok(/duplicate alert/.test(ev)); assert.ok(!/64\.96/.test(ev), 'dollar amount leaked');
+  });
+  await test('agent: maskIds leaves prices and times alone', async () => {
+    assert.strictEqual(A.maskIds('LONG @ 7771.25 at 13:01:16'), 'LONG @ 7771.25 at 13:01:16');
+    assert.strictEqual(A.maskIds('acct 12345678'), 'acct …5678');
   });
 
   for (const [s, n, e] of results) console.log(`${s}  ${n}${e ? '\n      ' + e : ''}`);

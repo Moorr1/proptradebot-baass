@@ -175,6 +175,16 @@ http://localhost:5555/setup</pre>
         <button class="btn btn-secondary" onclick="loadBotStatus()" style="margin-top:16px;">Refresh Status</button>
       </div>
 
+      <!-- Live status from the app (Web + Agent step 1) -->
+      <div class="card" id="live-card">
+        <h2>📡 Live</h2>
+        <p id="live-summary" style="font-size:14px;">Waiting for your PropTradeBot app to report…</p>
+        <div id="live-accounts" style="font-size:13px; color:#94a3b8; margin-bottom:8px;"></div>
+        <div id="live-positions" style="font-size:14px; margin-bottom:12px;"></div>
+        <div style="font-size:13px; color:#94a3b8; margin-bottom:6px;">Recent activity</div>
+        <div id="live-events" style="font-size:13px; font-family:ui-monospace,Menlo,monospace; max-height:260px; overflow-y:auto;"></div>
+      </div>
+
       <!-- Setup Guide -->
       <div class="card" id="setup-guide">
         <h2>🚀 Setup Guide</h2>
@@ -292,6 +302,8 @@ http://localhost:5555/setup</pre>
       await loadBotStatus();
       await loadTvWebhook();
       await loadChatHistory();
+      await loadLive();
+      setInterval(() => { if (!document.hidden) loadLive(); }, 15000);
     }
 
     // ─── API Helpers ───
@@ -309,6 +321,43 @@ http://localhost:5555/setup</pre>
         body: JSON.stringify(body)
       });
       return r.json();
+    }
+
+    // ─── Live status (Web + Agent step 1) ───
+    // Read-only. Rendered with textContent: event text comes from the app and
+    // may quote alert text, so it is never parsed as HTML.
+    function liveLine(parent, text, color) {
+      const d = document.createElement('div');
+      d.textContent = text; if (color) d.style.color = color;
+      d.style.padding = '2px 0'; parent.appendChild(d);
+    }
+    function fmtTime(t) { try { return new Date(t).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'}); } catch (e) { return ''; } }
+    async function loadLive() {
+      try {
+        const data = await apiGet('/api/user/agent');
+        const s = data && data.status, sum = document.getElementById('live-summary');
+        const acc = document.getElementById('live-accounts'), pos = document.getElementById('live-positions'), ev = document.getElementById('live-events');
+        acc.textContent = ''; pos.textContent = ''; ev.textContent = '';
+        if (!s) { sum.textContent = 'No report yet. Live status needs PropTradeBot 1.7.0 or later, running and signed in.'; return; }
+        const ago = Math.round((Date.now() - new Date(s.reported_at).getTime()) / 1000);
+        sum.textContent = (s.online ? '🟢 Online' : '🔴 Offline') + ' · app ' + (s.version || '?') +
+          ' · broker ' + (s.broker_connected ? 'connected' : 'NOT connected') + ' · last report ' + (ago < 90 ? ago + 's' : Math.round(ago / 60) + ' min') + ' ago';
+        sum.style.color = s.online && s.broker_connected ? '#86efac' : '#fca5a5';
+        const accts = Array.isArray(s.accounts) ? s.accounts : [];
+        acc.textContent = accts.length ? 'Accounts: ' + accts.map(a => a.label + (a.enabled ? '' : ' (off)') + (a.follower ? ' (follower)' : '')).join(' · ') : '';
+        const ps = Array.isArray(s.positions) ? s.positions : [];
+        if (!ps.length) liveLine(pos, 'No open positions.', '#94a3b8');
+        ps.forEach(p => liveLine(pos, `${(p.direction || '').toUpperCase()} ${p.instrument || ''} ${p.remaining ?? ''}/${p.total ?? ''} @ ${p.entry ?? '?'} · stop ${p.stop ?? '?'}`));
+        if (s.last_error) liveLine(pos, '⚠ ' + s.last_error, '#fcd34d');
+        const evs = (data.events || []);
+        if (!evs.length) liveLine(ev, 'Nothing yet today.', '#94a3b8');
+        evs.forEach(e => {
+          const what = e.kind === 'ALERT'
+            ? `${e.source || 'alert'}: ${e.type || ''} ${e.direction || ''} → ${e.acted ? 'acted' : 'skipped'}${e.reason ? ' (' + e.reason + ')' : ''}`
+            : (e.message || e.kind);
+          liveLine(ev, fmtTime(e.ts) + '  ' + e.kind + '  ' + what, e.kind === 'ERROR' ? '#fca5a5' : null);
+        });
+      } catch (e) { console.error('live error:', e); }
     }
 
     // ─── Setup assistant (ops #3) ───
