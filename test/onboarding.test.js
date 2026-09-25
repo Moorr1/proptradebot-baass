@@ -95,7 +95,10 @@ class FakePool {
     if (/^DELETE FROM onboarding_messages WHERE created_at/.test(q)) return rows([]);
     if (/^INSERT INTO agent_status/.test(q)) { db.agent_status[p[0]] = { payload: JSON.parse(p[1]), updated_at: new Date() }; return rows([]); }
     if (/FROM agent_status WHERE user_id = \$1/.test(q)) { const a = db.agent_status[p[0]]; return rows(a ? [{ ...a }] : []); }
-    if (/^INSERT INTO agent_events/.test(q)) { db.agent_events.push({ user_id: p[0], ts: new Date(p[1]), kind: p[2], payload: JSON.parse(p[3]) }); return rows([]); }
+    if (/^INSERT INTO agent_events/.test(q)) {
+      for (let i = 0; i < p.length; i += 4) db.agent_events.push({ user_id: p[i], ts: new Date(p[i + 1]), kind: p[i + 2], payload: JSON.parse(p[i + 3]) });
+      return rows([]);
+    }
     if (/FROM agent_events WHERE user_id = \$1/.test(q)) return rows(db.agent_events.filter((e) => e.user_id === p[0]).slice().reverse().map((e) => ({ ...e })));
     if (/^DELETE FROM agent_events/.test(q)) return rows([]);
     if (/FROM bot_configs|FROM accounts/.test(q)) return rows([]);
@@ -425,6 +428,30 @@ async function test(name, fn) {
     assert.ok(/"live_status":\{/.test(st) && /"broker_connected":true/.test(st), st.slice(0, 300));
     const ev = modelCalls[2].messages.at(-1).content[0].content;
     assert.ok(/duplicate alert/.test(ev)); assert.ok(!/64\.96/.test(ev), 'dollar amount leaked');
+  });
+  await test('agent: status rate-limited to one per 5 s per user', async () => {
+    const r = await req('POST', '/api/agent/status', { headers: key1, body: { version: '1.7.0' } });
+    assert.strictEqual(r.status, 429);
+  });
+  await test('agent: pathological strings cost < 50 ms (no regex blow-up)', async () => {
+    const t = Date.now(); A.clean('a1'.repeat(15000)); A.clean('-'.repeat(30000)); A.clean('1'.repeat(30000));
+    assert.ok(Date.now() - t < 50, (Date.now() - t) + 'ms');
+  });
+  await test('agent: Rithmic/Apex ids masked to the real last 4', async () => {
+    assert.strictEqual(A.maskIds('PA-APEX-123456-01'), 'PA-…3456');
+  });
+  await test('agent: reported kind kept, validated kind wins', async () => {
+    const r = await req('POST', '/api/agent/events', { headers: key1, body: { events: [{ kind: 'MES_T1_FILLED', message: 'T1 5c' }, { kind: 'SOMETHING_NEW' }] } });
+    assert.strictEqual(r.body.stored, 2);
+    const a = await req('GET', '/api/user/agent', { headers: alice });
+    assert.strictEqual(a.body.events[0].kind, 'OTHER'); assert.strictEqual(a.body.events[0].reported_kind, 'SOMETHING_NEW');
+    assert.strictEqual(a.body.events[1].kind, 'MES_T1_FILLED');
+  });
+  await test('assistant: money scrubbed in every format the app writes', async () => {
+    const { _test: O } = require('../onboarding_agent');
+    for (const m of ['daily loss limit hit ($-450.00)', 'Today P&L: $-450.00', 'P&L 64.96', '+64.96 USD', 'profit of 120.5', 'net +$194.88'])
+      assert.ok(!/\d{2,}\.\d\d|450|194|120/.test(O.scrubMoney(m)), m + ' -> ' + O.scrubMoney(m));
+    assert.strictEqual(O.scrubMoney('LONG 7 MES @ 7771.25 stop 7760.25'), 'LONG 7 MES @ 7771.25 stop 7760.25');
   });
   await test('agent: maskIds leaves prices and times alone', async () => {
     assert.strictEqual(A.maskIds('LONG @ 7771.25 at 13:01:16'), 'LONG @ 7771.25 at 13:01:16');

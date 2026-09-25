@@ -346,11 +346,12 @@ http://localhost:5555/setup</pre>
         const accts = Array.isArray(s.accounts) ? s.accounts : [];
         acc.textContent = accts.length ? 'Accounts: ' + accts.map(a => a.label + (a.enabled ? '' : ' (off)') + (a.follower ? ' (follower)' : '')).join(' · ') : '';
         const ps = Array.isArray(s.positions) ? s.positions : [];
-        if (!ps.length) liveLine(pos, 'No open positions.', '#94a3b8');
+        if (s.positions == null) liveLine(pos, 'Positions unknown right now (the app could not read them). Check the app or your broker.', '#fcd34d');
+        else if (!ps.length) liveLine(pos, 'No open positions.', '#94a3b8');
         ps.forEach(p => liveLine(pos, `${(p.direction || '').toUpperCase()} ${p.instrument || ''} ${p.remaining ?? ''}/${p.total ?? ''} @ ${p.entry ?? '?'} · stop ${p.stop ?? '?'}`));
         if (s.last_error) liveLine(pos, '⚠ ' + s.last_error, '#fcd34d');
         const evs = (data.events || []);
-        if (!evs.length) liveLine(ev, 'Nothing yet today.', '#94a3b8');
+        if (!evs.length) liveLine(ev, 'No activity reported yet.', '#94a3b8');
         evs.forEach(e => {
           const what = e.kind === 'ALERT'
             ? `${e.source || 'alert'}: ${e.type || ''} ${e.direction || ''} → ${e.acted ? 'acted' : 'skipped'}${e.reason ? ' (' + e.reason + ')' : ''}`
