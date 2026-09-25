@@ -21,7 +21,12 @@ async function latest(pool, userId) {
 
 function mountSettingsApi(app, pool, { requireApiKey, auth }) {
   // The settings page uses the same rules as the server (and the app).
-  app.get('/js/settings_model.js', (req, res) => res.sendFile(path.join(__dirname, 'settings_model.js')));
+  // no-cache: browsers must revalidate, so a deploy never leaves a stale rule model
+  // running against a new page (seen in the 1.8.0 live test).
+  app.get('/js/settings_model.js', (req, res) => {
+    res.set('Cache-Control', 'no-cache');
+    res.sendFile(path.join(__dirname, 'settings_model.js'));
+  });
 
   // ---- App -> server -------------------------------------------------------------
   // First connection of a 1.8+ app: its current local settings become version 1,
