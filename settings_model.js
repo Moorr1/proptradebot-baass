@@ -85,12 +85,20 @@ function riskIncrease(oldS, newS) {
   return r;
 }
 
+// The parts that change trading (labels and leader/follower flags are display only).
+function canonical(s) {
+  const legs = {};
+  for (const k of ['sp', 'nq']) { const L = s.legs[k]; legs[k] = {}; Object.keys(L).sort().forEach((f) => { legs[k][f] = L[f]; }); }
+  return JSON.stringify({ accounts: (s.accounts || []).map((a) => [a.ref, a.enabled]).sort(),
+                          broker_ladder: s.broker_ladder, eod: { enabled: s.eod.enabled, time: s.eod.time }, legs });
+}
+
 function totalRisk(s) {
   const n = (s.accounts || []).filter((a) => a.enabled).length;
   const per = legRisk(s.legs.sp) + legRisk(s.legs.nq);
   return { perAccount: per, accounts: n, total: per * n };
 }
 
-const api = { POINT_VALUE, validate, riskIncrease, totalRisk, legRisk };
+const api = { POINT_VALUE, validate, riskIncrease, totalRisk, legRisk, canonical };
 if (typeof module !== 'undefined' && module.exports) module.exports = api;   // server + tests
 else window.PTBSettings = api;                                               // settings page

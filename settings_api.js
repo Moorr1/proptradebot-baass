@@ -31,13 +31,19 @@ function mountSettingsApi(app, pool, { requireApiKey, auth }) {
       if (JSON.stringify(s || {}).length > MAX_SETTINGS_BYTES) return res.status(413).json({ success: false, error: 'too large' });
       const errs = M.validate(s);
       if (errs.length) return res.status(400).json({ success: false, errors: errs });
+      // The computer is the authority for what it runs. A version is added when
+      // this is the first import, or when the app reports settings changed on
+      // the computer (local_change). Identical settings never add a version.
       const cur = await latest(pool, req.botUser.id);
-      if (cur) return res.json({ success: true, imported: false, version: cur.version });
-      await pool.query(
+      if (cur && M.canonical(cur.settings) === M.canonical(s)) return res.json({ success: true, imported: false, version: cur.version });
+      if (cur && !(req.body && req.body.local_change === true)) return res.json({ success: true, imported: false, version: cur.version });
+      const next = cur ? cur.version + 1 : 1;
+      const ins = await pool.query(
         `INSERT INTO settings_versions (user_id, version, settings, source, risk_reasons)
-         VALUES ($1, 1, $2, 'app', '[]'::jsonb) ON CONFLICT (user_id, version) DO NOTHING`,
-        [req.botUser.id, JSON.stringify(s)]);
-      res.json({ success: true, imported: true, version: 1 });
+         VALUES ($1, $2, $3, 'app', '[]'::jsonb) ON CONFLICT (user_id, version) DO NOTHING RETURNING version`,
+        [req.botUser.id, next, JSON.stringify(s)]);
+      if (!ins.rows.length) return res.status(409).json({ success: false, error: 'version conflict, retry' });
+      res.json({ success: true, imported: true, version: next });
     } catch (e) {
       console.error('settings import error:', e.message);
       res.status(500).json({ success: false, error: 'internal' });

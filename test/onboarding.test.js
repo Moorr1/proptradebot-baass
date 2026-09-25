@@ -109,10 +109,10 @@ class FakePool {
     if (/FROM settings_versions WHERE user_id = \$1/.test(q))
       return rows(db.settings_versions.filter((x) => x.user_id === p[0]).sort((a, b) => b.version - a.version).map((x) => ({ ...x })));
     if (/^INSERT INTO settings_versions/.test(q)) {
-      const version = /VALUES \(\$1, 1,/.test(q) ? 1 : p[1];
+      const version = p[1];
       if (db.settings_versions.some((x) => x.user_id === p[0] && x.version === version)) return rows([]);
-      const rec = /VALUES \(\$1, 1,/.test(q)
-        ? { user_id: p[0], version: 1, settings: JSON.parse(p[1]), source: 'app', risk_reasons: [], created_at: new Date() }
+      const rec = /'app'/.test(q)
+        ? { user_id: p[0], version, settings: JSON.parse(p[2]), source: 'app', risk_reasons: [], created_at: new Date() }
         : { user_id: p[0], version, settings: JSON.parse(p[2]), source: 'web', risk_reasons: JSON.parse(p[3]), created_at: new Date() };
       db.settings_versions.push(rec); return rows([{ version }]);
     }
@@ -539,10 +539,20 @@ async function test(name, fn) {
     assert.strictEqual((await req('GET', '/api/user/settings', { headers: bob })).body.current, null);
     assert.strictEqual((await req('POST', '/api/user/settings', { headers: bob, body: { settings: SV.base, base_version: 4 } })).status, 409);
   });
+  await test('settings: app import with a local edit adds a version; identical import does not', async () => {
+    const g = await req('GET', '/api/agent/settings', { headers: key2 });
+    const same = await req('POST', '/api/agent/settings/import', { headers: key2, body: { settings: g.body.settings, local_change: true } });
+    assert.strictEqual(same.body.imported, false);
+    const edited = clone(g.body.settings); edited.legs.sp.stop = 9;
+    const no = await req('POST', '/api/agent/settings/import', { headers: key2, body: { settings: edited } });
+    assert.strictEqual(no.body.imported, false, 'without local_change nothing is created');
+    const yes = await req('POST', '/api/agent/settings/import', { headers: key2, body: { settings: edited, local_change: true } });
+    assert.strictEqual(yes.body.imported, true); assert.strictEqual(yes.body.version, g.body.version + 1);
+  });
   await test('settings: page shows what the app reports as running', async () => {
     db.agent_status.u1 = { payload: { settings: { running: 2, pending: 4, state: 'needs_approval' } }, updated_at: new Date() };
     const r = await req('GET', '/api/user/settings', { headers: alice });
-    assert.strictEqual(r.body.current.version, 4); assert.strictEqual(r.body.running.state, 'needs_approval'); assert.ok(r.body.history.length >= 4);
+    assert.strictEqual(r.body.current.version, 5); assert.strictEqual(r.body.running.state, 'needs_approval'); assert.ok(r.body.history.length >= 5);
   });
   await test('settings: model is served to the settings page', async () => {
     const r = await req('GET', '/js/settings_model.js'); assert.strictEqual(r.status, 200); assert.ok(/window.PTBSettings/.test(r.text));

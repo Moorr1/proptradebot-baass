@@ -25,6 +25,7 @@ const db = {
   support_tickets: [],
   agent_status: {},
   agent_events: [],
+  settings_versions: [],
   queries: [],
 };
 const U = (id) => db.users.find((u) => u.id === id);
@@ -103,6 +104,20 @@ class FakePool {
     }
     if (/FROM agent_events WHERE user_id = \$1/.test(q)) return rows(db.agent_events.filter((e) => e.user_id === p[0]).slice().reverse().map((e) => ({ ...e })));
     if (/^DELETE FROM agent_events/.test(q)) return rows([]);
+    if (/FROM settings_versions WHERE user_id = \$1 ORDER BY version DESC LIMIT 1/.test(q)) {
+      const v = db.settings_versions.filter((x) => x.user_id === p[0]).sort((a, b) => b.version - a.version)[0];
+      return rows(v ? [{ ...v }] : []);
+    }
+    if (/FROM settings_versions WHERE user_id = \$1/.test(q))
+      return rows(db.settings_versions.filter((x) => x.user_id === p[0]).sort((a, b) => b.version - a.version).map((x) => ({ ...x })));
+    if (/^INSERT INTO settings_versions/.test(q)) {
+      const version = p[1];
+      if (db.settings_versions.some((x) => x.user_id === p[0] && x.version === version)) return rows([]);
+      const rec = /'app'/.test(q)
+        ? { user_id: p[0], version, settings: JSON.parse(p[2]), source: 'app', risk_reasons: [], created_at: new Date() }
+        : { user_id: p[0], version, settings: JSON.parse(p[2]), source: 'web', risk_reasons: JSON.parse(p[3]), created_at: new Date() };
+      db.settings_versions.push(rec); return rows([{ version }]);
+    }
     if (/FROM bot_configs|FROM accounts/.test(q)) return rows([]);
     throw new Error('FakePool: unhandled query: ' + q.slice(0, 120));
   }
