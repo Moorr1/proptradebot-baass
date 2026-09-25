@@ -5,6 +5,7 @@
 // so they cannot drift apart silently.
 // =============================================================================
 
+(function () {   // own scope: the settings page loads this as a plain <script>
 const POINT_VALUE = { MES: 5, ES: 50, MNQ: 2, NQ: 20 };
 const LEG_INSTRUMENTS = { sp: ['MES', 'ES'], nq: ['MNQ', 'NQ'] };
 const FULL_SIZE = new Set(['ES', 'NQ']);
@@ -157,3 +158,4 @@ function totalRisk(s) {
 const api = { POINT_VALUE, validate, riskIncrease, totalRisk, legRisk, canonical, lockedChanges, sanitize, diff };
 if (typeof module !== 'undefined' && module.exports) module.exports = api;   // server + tests
 else window.PTBSettings = api;                                               // settings page
+})();

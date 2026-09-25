@@ -589,6 +589,20 @@ async function test(name, fn) {
     const r = await req('GET', '/api/user/settings', { headers: alice });
     assert.ok(r.body.current.version >= 7); assert.strictEqual(r.body.running.state, 'needs_approval'); assert.ok(r.body.history.length >= 7);
   });
+  await test('settings: page script and the model load together in one browser scope', async () => {
+    const vm = require('vm'), fs = require('fs');
+    const page = fs.readFileSync(require('path').join(__dirname, '..', 'public', 'settings.html'), 'utf8');
+    const inline = [...page.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1]).join('\n');
+    const model = fs.readFileSync(require('path').join(__dirname, '..', 'settings_model.js'), 'utf8');
+    // Classic scripts share one global lexical scope: a duplicate top-level
+    // const/function name across them is a SyntaxError in the browser.
+    const ctx = vm.createContext({ window: {}, document: { getElementById: () => null, addEventListener() {} }, console });
+    new vm.Script(model).runInContext(ctx);
+    assert.ok(ctx.window.PTBSettings && ctx.window.PTBSettings.validate, 'model did not register window.PTBSettings');
+    assert.doesNotThrow(() => new vm.Script(inline), 'page script has a syntax error');
+    assert.doesNotThrow(() => new vm.Script(model + '\n;' + inline.replace(/\$\('preset'\)\.addEventListener[\s\S]*$/, '')),
+      'model and page declare the same top-level name');
+  });
   await test('settings: model is served to the settings page', async () => {
     const r = await req('GET', '/js/settings_model.js'); assert.strictEqual(r.status, 200); assert.ok(/window.PTBSettings/.test(r.text));
   });
