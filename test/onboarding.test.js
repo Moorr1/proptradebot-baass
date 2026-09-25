@@ -23,6 +23,7 @@ const db = {
   support_tickets: [],
   agent_status: {},
   agent_events: [],
+  settings_versions: [],
   queries: [],
 };
 const U = (id) => db.users.find((u) => u.id === id);
@@ -101,6 +102,20 @@ class FakePool {
     }
     if (/FROM agent_events WHERE user_id = \$1/.test(q)) return rows(db.agent_events.filter((e) => e.user_id === p[0]).slice().reverse().map((e) => ({ ...e })));
     if (/^DELETE FROM agent_events/.test(q)) return rows([]);
+    if (/FROM settings_versions WHERE user_id = \$1 ORDER BY version DESC LIMIT 1/.test(q)) {
+      const v = db.settings_versions.filter((x) => x.user_id === p[0]).sort((a, b) => b.version - a.version)[0];
+      return rows(v ? [{ ...v }] : []);
+    }
+    if (/FROM settings_versions WHERE user_id = \$1/.test(q))
+      return rows(db.settings_versions.filter((x) => x.user_id === p[0]).sort((a, b) => b.version - a.version).map((x) => ({ ...x })));
+    if (/^INSERT INTO settings_versions/.test(q)) {
+      const version = /VALUES \(\$1, 1,/.test(q) ? 1 : p[1];
+      if (db.settings_versions.some((x) => x.user_id === p[0] && x.version === version)) return rows([]);
+      const rec = /VALUES \(\$1, 1,/.test(q)
+        ? { user_id: p[0], version: 1, settings: JSON.parse(p[1]), source: 'app', risk_reasons: [], created_at: new Date() }
+        : { user_id: p[0], version, settings: JSON.parse(p[2]), source: 'web', risk_reasons: JSON.parse(p[3]), created_at: new Date() };
+      db.settings_versions.push(rec); return rows([{ version }]);
+    }
     if (/FROM bot_configs|FROM accounts/.test(q)) return rows([]);
     throw new Error('FakePool: unhandled query: ' + q.slice(0, 120));
   }
@@ -456,6 +471,81 @@ async function test(name, fn) {
   await test('agent: maskIds leaves prices and times alone', async () => {
     assert.strictEqual(A.maskIds('LONG @ 7771.25 at 13:01:16'), 'LONG @ 7771.25 at 13:01:16');
     assert.strictEqual(A.maskIds('acct 12345678'), 'acct …5678');
+  });
+
+  // ---------------- Web + Agent step 2: settings
+  const M = require('../settings_model');
+  const SV = require('./settings_vectors.json');
+  await test('settings: shared rule vectors (validate + risk) all hold', async () => {
+    for (const v of SV.vectors) {
+      const e = M.validate(v.new);
+      assert.strictEqual(e.length === 0, v.valid, v.name + ' ' + e.join('; '));
+      if (v.valid && v.risk) {
+        const r = M.riskIncrease(v.old, v.new);
+        if (v.risk.length === 0) assert.deepStrictEqual(r, [], v.name);
+        else v.risk.forEach((x) => assert.ok(r.some((y) => y.includes(x)), v.name + ': ' + r.join('; ')));
+      }
+    }
+  });
+  const key2 = { 'x-api-key': U('u1').api_key };
+  const clone = (o) => JSON.parse(JSON.stringify(o));
+  await test('settings: page says "no settings yet" before the app imports', async () => {
+    const r = await req('GET', '/api/user/settings', { headers: alice });
+    assert.strictEqual(r.body.current, null);
+    const w = await req('POST', '/api/user/settings', { headers: alice, body: { settings: SV.base, base_version: 0 } });
+    assert.strictEqual(w.status, 409);
+  });
+  await test('settings: app import creates version 1 once; invalid import refused', async () => {
+    const bad = clone(SV.base); bad.legs.sp.runner_contracts = 3;
+    assert.strictEqual((await req('POST', '/api/agent/settings/import', { headers: key2, body: { settings: bad } })).status, 400);
+    const a = await req('POST', '/api/agent/settings/import', { headers: key2, body: { settings: SV.base } });
+    assert.ok(a.body.imported && a.body.version === 1);
+    const b = await req('POST', '/api/agent/settings/import', { headers: key2, body: { settings: SV.base } });
+    assert.ok(!b.body.imported && b.body.version === 1);
+  });
+  await test('settings: a risk-reducing save needs no approval', async () => {
+    const s2 = clone(SV.base); s2.legs.sp.stop = 8;
+    const r = await req('POST', '/api/user/settings', { headers: alice, body: { settings: s2, base_version: 1 } });
+    assert.strictEqual(r.status, 200, r.text); assert.strictEqual(r.body.version, 2); assert.strictEqual(r.body.needs_approval, false);
+    const g = await req('GET', '/api/agent/settings', { headers: key2 });
+    assert.strictEqual(g.body.version, 2); assert.strictEqual(g.body.settings.legs.sp.stop, 8);
+  });
+  await test('settings: a risk-adding save is flagged for approval, with reasons', async () => {
+    const s3 = clone(SV.base); s3.legs.sp.stop = 15; s3.accounts[1].enabled = true;
+    const r = await req('POST', '/api/user/settings', { headers: alice, body: { settings: s3, base_version: 2 } });
+    assert.strictEqual(r.body.needs_approval, true);
+    assert.ok(r.body.reasons.some((x) => /wider stop/.test(x)) && r.body.reasons.some((x) => /turned on/.test(x)), r.body.reasons.join('; '));
+  });
+  await test('settings: stale page (old base_version) is refused', async () => {
+    const r = await req('POST', '/api/user/settings', { headers: alice, body: { settings: SV.base, base_version: 1 } });
+    assert.strictEqual(r.status, 409);
+  });
+  await test('settings: the website cannot add accounts or rename them', async () => {
+    const s4 = clone(SV.base); s4.accounts.push({ ref: 'a_1111111111111111', label: 'x', enabled: true });
+    assert.strictEqual((await req('POST', '/api/user/settings', { headers: alice, body: { settings: s4, base_version: 3 } })).status, 400);
+    const s5 = clone(SV.base); s5.accounts[0].label = 'EVIL'; s5.accounts[0].leader = true;
+    const r = await req('POST', '/api/user/settings', { headers: alice, body: { settings: s5, base_version: 3 } });
+    assert.strictEqual(r.status, 200, r.text);
+    const g = await req('GET', '/api/agent/settings', { headers: key2 });
+    assert.strictEqual(g.body.settings.accounts[0].label, '50KTC-…6344');
+  });
+  await test('settings: invalid settings from the page are refused with reasons', async () => {
+    const s6 = clone(SV.base); s6.legs.sp.stop = 0;
+    const r = await req('POST', '/api/user/settings', { headers: alice, body: { settings: s6, base_version: 4 } });
+    assert.strictEqual(r.status, 400); assert.ok(r.body.errors.some((x) => /initial stop/.test(x)));
+  });
+  await test('settings: another user sees nothing and cannot save into this account', async () => {
+    const bob = { 'x-test-clerk': 'clerk_bob' };
+    assert.strictEqual((await req('GET', '/api/user/settings', { headers: bob })).body.current, null);
+    assert.strictEqual((await req('POST', '/api/user/settings', { headers: bob, body: { settings: SV.base, base_version: 4 } })).status, 409);
+  });
+  await test('settings: page shows what the app reports as running', async () => {
+    db.agent_status.u1 = { payload: { settings: { running: 2, pending: 4, state: 'needs_approval' } }, updated_at: new Date() };
+    const r = await req('GET', '/api/user/settings', { headers: alice });
+    assert.strictEqual(r.body.current.version, 4); assert.strictEqual(r.body.running.state, 'needs_approval'); assert.ok(r.body.history.length >= 4);
+  });
+  await test('settings: model is served to the settings page', async () => {
+    const r = await req('GET', '/js/settings_model.js'); assert.strictEqual(r.status, 200); assert.ok(/window.PTBSettings/.test(r.text));
   });
 
   for (const [s, n, e] of results) console.log(`${s}  ${n}${e ? '\n      ' + e : ''}`);

@@ -1,0 +1,2493 @@
+{
+ "base": {
+  "schema": 1,
+  "legs": {
+   "sp": {
+    "instrument": "MES",
+    "contracts": 7,
+    "stop": 11,
+    "stop_after_t1": 4,
+    "t1_contracts": 5,
+    "t1_points": 4.5,
+    "t2_contracts": 1,
+    "t2_points": 11,
+    "runner_contracts": 1,
+    "runner_close": 20
+   },
+   "nq": {
+    "instrument": "MNQ",
+    "contracts": 0,
+    "stop": 35,
+    "stop_after_t1": 35,
+    "t1_contracts": 0,
+    "t1_points": 20,
+    "t2_contracts": 0,
+    "t2_points": 40,
+    "runner_contracts": 0,
+    "runner_close": 60
+   }
+  },
+  "broker_ladder": true,
+  "eod": {
+   "enabled": true,
+   "time": "15:55"
+  },
+  "accounts": [
+   {
+    "ref": "a_0123456789abcdef",
+    "label": "50KTC-\u20266344",
+    "enabled": true
+   },
+   {
+    "ref": "a_fedcba9876543210",
+    "label": "50KTC-\u20264472",
+    "enabled": false
+   }
+  ]
+ },
+ "vectors": [
+  {
+   "name": "same settings",
+   "old": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "new": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "valid": true,
+   "risk": []
+  },
+  {
+   "name": "fewer contracts",
+   "old": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "new": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 3,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 1,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "valid": true,
+   "risk": []
+  },
+  {
+   "name": "tighter stop",
+   "old": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "new": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 8,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "valid": true,
+   "risk": []
+  },
+  {
+   "name": "account off",
+   "old": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "new": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": false
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "valid": true,
+   "risk": []
+  },
+  {
+   "name": "more contracts",
+   "old": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "new": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 9,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 7,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "valid": true,
+   "risk": [
+    "more contracts"
+   ]
+  },
+  {
+   "name": "wider stop",
+   "old": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "new": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 15,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "valid": true,
+   "risk": [
+    "wider stop"
+   ]
+  },
+  {
+   "name": "looser stop after T1",
+   "old": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "new": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 6,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "valid": true,
+   "risk": [
+    "looser stop after T1"
+   ]
+  },
+  {
+   "name": "full size",
+   "old": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "new": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "ES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "valid": true,
+   "risk": [
+    "full-size"
+   ]
+  },
+  {
+   "name": "account on",
+   "old": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "new": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": true
+     }
+    ]
+   },
+   "valid": true,
+   "risk": [
+    "turned on"
+   ]
+  },
+  {
+   "name": "eod off",
+   "old": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "new": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": false,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "valid": true,
+   "risk": [
+    "EOD flatten turned off"
+   ]
+  },
+  {
+   "name": "eod later",
+   "old": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "new": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "16:05"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "valid": true,
+   "risk": [
+    "EOD flatten later"
+   ]
+  },
+  {
+   "name": "eod earlier",
+   "old": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "new": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:30"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "valid": true,
+   "risk": []
+  },
+  {
+   "name": "broker ladder off",
+   "old": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "new": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": false,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "valid": true,
+   "risk": [
+    "Broker ladder turned off"
+   ]
+  },
+  {
+   "name": "nasdaq leg switched on",
+   "old": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "new": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 3,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 1,
+      "t1_points": 20,
+      "t2_contracts": 1,
+      "t2_points": 40,
+      "runner_contracts": 1,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "valid": true,
+   "risk": [
+    "more contracts"
+   ]
+  },
+  {
+   "name": "legs don't add up",
+   "old": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "new": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 2,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "valid": false,
+   "risk": null
+  },
+  {
+   "name": "no stop",
+   "old": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "new": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 0,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "valid": false,
+   "risk": null
+  },
+  {
+   "name": "stop after T1 wider than stop",
+   "old": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "new": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 12,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "valid": false,
+   "risk": null
+  },
+  {
+   "name": "T2 not beyond T1",
+   "old": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "new": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 4,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "valid": false,
+   "risk": null
+  },
+  {
+   "name": "runner not beyond T2",
+   "old": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "new": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 10
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "valid": false,
+   "risk": null
+  },
+  {
+   "name": "wrong instrument for leg",
+   "old": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "new": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MNQ",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "valid": false,
+   "risk": null
+  },
+  {
+   "name": "fractional contracts",
+   "old": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "new": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7.5,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "valid": false,
+   "risk": null
+  },
+  {
+   "name": "above server max",
+   "old": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "new": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 60,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 58,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "valid": false,
+   "risk": null
+  },
+  {
+   "name": "bad eod time",
+   "old": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "new": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "25:00"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "valid": false,
+   "risk": null
+  },
+  {
+   "name": "bad account ref",
+   "old": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "new": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "acct-123",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "valid": false,
+   "risk": null
+  },
+  {
+   "name": "leg off ignores ladder",
+   "old": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 7,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "new": {
+    "schema": 1,
+    "legs": {
+     "sp": {
+      "instrument": "MES",
+      "contracts": 0,
+      "stop": 11,
+      "stop_after_t1": 4,
+      "t1_contracts": 5,
+      "t1_points": 4.5,
+      "t2_contracts": 1,
+      "t2_points": 11,
+      "runner_contracts": 1,
+      "runner_close": 20
+     },
+     "nq": {
+      "instrument": "MNQ",
+      "contracts": 0,
+      "stop": 35,
+      "stop_after_t1": 35,
+      "t1_contracts": 0,
+      "t1_points": 20,
+      "t2_contracts": 0,
+      "t2_points": 40,
+      "runner_contracts": 0,
+      "runner_close": 60
+     }
+    },
+    "broker_ladder": true,
+    "eod": {
+     "enabled": true,
+     "time": "15:55"
+    },
+    "accounts": [
+     {
+      "ref": "a_0123456789abcdef",
+      "label": "50KTC-\u20266344",
+      "enabled": true
+     },
+     {
+      "ref": "a_fedcba9876543210",
+      "label": "50KTC-\u20264472",
+      "enabled": false
+     }
+    ]
+   },
+   "valid": true,
+   "risk": []
+  }
+ ]
+}
