@@ -6,14 +6,14 @@
   <title>PropTradeBot — Execution that keeps you funded</title>
   <meta name="description" content="Connect TradingView, Telegram or Discord — or trade with one click. PropTradeBot runs the full managed trade across every prop account you own: laddered entries, trims, adaptive stops, flat before the close.">
   <meta property="og:title" content="PropTradeBot — Execution that keeps you funded">
-  <meta property="og:description" content="Your signal, executed identically across every funded account — laddered entries, trims, adaptive stops, flat before the close. 7-day free trial.">
+  <meta property="og:description" content="Your signal, executed identically across every funded account — laddered entries, trims, adaptive stops, flat before the close. Join the waitlist.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://proptradebot.com">
   <meta property="og:image" content="https://proptradebot.com/PropTradeBot_Poster.png">
   <meta property="og:image:alt" content="PropTradeBot — automated prop-account trade execution">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="PropTradeBot — Execution that keeps you funded">
-  <meta name="twitter:description" content="Your signal, executed identically across every funded account — laddered entries, trims, adaptive stops, flat before the close. 7-day free trial.">
+  <meta name="twitter:description" content="Your signal, executed identically across every funded account — laddered entries, trims, adaptive stops, flat before the close. Join the waitlist.">
   <meta name="twitter:image" content="https://proptradebot.com/PropTradeBot_Poster.png">
   <script async crossorigin="anonymous" data-clerk-publishable-key="pk_live_Y2xlcmsucHJvcHRyYWRlYm90LmNvbSQ" src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5/dist/clerk.browser.js" type="text/javascript"></script>
   <style>
@@ -205,7 +205,8 @@
       <div class="logo">Prop<span>TradeBot</span></div>
       <div id="auth-buttons">
         <button class="btn btn-outline" onclick="showAuth('sign-in')">Sign In</button>
-        <a href="https://whop.com/proptradebot/proptradebot-pro" class="btn btn-primary" style="text-decoration:none;">Get Started</a>
+        <a href="/dashboard.html" class="btn btn-outline" style="text-decoration:none;">Dashboard</a>
+        <a href="#waitlist" class="btn btn-primary" style="text-decoration:none;">Join the waitlist</a>
       </div>
       <div id="user-nav">
         <span id="user-email"></span>
@@ -219,8 +220,9 @@
     <div class="container">
       <h1>Execution that keeps you funded.</h1>
       <p>Connect TradingView, Telegram or Discord — or trade with one click. PropTradeBot runs the whole managed trade across every prop account you own: laddered entries, T1/T2 trims, adaptive stops, flat before the close. The same trade, the same size, every time, whether or not you are at the screen.</p>
+      <p style="color:#94a3b8; font-size:15px;">We're onboarding in waves. Leave your email and we'll invite you when a seat opens.</p>
       <div class="hero-cta">
-        <a href="https://whop.com/proptradebot/proptradebot-pro" class="btn btn-primary btn-lg" style="text-decoration:none;">Start Free Trial</a>
+        <a href="#waitlist" class="btn btn-primary btn-lg" style="text-decoration:none;">Join the waitlist</a>
         <button class="btn btn-outline btn-lg" onclick="document.getElementById('how-it-works').scrollIntoView({behavior:'smooth'})">See how it works</button>
       </div>
     </div>
@@ -293,7 +295,7 @@
         <div class="step">
           <div class="step-number">1</div>
           <h3>Connect Your Accounts</h3>
-          <p>Pick your firm in the guided setup and PropTradeBot configures the connection — no endpoint URLs, no config files. Works with Topstep, Tradeify, Lucid, Take Profit Trader, Bulenox, and any Tradovate firm.</p>
+          <p>Pick your firm in the guided setup and PropTradeBot configures the connection — no endpoint URLs, no config files. Works with Topstep, Lucid, Take Profit Trader, and any Tradovate firm.</p>
         </div>
         <div class="step">
           <div class="step-number">2</div>
@@ -319,12 +321,12 @@
   <section class="pricing" id="pricing">
     <div class="container">
       <h2 class="section-title">Simple Pricing</h2>
-      <p class="section-subtitle">One plan. Everything included. 7-day free trial.</p>
+      <p class="section-subtitle">One plan. Everything included. We're onboarding from the waitlist in waves.</p>
       <div class="pricing-grid" style="max-width: 420px; margin: 60px auto 0;">
         <div class="pricing-card popular">
           <div class="popular-badge">ALL-INCLUSIVE</div>
           <h3>PropTradeBot Pro</h3>
-          <div class="price">$149<span>/month</span></div>
+          <div class="price">$149<span>/month when invited</span></div>
           <p style="color:#64748b; margin-bottom:16px;">Disciplined execution for serious prop firm traders.</p>
           <ul>
             <li>Multiple funded accounts across supported firms</li>
@@ -335,21 +337,34 @@
             <li>Real-time P&L dashboard</li>
             <li>Priority support</li>
           </ul>
-          <a href="https://whop.com/proptradebot/proptradebot-pro" class="btn btn-primary" style="text-decoration:none;">Start Free Trial</a>
+          <a href="#waitlist" class="btn btn-primary" style="text-decoration:none;">Request access</a>
         </div>
       </div>
-      <p style="text-align: center; color: #64748b; margin-top: 32px; font-size: 14px;">
-        7-day free trial · Credit card required · Cancel anytime<br>
-        <span style="font-size: 12px;">By signing up, you agree to our <a href="/terms.html" style="color: #22c55e;">Terms of Service</a></span>
+      <div style="max-width: 420px; margin: 24px auto 0; padding: 18px 20px; border: 1px solid #22c55e; border-radius: 12px; background: rgba(34,197,94,0.06);">
+        <p style="color:#22c55e; font-weight:700; margin:0 0 6px;">Founding members: $99/month, locked for 12 months</p>
+        <p style="color:#94a3b8; font-size:14px; margin:0;">For the first 20 people who accept an invite. Your 7-day trial starts when your invite is activated, not when you join the list. After 12 months the regular price applies, with notice. A spot on the list doesn't reserve a founding seat.</p>
+      </div>
+      <p style="text-align: center; color: #64748b; margin-top: 24px; font-size: 14px;">
+        Joining the waitlist is free: no card, no charge.<br>
+        <span style="font-size: 12px;">Paid plans are covered by our <a href="/terms.html" style="color: #22c55e;">Terms of Service</a></span>
       </p>
     </div>
   </section>
 
-  <section class="cta">
+  <section class="cta" id="waitlist">
     <div class="container">
-      <h2>Ready to Execute Like a Machine?</h2>
-      <p>Stop fumbling fills and breaking your own rules. 7-day free trial, credit card required.</p>
-      <a href="https://whop.com/proptradebot/proptradebot-pro" class="btn btn-primary btn-lg" style="text-decoration:none;">Get Started Free</a>
+      <h2>Join the waitlist</h2>
+      <p>Leave your email and we'll invite you when a seat opens. No card, no charge.</p>
+      <form id="waitlist-form" onsubmit="joinWaitlist(event)" style="max-width: 460px; margin: 24px auto 0; display: flex; flex-direction: column; gap: 12px;">
+        <input type="email" id="wl-email" required maxlength="254" placeholder="you@example.com" autocomplete="email"
+               style="padding: 14px 16px; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; font-size: 16px;">
+        <input type="text" id="wl-handle" maxlength="100" placeholder="Discord or Telegram handle (optional)"
+               style="padding: 14px 16px; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; font-size: 16px;">
+        <input type="text" id="wl-website" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"
+               style="position:absolute; left:-9999px; width:1px; height:1px; opacity:0;">
+        <button type="submit" id="wl-submit" class="btn btn-primary btn-lg">Join the waitlist</button>
+        <p id="wl-msg" role="status" style="min-height: 1.2em; margin: 0; font-size: 15px;"></p>
+      </form>
     </div>
   </section>
 
@@ -503,6 +518,35 @@
       } catch (e) {
         alert('Checkout error: ' + e.message);
       }
+    }
+
+    async function joinWaitlist(ev) {
+      ev.preventDefault();
+      const btn = document.getElementById('wl-submit');
+      const msg = document.getElementById('wl-msg');
+      btn.disabled = true; msg.style.color = '#94a3b8'; msg.textContent = 'Sending...';
+      try {
+        const res = await fetch('/api/waitlist', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: document.getElementById('wl-email').value,
+            handle: document.getElementById('wl-handle').value,
+            website: document.getElementById('wl-website').value,
+            source: 'homepage'
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          msg.style.color = '#22c55e'; msg.textContent = data.message;
+          document.getElementById('waitlist-form').reset();
+        } else {
+          msg.style.color = '#f87171'; msg.textContent = data.error || 'Something went wrong. Please try again.';
+        }
+      } catch (e) {
+        msg.style.color = '#f87171';
+        msg.textContent = 'Could not reach the server. Email support@proptradebot.com and we will add you.';
+      } finally { btn.disabled = false; }
     }
   </script>
 </body>

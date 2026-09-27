@@ -45,7 +45,7 @@ app.use(express.static('public', { extensions: ['html'] }));
 // outside everything looked fine and customers quietly kept downloading a build
 // with known bugs in it. fbd_preflight.py now fails when the newest local build
 // is ahead of what lives in public/downloads.
-const LATEST_APP_VERSION = '1.8.0';   // the onboarding agent reports this too
+const LATEST_APP_VERSION = '1.9.0';   // the onboarding agent reports this too
 app.get('/downloads/PropTradeBot.dmg', (req, res) => {
   res.redirect(302, `/downloads/PropTradeBot-v${LATEST_APP_VERSION}-notarized.dmg`);
 });
@@ -146,6 +146,10 @@ app.use('/api/user', clerkAuth);
 // signed-in user. See onboarding_agent.js for the hard lines.
 const { mountOnboarding } = require('./onboarding_agent');
 mountOnboarding(app, pool, { auth: clerkAuth, latestVersion: LATEST_APP_VERSION });
+
+// Waitlist while sales are closed (ops #4). Needs migrate_waitlist.sql.
+const { mountWaitlist } = require('./waitlist');
+mountWaitlist(app, pool);
 app.use('/api/accounts', clerkAuth);
 
 // Bot gateway routes use API key auth (below), not Clerk
@@ -1172,7 +1176,7 @@ app.post('/api/user/tv-webhook', ClerkExpressRequireAuth(), async (req, res) => 
       [tvToken, tvPass, clerkId]
     );
     if (result.rows.length === 0) return res.status(404).json({ success: false, error: 'User not found' });
-    const base = process.env.PUBLIC_BASE_URL || 'https://proptradebot-baass.onrender.com';
+    const base = process.env.PUBLIC_BASE_URL || 'https://proptradebot.com';  // old onrender URLs keep working (same app)
     res.json({ success: true, webhook_url: `${base}/tv/${result.rows[0].tv_token}`, passphrase: result.rows[0].tv_passphrase });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -1186,7 +1190,7 @@ app.get('/api/user/tv-webhook', ClerkExpressRequireAuth(), async (req, res) => {
     const result = await pool.query('SELECT tv_token, tv_passphrase FROM users WHERE clerk_id = $1', [clerkId]);
     if (result.rows.length === 0) return res.status(404).json({ success: false, error: 'User not found' });
     const row = result.rows[0];
-    const base = process.env.PUBLIC_BASE_URL || 'https://proptradebot-baass.onrender.com';
+    const base = process.env.PUBLIC_BASE_URL || 'https://proptradebot.com';  // old onrender URLs keep working (same app)
     res.json({ success: true, configured: !!row.tv_token, webhook_url: row.tv_token ? `${base}/tv/${row.tv_token}` : null, passphrase: row.tv_passphrase || null });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });

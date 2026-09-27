@@ -60,7 +60,7 @@
 <body>
   <div class="container">
     <h1>Privacy Policy</h1>
-    <p class="updated">Last updated: May 30, 2026</p>
+    <p class="updated">Last updated: September 27, 2026</p>
 
     <h2>1. Information We Collect</h2>
     <p>PropTradeBot collects the following information:</p>
@@ -68,6 +68,8 @@
       <li><strong>Account information:</strong> Email address, name, and billing information when you subscribe.</li>
       <li><strong>API usage:</strong> Trading signals processed, bot configuration, and performance metrics.</li>
       <li><strong>Bot status:</strong> Periodic heartbeat and trade counts sent by your bot so we can confirm your subscription is active and show accurate figures on your dashboard.</li>
+      <li><strong>Waitlist:</strong> Your email address and, if you give it, your Discord or Telegram handle. We use them only to send your invite and PropTradeBot updates. Ask us to remove them at any time.</li>
+      <li><strong>Setup assistant:</strong> The messages you send the dashboard's setup assistant, kept for 30 days. Keys and passwords are removed before a message is stored or sent to the AI provider.</li>
     </ul>
 
     <h2>2. How We Use Your Information</h2>
@@ -80,14 +82,17 @@
     </ul>
 
     <h2>3. Data Storage & Security</h2>
-    <p>Your data is stored securely using industry-standard encryption. We use Clerk for authentication and Stripe for payment processing — neither stores your full payment details on our servers.</p>
+    <p>Your data is stored securely using industry-standard encryption. We use Clerk for authentication and Whop (and, for older accounts, Stripe) for payment processing. Your full payment details are never stored on our servers.</p>
 
     <h2>4. Third-Party Services</h2>
     <p>We use the following third-party services:</p>
     <ul>
-      <li><strong>Stripe</strong> — Payment processing</li>
+      <li><strong>Whop</strong> — Payment processing and memberships</li>
+      <li><strong>Stripe</strong> — Payment processing (older accounts)</li>
       <li><strong>Clerk</strong> — Authentication</li>
       <li><strong>Render</strong> — Hosting</li>
+      <li><strong>Neon</strong> — Database</li>
+      <li><strong>Anthropic</strong> — AI model behind the setup assistant (receives your assistant messages with keys and passwords removed)</li>
       <li><strong>PostHog</strong> — Product analytics (anonymized)</li>
     </ul>
 

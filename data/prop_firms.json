@@ -57,14 +57,16 @@
         "rithmic"
       ],
       "default_rail": "tradovate",
-      "automation_policy": "api_permitted",
-      "api_automation_ok": true,
+      "automation_policy": "excluded_pending_written_clarification",
+      "api_automation_ok": false,
       "verified": true,
       "notes": "Native Tradovate (primary platform). Owned, non-HFT bots explicitly allowed; may require proof of sole ownership (video enabling code on your own PC). Microscalping rule: >50% of trades AND profit must be from holds >10s. Same Tradovate connection works eval -> funded -> live. Best Tradovate-API fit of the group.",
       "sources": [
         "help.tradeify.co/en/articles/10468318-guidelines-for-traders",
         "blog.traderspost.io/article/automate-tradeify-with-traderspost"
-      ]
+      ],
+      "previous_automation_policy": "api_permitted",
+      "exclusion_note": "Excluded 2026-09-27 (ops #29): published terms conflict with PropTradeBot's model. Exclusive-use rule: a bot may be used for Tradeify only, which conflicts with multi-firm use. Restore only after written policy clarification from the firm (research: ops #7)."
     },
     {
       "id": "lucid",
@@ -132,15 +134,17 @@
         "Singapore"
       ],
       "rithmic_market_data": true,
-      "automation_policy": "api_permitted",
-      "api_automation_ok": true,
+      "automation_policy": "excluded_pending_written_clarification",
+      "api_automation_ok": false,
       "verified": true,
       "notes": "Rithmic-exclusive \u2014 no native Tradovate account. System name and gateway confirmed verbatim from Bulenox's own connection doc: System = 'Rithmic Paper Trading', Gateway = 'Chicago' (Europe/Frankfurt/Tokyo/Singapore alternates). Market Data ON and Allow Plugins ON (note: this is the OPPOSITE of Apex's guidance). Automation explicitly permitted (bots, EAs, copiers). 40% single-day consistency rule at payout; flat by 4:00 PM CT. Bulenox documents one connection procedure for all account stages; whether funded uses a different system is undocumented, not confirmed false.",
       "sources": [
         "bulenox.com/help/connection/",
         "bulenox.tawk.help/article/ninjatrader-connection-guide",
         "blog.pickmytrade.io/bulenox-futures-trading-success/"
-      ]
+      ],
+      "previous_automation_policy": "api_permitted",
+      "exclusion_note": "Excluded 2026-09-27 (ops #29): published terms conflict with PropTradeBot's model. Terms allow only user-built tools for personal use; commercial/shared/distributed automation is not allowed and third-party algorithms need management approval. Restore only after written policy clarification from the firm (research: ops #7)."
     },
     {
       "id": "apex",

@@ -84,13 +84,13 @@
           </div>
         </div>
         <div id="subscribe-section" style="margin-top:16px;">
-          <p>Subscribe to activate your bot:</p>
+          <p>We're onboarding in waves. Join the waitlist and we'll email you when your invite is ready.</p>
           <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:12px; align-items:center;">
             <!-- Stripe checkout (legacy / direct users) -->
             <button class="btn btn-primary" id="btn-pro" style="display:none;" disabled>Loading...</button>
-            <!-- Whop checkout (primary) -->
-            <a href="https://whop.com/proptradebot/proptradebot-pro" class="btn btn-primary" id="btn-whop-subscribe" style="text-decoration:none;">Start Free Trial — $149/mo</a>
-            <span style="color:#64748b; font-size:13px;">7-day free trial · Cancel anytime</span>
+            <!-- Waitlist while sales are closed (ops #4); invites carry the checkout link -->
+            <a href="/#waitlist" class="btn btn-primary" id="btn-whop-subscribe" style="text-decoration:none;">Join the waitlist</a>
+            <span style="color:#64748b; font-size:13px;">No card, no charge</span>
           </div>
         </div>
         <div id="billing-section" style="margin-top:16px; display:none;">
@@ -105,7 +105,8 @@
       <!-- API Key -->
       <div class="card">
         <h2>🔑 API Key</h2>
-        <p>Your bot uses this key to connect to our cloud backend. Keep it secret.</p>
+        <p>Your PropTradeBot API Key connects the app on your Mac to your account. Keep it secret.</p>
+        <p style="font-size:13px; color:#94a3b8;">Lost it? Generate a new one: it replaces the old key, so paste the new one into the app's setup page (<code>localhost:5555/setup</code>) afterwards.</p>
         <div id="api-key-section">
           <div class="api-key-box">
             <div id="api-key-display" class="api-key-display hidden">No API key generated yet</div>
@@ -115,8 +116,8 @@
         </div>
         <div id="api-key-instructions" style="margin-top:16px; display:none;">
           <p><strong>How to use your API key:</strong></p>
-          <pre style="margin-top:8px;">Paste this key into the PropTradeBot Setup Wizard
-when prompted for your API key.
+          <pre style="margin-top:8px;">Paste this key into the PropTradeBot setup wizard
+where it asks for your PropTradeBot API Key.
 
 Download the app below, open it, and visit:
 http://localhost:5555/setup</pre>
@@ -203,10 +204,14 @@ http://localhost:5555/setup</pre>
           </div>
           <div style="margin-bottom:16px; padding:12px; background:#0f172a; border-radius:8px; border-left:3px solid #38bdf8;">
             <strong>Step 3:</strong> First Run
-            <p style="margin:8px 0 0; font-size:13px;">Enter your API key when prompted. The bot downloads automatically.</p>
+            <p style="margin:8px 0 0; font-size:13px;">Open the app. The setup page opens in your browser (or go to <code>localhost:5555/setup</code>). Paste your PropTradeBot API Key from step 1, connect your firm, and turn on your <strong>practice</strong> account first.</p>
+          </div>
+          <div style="margin-bottom:16px; padding:12px; background:#0f172a; border-radius:8px; border-left:3px solid #38bdf8;">
+            <strong>Step 4:</strong> Connect TradingView
+            <p style="margin:8px 0 0; font-size:13px;">In the 📈 TradingView Strategy card above, click <strong>Generate Webhook</strong>. Send the <strong>Test first</strong> message once (it never reaches your bot), then ask the setup assistant below whether it arrived.</p>
           </div>
           <div style="padding:12px; background:#0f172a; border-radius:8px; border-left:3px solid #22c55e;">
-            <strong>Step 4:</strong> That's it — your signals fire the ladder
+            <strong>Step 5:</strong> That's it — your signals fire the ladder
             <p style="margin:8px 0 0; font-size:13px;">Leave PropTradeBot running during market hours. Point a TradingView alert at your PropTradeBot webhook, connect a Telegram or Discord feed, or trade with one click — every entry fires the full managed trade across your accounts automatically.</p>
           </div>
         </div>
@@ -420,7 +425,7 @@ http://localhost:5555/setup</pre>
         + '  "passphrase": "' + pass + '",\n'
         + '  "ticker": "{{ticker}}",\n'
         + '  "action": "buy",\n'
-        + '  "price": {{close}},\n'
+        + '  "price": "{{close}}",\n'
         + '  "test": true\n'
         + '}';
     }
