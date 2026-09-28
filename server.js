@@ -77,7 +77,10 @@ async function getClerkEmail(auth) {
 
 // Health check
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  // commit: which build is actually running (Render sets RENDER_GIT_COMMIT), so a
+  // deploy can be confirmed from the live site instead of assumed.
+  res.json({ status: 'ok', timestamp: new Date().toISOString(),
+             commit: (process.env.RENDER_GIT_COMMIT || 'unknown').slice(0, 7) });
 });
 
 // /api/stripe-diag removed 2026-09-24 (ops #13): it was public and returned
