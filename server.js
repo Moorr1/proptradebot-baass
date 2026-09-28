@@ -1480,6 +1480,7 @@ app.post('/whop-webhook', async (req, res) => {
       }
 
       case 'membership.went_invalid':
+      case 'membership.deactivated':   // Whop's current name for a lapsed/cancelled membership
       case 'membership.cancelled':
       case 'membership.expired': {
         // Member cancelled or payment failed — revoke access
