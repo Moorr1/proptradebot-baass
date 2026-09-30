@@ -1577,7 +1577,7 @@ app.get('/whop-success', async (req, res) => {
           </div>
           <div class="step">
             <div class="step-num">3</div>
-            <div class="step-text"><strong>Install and run the wizard</strong> — download below, drag PropTradeBot to Applications, paste your API key, then pick your prop firm and connect it. Topstep, Tradeify, Lucid, Take Profit Trader, MyFundedFutures and Bulenox are all supported.</div>
+            <div class="step-text"><strong>Install and run the wizard</strong> — download below, drag PropTradeBot to Applications, paste your API key, then pick your prop firm and connect it. Topstep is supported today; other firms are added only after they confirm API automation in writing.</div>
           </div>
         </div>
         <a href="/downloads/PropTradeBot.dmg" class="btn">⬇ Download PropTradeBot for Mac</a>

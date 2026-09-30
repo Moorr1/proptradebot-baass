@@ -76,14 +76,16 @@
         "rithmic"
       ],
       "default_rail": "tradovate",
-      "automation_policy": "api_permitted",
-      "api_automation_ok": true,
+      "automation_policy": "no_api_access",
+      "api_automation_ok": false,
       "verified": true,
       "notes": "Native Tradovate (via CQG). Official 'Permitted Activities': automated systems, API strategies and trade copiers permitted (trader responsible for errors). No HFT, no microscalping (>50% profit from <=5s holds), no hedging/martingale. CONFIRM WITH SUPPORT: Lucid permits automation but does not publicly document a self-serve Tradovate app-key (cid/secret) flow \u2014 verify key provisioning before relying on raw API.",
       "sources": [
         "support.lucidtrading.com/en/articles/11404728-permitted-activities",
         "support.lucidtrading.com/en/articles/11404614-supported-platforms"
-      ]
+      ],
+      "previous_automation_policy": "api_permitted",
+      "exclusion_note": "Lucid support in writing (2026-05-21): third-party automation allowed only without direct API access, 'which is not provided by Lucid'. PropTradeBot needs API access, so it cannot connect to Lucid accounts."
     },
     {
       "id": "takeprofittrader",
@@ -93,14 +95,16 @@
         "rithmic"
       ],
       "default_rail": "tradovate",
-      "automation_policy": "api_permitted_restricted",
-      "api_automation_ok": true,
+      "automation_policy": "automation_prohibited",
+      "api_automation_ok": false,
       "verified": true,
       "notes": "Choose the Tradovate/CQG data feed at purchase for a NATIVE Tradovate account (the Rithmic-feed option will NOT work with the Tradovate API). Copiers/automation acknowledged 'at the trader's full responsibility', BUT ToS says it wants discretionary traders and PROHIBITS sub-second HFT algos. Suitable for slower/semi-automated only; confirm your bot with support. Flat by 5:00 PM ET; news-flatten on funded; eval consistency <=50%/day.",
       "sources": [
         "takeprofittrader.com/terms",
         "blog.traderspost.io/article/automate-take-profit-trader-with-traderspost"
-      ]
+      ],
+      "previous_automation_policy": "api_permitted_restricted",
+      "exclusion_note": "TPT support in writing (2026-09-30): 'Automated, algorithmic, AI, and bot trading are not permitted. All trading must be completed manually by the user.' Applies to Test, PRO and PRO+."
     },
     {
       "id": "myfundedfutures",
@@ -222,10 +226,12 @@
         "tradovate"
       ],
       "default_rail": "tradovate",
-      "automation_policy": "unknown_confirm_with_firm",
-      "api_automation_ok": true,
+      "automation_policy": "unverified",
+      "api_automation_ok": false,
       "verified": false,
-      "notes": "Catch-all for a firm not listed above that issues a NATIVE Tradovate account with API access. Because Tradovate is one shared API, it works with the customer's own firm-issued Tradovate credentials. The customer MUST confirm their firm (a) issues a native Tradovate account (not a Rithmic front-end) and (b) permits automated API trading on their account type."
+      "notes": "Catch-all for a firm not listed above that issues a NATIVE Tradovate account with API access. Because Tradovate is one shared API, it works with the customer's own firm-issued Tradovate credentials. The customer MUST confirm their firm (a) issues a native Tradovate account (not a Rithmic front-end) and (b) permits automated API trading on their account type.",
+      "previous_automation_policy": "unknown_confirm_with_firm",
+      "exclusion_note": "Not supported until a specific firm confirms in writing that its accounts get Tradovate API credentials and that automated trading is allowed. Lucid and TPT both said no."
     }
   ]
 }
