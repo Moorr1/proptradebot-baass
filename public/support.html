@@ -140,13 +140,13 @@
 
       <div class="faq-item">
         <h4>Which prop firms are supported?</h4>
-        <p>Today PropTradeBot supports <strong>Topstep</strong> (through the TopstepX / ProjectX API). We add a firm only when it confirms in writing that its accounts can get API access and that automated trading is allowed. Lucid Trading does not provide API access, and Take Profit Trader does not permit automated trading, so PropTradeBot can't be used at either (details below). See <a href="#firm-rules">each firm's automation rules</a> below. Don't see your firm? Let us know at <a href="mailto:support@proptradebot.com">support@proptradebot.com</a>.</p>
+        <p>Today PropTradeBot supports <strong>Topstep</strong> (through the TopstepX / ProjectX API). We add a firm only when it confirms in writing that its accounts can get API access and that automated trading is allowed. See <a href="#firm-rules">Topstep's automation rules</a> below. Don't see your firm? Let us know at <a href="mailto:support@proptradebot.com">support@proptradebot.com</a>.</p>
       </div>
     </div>
 
-    <h2 id="firm-rules">Prop firm rules for automation</h2>
-    <p class="rules-note"><strong>Supported today: Topstep only.</strong> Lucid and Take Profit Trader are listed so you can see why they are not supported.</p>
-    <p class="rules-note"><strong>Checked 2026-09-27.</strong> Firms change their rules; confirm with your firm before trading. Following your firm's rules is your responsibility (see <a href="/terms.html">Terms</a>, section 5). This is a summary of each firm's published rules, not legal advice, and not a promise that you will pass an evaluation or get funded. No firm approves or endorses PropTradeBot.</p>
+    <h2 id="firm-rules">Topstep rules for automation</h2>
+    <p class="rules-note"><strong>Supported today: Topstep only.</strong></p>
+    <p class="rules-note"><strong>Checked 2026-09-27.</strong> Topstep can change its rules; confirm with Topstep before trading. Following Topstep's rules is your responsibility (see <a href="/terms.html">Terms</a>, section 5). This is a summary of Topstep's published rules, not legal advice, and not a promise that you will pass an evaluation or get funded. Topstep does not approve or endorse PropTradeBot.</p>
 
     <h3>Topstep</h3>
     <table class="rules">
@@ -157,29 +157,6 @@
       <tr><td>Trade Copier</td><td>"Trade copying is only available for Trading Combine® and Express Funded Account® accounts. Live Funded Account® accounts cannot use the Trade Copier."</td><td><a href="https://help.topstep.com/en/articles/14434175-topstepx" target="_blank" rel="noopener">TopstepX</a></td></tr>
       <tr><td>Custom bots (Combine / Express Funded)</td><td>Allowed through the API, subject to platform rules and the ban on high-frequency trading. You own and are responsible for the bot.</td><td><a href="https://help.topstep.com/en/articles/11187768-topstepx-api-access" target="_blank" rel="noopener">TopstepX API Access</a></td></tr>
       <tr><td>Hedging</td><td>"Cross-account hedging is prohibited at Topstep."</td><td><a href="https://help.topstep.com/en/articles/13747047-understanding-hedging" target="_blank" rel="noopener">Understanding Hedging</a></td></tr>
-    </table>
-
-    <h3>Lucid Trading</h3>
-    <table class="rules">
-      <tr><th>Topic</th><th>What Lucid says</th><th>Source</th></tr>
-      <tr><td><strong>Can PropTradeBot be used?</strong></td><td><strong>No.</strong> Lucid support confirmed in writing (May 2026) that third-party automation is allowed only if it does not use direct API access, "which is not provided by Lucid." PropTradeBot places orders through an API.</td><td>Email from Lucid support, 2026-05-21</td></tr>
-      <tr><td>Automation and trade copiers</td><td>"Automated trading systems and trade copiers are permitted… Traders are fully responsible for any software errors, malfunctions, or unintended outcomes."</td><td><a href="https://support.lucidtrading.com/en/articles/11404728-other-activities" target="_blank" rel="noopener">Other Activities</a></td></tr>
-      <tr><td>Hedging</td><td>Strictly prohibited across accounts (same user, different users, or other firms), including correlated products.</td><td><a href="https://support.lucidtrading.com/en/articles/11404734" target="_blank" rel="noopener">Prohibited: Hedging</a></td></tr>
-      <tr><td>High-frequency trading</td><td>Prohibited; Lucid uses automated detection.</td><td><a href="https://support.lucidtrading.com/en/articles/11404736-prohibited-high-frequency-trading" target="_blank" rel="noopener">Prohibited: HFT</a></td></tr>
-      <tr><td>News</td><td>Not allowed on LucidDaily; allowed on Flex, Pro and Direct.</td><td><a href="https://support.lucidtrading.com/en/articles/11404728-other-activities" target="_blank" rel="noopener">Other Activities</a></td></tr>
-      <tr><td>Account limits</td><td>A shared cap of 10 accounts across evaluation and funded (for example, 5 evaluation accounts leaves room for 5 funded). See the article for LucidLive limits.</td><td><a href="https://support.lucidtrading.com/en/articles/11404617" target="_blank" rel="noopener">Maximum Number of Accounts</a></td></tr>
-      <tr><td>VPS</td><td>Not confirmed. Check with Lucid.</td><td>No VPS article found (2026-09-27)</td></tr>
-    </table>
-
-    <h3>Take Profit Trader</h3>
-    <table class="rules">
-      <tr><th>Topic</th><th>What Take Profit Trader says</th><th>Source</th></tr>
-      <tr><td><strong>Can PropTradeBot be used?</strong></td><td><strong>No.</strong> TPT support confirmed in writing (September 2026): "Automated, algorithmic, AI, and bot trading are not permitted. All trading must be completed manually by the user." This applies to Test, PRO and PRO+ accounts.</td><td>Email from TPT support, 2026-09-30</td></tr>
-      <tr><td>Trade copiers</td><td>Allowed only for accounts you own and control, and only with approved copiers (Tradesyncer, TradeCopia, Affordable Indicators, Replikanto Flowbot Compliance Edition, and platform-native copiers).</td><td><a href="https://takeprofittraderhelp.zendesk.com/hc/en-us/articles/34431176505245-Trade-Copier-Policy" target="_blank" rel="noopener">Trade Copier Policy</a></td></tr>
-      <tr><td>Independent execution</td><td>Accounts must not "Mirror another trader's activity in real time through automated or coordinated execution" or "Enter or exit trades in coordinated timing and pricing patterns with other users." Syncing your own accounts is allowed.</td><td><a href="https://takeprofittraderhelp.zendesk.com/hc/en-us/articles/34431223270557-Independent-Trade-Execution-Policy" target="_blank" rel="noopener">Independent Trade Execution Policy</a></td></tr>
-      <tr><td>Counter positions</td><td>"Take Profit Trader strictly prohibits holding opposite positions in the same or closely related products across any accounts under the same beneficial control."</td><td><a href="https://takeprofittraderhelp.zendesk.com/hc/en-us/articles/30331694826909-Rule-6-No-Counter-Positions" target="_blank" rel="noopener">Rule 6: No Counter Positions</a></td></tr>
-      <tr><td>Account limits</td><td>TPT's terms list a maximum of 5 active PRO/PRO+ accounts and up to 10 passed tests per 30 days. Confirm the current numbers with TPT.</td><td><a href="https://takeprofittrader.com/terms" target="_blank" rel="noopener">Terms of Service</a></td></tr>
-      <tr><td>VPS</td><td>Not confirmed. Check with TPT. (TPT separately prohibits VPNs or remote connections that route activity through a restricted country.)</td><td><a href="https://takeprofittraderhelp.zendesk.com/hc/en-us/articles/22447557656477-Restricted-Countries" target="_blank" rel="noopener">Restricted Countries</a></td></tr>
     </table>
 
     <h2>Documentation</h2>
