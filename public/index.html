@@ -357,6 +357,20 @@
                style="padding: 14px 16px; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; font-size: 16px;">
         <input type="text" id="wl-handle" maxlength="100" placeholder="Discord or Telegram handle (optional)"
                style="padding: 14px 16px; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; font-size: 16px;">
+        <select id="wl-heard" aria-label="How did you hear about us?"
+               style="padding: 14px 16px; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; font-size: 16px;">
+          <option value="">How did you hear about us? (optional)</option>
+          <option value="x">X (Twitter)</option>
+          <option value="youtube">YouTube</option>
+          <option value="whop">Whop</option>
+          <option value="reddit">Reddit</option>
+          <option value="discord">Discord</option>
+          <option value="tradingview">TradingView</option>
+          <option value="topstep">Topstep community</option>
+          <option value="search">Google / search</option>
+          <option value="friend">A friend</option>
+          <option value="other">Other</option>
+        </select>
         <input type="text" id="wl-website" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"
                style="position:absolute; left:-9999px; width:1px; height:1px; opacity:0;">
         <button type="submit" id="wl-submit" class="btn btn-primary btn-lg">Join the waitlist</button>
@@ -530,7 +544,8 @@
             email: document.getElementById('wl-email').value,
             handle: document.getElementById('wl-handle').value,
             website: document.getElementById('wl-website').value,
-            source: 'homepage'
+            source: (new URLSearchParams(location.search).get('utm_source') || 'homepage'),
+            heard: document.getElementById('wl-heard').value
           })
         });
         const data = await res.json();

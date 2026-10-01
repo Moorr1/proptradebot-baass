@@ -30,6 +30,11 @@ async function report(pool, now = new Date()) {
     return { n: i + 1, joined: r.joined.toISOString().slice(0, 10), lockEnds: lockEnds.toISOString().slice(0, 10),
              daysLeft, due: daysLeft <= LOCK_WARN_DAYS };
   });
+  // Signups by where they came from (ops #39): link tag and "How did you hear".
+  w.by_source = (await pool.query(`SELECT coalesce(source, 'unknown') AS k, count(*)::int AS n
+    FROM waitlist GROUP BY 1 ORDER BY 2 DESC`)).rows;
+  w.by_heard = (await pool.query(`SELECT coalesce(heard, 'not given') AS k, count(*)::int AS n
+    FROM waitlist GROUP BY 1 ORDER BY 2 DESC`)).rows;
   return { waitlist: w, founding: { taken: members.length, of: 20, members } };
 }
 
@@ -41,6 +46,11 @@ function markdown(r, stamp) {
     `**Waitlist:** ${w.total} total · ${w.last_24h} in the last 24h · ${w.last_7d} in the last 7 days · ${w.invited} invited`,
     `**Founding seats:** ${f.taken} of ${f.of} taken`,
   ];
+  const fmt = (xs) => (xs || []).map((x) => `${x.k} ${x.n}`).join(' · ');
+  if (w.total) {
+    lines.push(`**By link (utm_source):** ${fmt(w.by_source)}`);
+    lines.push(`**How they heard:** ${fmt(w.by_heard)}`);
+  }
   for (const m of f.members) {
     lines.push(`- Founding member #${m.n}: joined ${m.joined}, price lock ends ${m.lockEnds}` +
       (m.due ? ` ⚠️ **${m.daysLeft} days left: move to the public price after notice**` : ''));
