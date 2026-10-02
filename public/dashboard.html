@@ -106,7 +106,7 @@
       <div class="card">
         <h2>🔑 API Key</h2>
         <p>Your PropTradeBot API Key connects the app on your Mac to your account. Keep it secret.</p>
-        <p style="font-size:13px; color:#94a3b8;">Lost it? Generate a new one: it replaces the old key, so paste the new one into the app's setup page (<code>localhost:5555/setup</code>) afterwards.</p>
+        <p style="font-size:13px; color:#94a3b8;">Lost it? Generate a new one: it replaces the old key, so afterwards open PropTradeBot on your Mac, go to <strong>Connection → Run setup again</strong>, and paste the new one.</p>
         <div id="api-key-section">
           <div class="api-key-box">
             <div id="api-key-display" class="api-key-display hidden">No API key generated yet</div>
@@ -119,8 +119,8 @@
           <pre style="margin-top:8px;">Paste this key into the PropTradeBot setup wizard
 where it asks for your PropTradeBot API Key.
 
-Download the app below, open it, and visit:
-http://localhost:5555/setup</pre>
+Download the app below and open it. Setup opens
+on its own the first time.</pre>
         </div>
       </div>
 
@@ -152,7 +152,7 @@ http://localhost:5555/setup</pre>
             <pre id="tv-test-template" style="flex:1; margin:0; white-space:pre; overflow-x:auto;"></pre>
             <button class="btn btn-secondary" onclick="copyTv('tv-test-template')">Copy</button>
           </div>
-          <p style="margin-top:12px; color:#94a3b8; font-size:13px;">Symbols like MES1!, MNQ1!, ES, NQ are auto-detected. <code>{{strategy.order.action}}</code> auto-fills buy/sell; for indicator alerts, replace it with a literal "buy" / "sell" / "flat".</p>
+          <p style="margin-top:12px; color:#94a3b8; font-size:13px;">The chart must be the contract you trade, as set on the app's Strategy tab: MES1! or ES1! for S&amp;P, MNQ1! or NQ1! for Nasdaq. An alert for the other size is refused, never traded at a different size. <code>{{strategy.order.action}}</code> and <code>{{strategy.market_position}}</code> fill themselves in for strategy alerts; for indicator alerts, use a literal "buy", "sell" or "exit" and remove the position line.</p>
         </div>
       </div>
 
@@ -204,7 +204,7 @@ http://localhost:5555/setup</pre>
           </div>
           <div style="margin-bottom:16px; padding:12px; background:#0f172a; border-radius:8px; border-left:3px solid #38bdf8;">
             <strong>Step 3:</strong> First Run
-            <p style="margin:8px 0 0; font-size:13px;">Open the app. The setup page opens in your browser (or go to <code>localhost:5555/setup</code>). Paste your PropTradeBot API Key from step 1, connect your firm, and turn on your <strong>practice</strong> account first.</p>
+            <p style="margin:8px 0 0; font-size:13px;">Open the app. Setup opens on its own. Paste your PropTradeBot API Key from step 1, connect your firm, and turn on your <strong>practice</strong> account first.</p>
           </div>
           <div style="margin-bottom:16px; padding:12px; background:#0f172a; border-radius:8px; border-left:3px solid #38bdf8;">
             <strong>Step 4:</strong> Connect TradingView
@@ -416,6 +416,7 @@ http://localhost:5555/setup</pre>
         + '  "passphrase": "' + pass + '",\n'
         + '  "ticker": "{{ticker}}",\n'
         + '  "action": "{{strategy.order.action}}",\n'
+        + '  "position": "{{strategy.market_position}}",\n'
         + '  "price": {{close}}\n'
         + '}';
     }
