@@ -125,7 +125,21 @@
 
       <div class="faq-item">
         <h4>What signal formats are supported?</h4>
-        <p>TradingView alerts, in PropTradeBot's alert format: the app gives you the exact message to paste, with a Copy button. The chart must be the contract you trade. Anything else is refused, with the reason shown in the app; PropTradeBot never guesses. Discord signal support is in development.</p>
+        <p>TradingView alerts, in PropTradeBot's alert format: the app gives you the exact message to paste, with a Copy button. The chart must be the contract you trade. Anything else is refused, with the reason shown in the app; PropTradeBot never guesses.</p>
+        <p>Discord signals from any provider you follow (app 1.10 or later). You teach the app the provider's format by pasting one real message of each kind — an entry such as <em>ES Long 7712</em>, and an exit such as <em>all out</em> — and it trades only messages that match. A message it doesn't recognise, or that could be read two ways, is never traded. Telegram is not supported yet.</p>
+      </div>
+
+      <div class="faq-item">
+        <h4>How do I connect a Discord signal provider?</h4>
+        <p>You need PropTradeBot 1.10 or later and Google Chrome on the same Mac.</p>
+        <ol style="margin:8px 0 0 20px; color:#cbd5e1;">
+          <li>Download the <a href="/downloads/PropTradeBot-Connector-v5.0.2.zip">PropTradeBot Connector</a> and unzip it.</li>
+          <li>In Chrome, open <strong>chrome://extensions</strong>, turn on <strong>Developer mode</strong>, click <strong>Load unpacked</strong> and choose the unzipped folder.</li>
+          <li>Open the Connector from Chrome's toolbar and paste the passphrase from PropTradeBot → Alerts.</li>
+          <li>In PropTradeBot → Discord, add the provider and teach it their messages. Start in <strong>Shadow</strong>: the app logs what it would have traded without trading.</li>
+          <li>Keep the provider's channel open in Chrome while you trade. When the shadow log looks right, switch the provider to <strong>Live</strong>.</li>
+        </ol>
+        <p style="margin-top:8px;">An entry is refused when the market is more than 10 points (S&amp;P) or 40 points (Nasdaq) from the provider's price, or when the app can't read a current price. That catches typos and late messages. PropTradeBot is not affiliated with any signal provider.</p>
       </div>
 
       <div class="faq-item">
