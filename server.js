@@ -1559,17 +1559,15 @@ app.get('/whop-success', async (req, res) => {
         <h1>You're in! Welcome to PropTradeBot.</h1>
         <p>Your subscription is active. Three steps, about ten minutes:</p>
         <div class="steps">
-          <!-- DISCORD GOES FIRST, DELIBERATELY.
-               This page used to open with "download the Mac app" and never
-               mentioned Discord at all — on a product whose primary thing is
-               real-time signals posted to Discord. Worse, this redirect pulls
-               the buyer off Whop the instant they pay, which is where the
-               Discord link lives. Someone who does not go back never joins the
-               channel they just paid for, and churns in week one blaming us
-               for sending nothing. -->
+          <!-- DISCORD STAYS FIRST: this redirect pulls the buyer off Whop the
+               instant they pay, and Whop is where the Discord link lives.
+               2026-10-05 (Richard): PropTradeBot does not post signals. The
+               Discord is the support and community server (announcements,
+               setup help, feedback), so it is described as optional help,
+               never as "signals" or "the part you are paying for". -->
           <div class="step">
             <div class="step-num">1</div>
-            <div class="step-text"><strong>Join the Discord</strong> — this is where signals post in real time. Head back to your Whop account at <a href="https://whop.com/hub" style="color:#60a5fa">whop.com/hub</a> and open the Discord app to link it. Do this first, it is the part you are paying for.</div>
+            <div class="step-text"><strong>Join the PropTradeBot Discord</strong> (optional, but the fastest way to get help) — setup help, release news and feedback. Head back to your Whop account at <a href="https://whop.com/hub" style="color:#60a5fa">whop.com/hub</a> and open the Discord app to link it. PropTradeBot does not post trade signals; you bring your own from TradingView or a Discord provider.</div>
           </div>
           <div class="step">
             <div class="step-num">2</div>
