@@ -1564,7 +1564,7 @@ app.get('/whop-success', async (req, res) => {
                2026-10-05 (Richard): PropTradeBot does not post signals. The
                Discord is the support and community server (announcements,
                setup help, feedback), so it is described as optional help,
-               never as "signals" or "the part you are paying for". -->
+               never as a signals feed. -->
           <div class="step">
             <div class="step-num">1</div>
             <div class="step-text"><strong>Join the PropTradeBot Discord</strong> (optional, but the fastest way to get help) — setup help, release news and feedback. Head back to your Whop account at <a href="https://whop.com/hub" style="color:#60a5fa">whop.com/hub</a> and open the Discord app to link it. PropTradeBot does not post trade signals; you bring your own from TradingView or a Discord provider.</div>
