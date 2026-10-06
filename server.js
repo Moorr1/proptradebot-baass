@@ -46,8 +46,22 @@ app.use(express.static('public', { extensions: ['html'] }));
 // with known bugs in it. fbd_preflight.py now fails when the newest local build
 // is ahead of what lives in public/downloads.
 const LATEST_APP_VERSION = '1.10.0';   // the onboarding agent reports this too
+// Download count for the daily metrics (ops #36). Stores the time, the version
+// served, the referring site's host and whether the client looks like a bot.
+// No IP, no user agent string, nothing personal. Fire-and-forget: the redirect
+// never waits on the database, so a DB problem can't break the download.
+pool.query(`CREATE TABLE IF NOT EXISTS download_events (
+    id serial PRIMARY KEY, created_at timestamptz NOT NULL DEFAULT now(),
+    version text, referrer_host text, is_bot boolean NOT NULL DEFAULT false)`)
+  .catch(e => console.error('download_events table:', e.message));
 app.get('/downloads/PropTradeBot.dmg', (req, res) => {
   res.redirect(302, `/downloads/PropTradeBot-v${LATEST_APP_VERSION}-notarized.dmg`);
+  let host = null;
+  try { host = new URL(req.get('referer') || '').host || null; } catch (e) { host = null; }
+  const isBot = /bot|crawl|spider|curl|wget|python|preview|monitor|headless/i.test(req.get('user-agent') || '');
+  pool.query('INSERT INTO download_events (version, referrer_host, is_bot) VALUES ($1, $2, $3)',
+             [LATEST_APP_VERSION, host, isBot])
+    .catch(e => console.error('download_events insert:', e.message));
 });
 
 // Friendly routes → Clerk handles auth client-side
