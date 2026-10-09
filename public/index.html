@@ -206,7 +206,7 @@
       <div id="auth-buttons">
         <button class="btn btn-outline" onclick="showAuth('sign-in')">Sign In</button>
         <a href="/dashboard.html" class="btn btn-outline" style="text-decoration:none;">Dashboard</a>
-        <a href="#waitlist" class="btn btn-primary" style="text-decoration:none;">Join the waitlist</a>
+        <a href="https://whop.com/proptradebot/proptradebot-pro/" target="_blank" rel="noopener" class="btn btn-primary" style="text-decoration:none;">Start 7-day trial</a>
       </div>
       <div id="user-nav">
         <span id="user-email"></span>
@@ -220,9 +220,9 @@
     <div class="container">
       <h1>Your strategy. Executed the same way on every account.</h1>
       <p>Send your TradingView alerts or your Discord provider's signals to PropTradeBot and it runs the whole managed trade on your Topstep accounts: one market entry, a stop on every position, T1/T2 trims and a runner, flat before the close. The same trade, the same size, every time, whether or not you are at the screen.</p>
-      <p style="color:#94a3b8; font-size:15px;">We're onboarding in waves. Leave your email and we'll invite you when a seat opens.</p>
+      <p style="color:#94a3b8; font-size:15px;">Founding members: $99/month, locked for your first 12 months. 20 seats. 7-day free trial.</p>
       <div class="hero-cta">
-        <a href="#waitlist" class="btn btn-primary btn-lg" style="text-decoration:none;">Join the waitlist</a>
+        <a href="https://whop.com/proptradebot/proptradebot-pro/" target="_blank" rel="noopener" class="btn btn-primary btn-lg" style="text-decoration:none;">Start your 7-day trial</a>
         <button class="btn btn-outline btn-lg" onclick="document.getElementById('how-it-works').scrollIntoView({behavior:'smooth'})">See how it works</button>
       </div>
     </div>
@@ -318,12 +318,13 @@
   <section class="pricing" id="pricing">
     <div class="container">
       <h2 class="section-title">Simple Pricing</h2>
-      <p class="section-subtitle">One plan. Everything included. We're onboarding from the waitlist in waves.</p>
+      <p class="section-subtitle">One plan. Everything included.</p>
       <div class="pricing-grid" style="max-width: 420px; margin: 60px auto 0;">
         <div class="pricing-card popular">
           <div class="popular-badge">ALL-INCLUSIVE</div>
           <h3>PropTradeBot Pro</h3>
-          <div class="price">$149<span>/month when invited</span></div>
+          <div class="price">$99<span>/month founding price</span></div>
+          <p style="color:#94a3b8; font-size:14px; margin:-8px 0 12px;">Regular price $149/month</p>
           <p style="color:#64748b; margin-bottom:16px;">Disciplined execution for serious prop firm traders.</p>
           <ul>
             <li>Multiple Topstep accounts</li>
@@ -335,15 +336,14 @@
             <li>Dashboard with P&L from Topstep's fills</li>
             <li>Priority support</li>
           </ul>
-          <a href="#waitlist" class="btn btn-primary" style="text-decoration:none;">Request access</a>
+          <a href="https://whop.com/proptradebot/proptradebot-pro/" target="_blank" rel="noopener" class="btn btn-primary" style="text-decoration:none;">Start 7-day trial</a>
         </div>
       </div>
       <div style="max-width: 420px; margin: 24px auto 0; padding: 18px 20px; border: 1px solid #22c55e; border-radius: 12px; background: rgba(34,197,94,0.06);">
         <p style="color:#22c55e; font-weight:700; margin:0 0 6px;">Founding members: $99/month, locked for 12 months</p>
-        <p style="color:#94a3b8; font-size:14px; margin:0;">For the first 20 customers, by invite or through our Whop store. Your 7-day trial starts when your plan is activated, not when you join the list. After 12 months the regular price applies, with notice. A spot on the list doesn't reserve a founding seat.</p>
+        <p style="color:#94a3b8; font-size:14px; margin:0;">For the first 20 customers, through our Whop store. Your 7-day free trial starts at checkout on Whop. After 12 months of continuous paid service the regular price applies, with notice.</p>
       </div>
       <p style="text-align: center; color: #64748b; margin-top: 24px; font-size: 14px;">
-        Joining the waitlist is free: no card, no charge.<br>
         <span style="font-size: 12px;">Paid plans are covered by our <a href="/terms.html" style="color: #22c55e;">Terms of Service</a></span>
       </p>
     </div>
@@ -351,8 +351,10 @@
 
   <section class="cta" id="waitlist">
     <div class="container">
-      <h2>Join the waitlist</h2>
-      <p>Leave your email and we'll invite you when a seat opens. No card, no charge.</p>
+      <h2>Start your 7-day trial</h2>
+      <p>Founding price $99/month for your first 12 months. 20 seats.</p>
+      <a href="https://whop.com/proptradebot/proptradebot-pro/" target="_blank" rel="noopener" class="btn btn-primary btn-lg" style="text-decoration:none; display:inline-block; margin-top:16px;">Start 7-day trial on Whop</a>
+      <p style="margin-top:32px; color:#94a3b8;">Not ready yet? Leave your email and we'll send you product updates. No card, no charge.</p>
       <form id="waitlist-form" onsubmit="joinWaitlist(event)" style="max-width: 460px; margin: 24px auto 0; display: flex; flex-direction: column; gap: 12px;">
         <input type="email" id="wl-email" required maxlength="254" placeholder="you@example.com" autocomplete="email"
                style="padding: 14px 16px; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; font-size: 16px;">
@@ -374,7 +376,7 @@
         </select>
         <input type="text" id="wl-website" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"
                style="position:absolute; left:-9999px; width:1px; height:1px; opacity:0;">
-        <button type="submit" id="wl-submit" class="btn btn-primary btn-lg">Join the waitlist</button>
+        <button type="submit" id="wl-submit" class="btn btn-outline btn-lg">Send me updates</button>
         <p id="wl-msg" role="status" style="min-height: 1.2em; margin: 0; font-size: 15px;"></p>
       </form>
     </div>
