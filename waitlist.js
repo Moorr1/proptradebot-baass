@@ -8,7 +8,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const WINDOW_MS = 60 * 60 * 1000;
 const MAX_PER_WINDOW = 5;
 const HEARD = new Set(['x', 'youtube', 'whop', 'reddit', 'discord', 'tradingview', 'topstep', 'search', 'friend', 'other']);
-const OK_MESSAGE = "You're on the list. We'll email you when your invite is ready.";
+const OK_MESSAGE = "Thanks. We'll email you product updates. You can start your 7-day trial on Whop any time.";
 
 function clientIp(req) {
   const fwd = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
