@@ -17,351 +17,302 @@
   <meta name="twitter:image" content="https://proptradebot.com/PropTradeBot_Poster.png">
   <script async crossorigin="anonymous" data-clerk-publishable-key="pk_live_Y2xlcmsucHJvcHRyYWRlYm90LmNvbSQ" src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5/dist/clerk.browser.js" type="text/javascript"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #0a0e1a;
-      color: #e2e8f0;
-      line-height: 1.6;
-    }
-    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+  :root{
+    --paper:#f5f3ee; --paper2:#ecE9e1; --ink:#15171b; --ink2:#3b3f46; --muted:#6a6e75; --line:#d9d5cb;
+    --green:#0e7a4a; --green-soft:#e1efe6; --red:#b3261e; --amber:#a86a00;
+    --term:#121417; --term2:#1b1e22; --termline:#2a2e34; --termtext:#d7dbe0; --termdim:#7d848d;
+    --serif:"Iowan Old Style","Charter","Palatino","Georgia",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Segoe UI",sans-serif;
+    --mono:ui-monospace,"SF Mono","Menlo","Consolas",monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font:17px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1160px;margin:0 auto;padding:0 40px}
+  .note{background:var(--ink);color:#f5f3ee;font:12px/1 var(--mono);letter-spacing:.04em;text-align:center;padding:9px}
+  /* nav */
+  nav{display:flex;align-items:center;justify-content:space-between;height:76px;border-bottom:1px solid var(--line)}
+  .logo{font:600 20px/1 var(--serif);letter-spacing:-.01em}
+  .logo i{font-style:normal;color:var(--green)}
+  .links{display:flex;gap:30px;align-items:center;font-size:15px;color:var(--ink2)}
+  .btn{display:inline-block;border-radius:6px;padding:12px 20px;font:600 15px/1 var(--sans);border:1px solid var(--ink)}
+  .btn.solid{background:var(--ink);color:var(--paper)}
+  .btn.solid:hover{background:var(--green);border-color:var(--green)}
+  .btn.line:hover{background:var(--paper2)}
+  /* hero */
+  .hero{display:grid;grid-template-columns:1fr 1.05fr;gap:64px;align-items:center;padding:84px 0 72px}
+  .eyebrow{font:500 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin-bottom:22px}
+  h1{font:500 58px/1.04 var(--serif);letter-spacing:-.02em;margin-bottom:26px}
+  h1 em{font-style:italic;color:var(--green)}
+  .lede{font-size:19px;color:var(--ink2);max-width:30em;margin-bottom:34px}
+  .ctas{display:flex;gap:12px;margin-bottom:22px}
+  .fine{font-size:14px;color:var(--muted)}
+  /* ticket */
+  .ticket{background:var(--term);border-radius:10px;color:var(--termtext);font:13px/1.5 var(--mono);box-shadow:0 30px 60px -30px rgba(20,22,27,.45);overflow:hidden}
+  .tk-head{display:flex;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--termline);color:var(--termdim);font-size:12px}
+  .tk-alert{padding:18px;border-bottom:1px solid var(--termline);display:flex;align-items:center;gap:12px}
+  .pill{font-size:11px;padding:3px 8px;border-radius:4px;border:1px solid var(--termline);color:var(--termdim)}
+  .buy{background:#123d27;color:#7fe0a8;border-color:#1d5a3a;font-weight:600}
+  .acct{padding:16px 18px;border-bottom:1px solid var(--termline)}
+  .acct:last-child{border-bottom:0}
+  .acct-top{display:flex;justify-content:space-between;margin-bottom:12px}
+  .acct-top b{color:#fff;font-weight:600}
+  .ok{color:#7fe0a8}
+  .rail{position:relative;height:28px}
+  .rail::before{content:"";position:absolute;left:0;right:0;top:9px;height:2px;background:var(--termline)}
+  .rail .fill{position:absolute;top:9px;height:2px;background:#2f8f5f}
+  .mk{position:absolute;top:3px;transform:translateX(-50%);text-align:center;font-size:10px;color:var(--termdim)}
+  .mk::before{content:"";display:block;width:10px;height:10px;border-radius:50%;margin:0 auto 4px;background:var(--term);border:2px solid var(--termdim)}
+  .mk.stop::before{border-color:#e5675d}.mk.stop{color:#e5675d}
+  .mk.ent::before{border-color:#fff;background:#fff}.mk.ent{color:#fff}
+  .mk.hit::before{border-color:#7fe0a8;background:#7fe0a8}.mk.hit{color:#7fe0a8}
+  .caption{font:12px/1.4 var(--mono);color:var(--muted);margin-top:12px}
+  /* fact strip */
+  .strip{border-top:1px solid var(--line);border-bottom:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr)}
+  .strip div{padding:26px 24px;border-right:1px solid var(--line)}
+  .strip div:last-child{border-right:0}
+  .strip span{display:block;font:12px/1 var(--mono);color:var(--muted);margin-bottom:10px}
+  .strip b{font:500 20px/1.25 var(--serif)}
+  /* sections */
+  section{padding:104px 0}
+  .kicker{font:500 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:18px}
+  h2{font:500 42px/1.1 var(--serif);letter-spacing:-.015em;margin-bottom:20px}
+  .sub{font-size:18px;color:var(--ink2);max-width:34em}
+  .split{display:grid;grid-template-columns:1fr 1.1fr;gap:64px;align-items:start}
+  /* log */
+  .log{background:var(--term);border-radius:10px;font:13px/1.5 var(--mono);color:var(--termtext);overflow:hidden}
+  .log .tk-head{font-size:12px}
+  .row{display:grid;grid-template-columns:88px 1fr;gap:14px;padding:13px 18px;border-bottom:1px solid var(--termline)}
+  .row:last-child{border-bottom:0}
+  .tag{font-size:11px;font-weight:700;letter-spacing:.06em;padding:3px 0}
+  .rf{color:#ff8a80}.ac{color:#7fe0a8}
+  .row small{display:block;color:var(--termdim);font-size:12px}
+  /* sources */
+  .dark{background:var(--ink);color:var(--paper)}
+  .dark .kicker{color:#8f949b}.dark .sub{color:#c4c7cc}
+  .sources{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:56px;border-top:1px solid #33363c}
+  .src{padding:36px 40px 0 0}
+  .src+.src{padding-left:40px;border-left:1px solid #33363c}
+  .src h3{font:500 26px/1.2 var(--serif);margin-bottom:22px}
+  .src ol{list-style:none;counter-reset:s}
+  .src li{counter-increment:s;display:grid;grid-template-columns:34px 1fr;padding:12px 0;border-top:1px solid #2a2d33;color:#d5d8dc;font-size:16px}
+  .src li::before{content:"0" counter(s);font:12px/1.9 var(--mono);color:#7fe0a8}
+  .src .tag2{font:11px/1 var(--mono);color:#e8b44c;border:1px solid #5a4516;border-radius:3px;padding:2px 5px;margin-left:6px}
+  /* safety list */
+  .rules{margin-top:48px;border-top:1px solid var(--ink)}
+  .rule{display:grid;grid-template-columns:260px 1fr;gap:40px;padding:22px 0;border-bottom:1px solid var(--line)}
+  .rule b{font:500 20px/1.3 var(--serif)}
+  .rule p{color:var(--ink2)}
+  /* videos */
+  .vids{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:48px}
+  .vid img{width:100%;display:block;border-radius:8px;border:1px solid var(--line)}
+  .vid h4{font:500 20px/1.3 var(--serif);margin:16px 0 4px}
+  .vid p{font:13px/1.4 var(--mono);color:var(--muted)}
+  /* pricing */
+  .price{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--ink);border-radius:10px;overflow:hidden;margin-top:48px}
+  .price .l{padding:44px;border-right:1px solid var(--ink)}
+  .big{font:500 76px/1 var(--serif);letter-spacing:-.03em}
+  .big small{font:16px var(--sans);color:var(--muted);letter-spacing:0}
+  .price ul{list-style:none;padding:36px 44px}
+  .price li{padding:9px 0;border-bottom:1px solid var(--line);font-size:16px}
+  .price li:last-child{border-bottom:0}
+  .price li::before{content:"✓";color:var(--green);font-weight:700;margin-right:12px}
+  footer{border-top:1px solid var(--line);padding:32px 0 48px;display:flex;justify-content:space-between;font-size:14px;color:var(--muted)}
+  @media (max-width:880px){
+    .wrap{padding:0 22px}.links a:not(.btn){display:none}
+    .hero,.split,.sources,.vids,.price{grid-template-columns:1fr;gap:40px}
+    h1{font-size:42px}h2{font-size:32px}
+    .strip{grid-template-columns:1fr 1fr}.strip div:nth-child(2){border-right:0}.strip div:nth-child(-n+2){border-bottom:1px solid var(--line)}
+    .src,.src+.src{padding:28px 0 0;border-left:0}
+    .rule{grid-template-columns:1fr;gap:6px}
+    .price .l{border-right:0;border-bottom:1px solid var(--ink)}
+    section{padding:72px 0}
+  }
 
-    /* Nav */
-    nav {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 20px 0; border-bottom: 1px solid #1e293b;
-    }
-    .logo { font-size: 24px; font-weight: 700; color: #22c55e; }
-    .logo span { color: #e2e8f0; }
-    #auth-buttons { display: flex; gap: 12px; }
-    .btn {
-      padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer;
-      font-size: 14px; font-weight: 600; transition: all 0.2s;
-    }
-    .btn-outline {
-      background: transparent; color: #94a3b8; border: 1px solid #334155;
-    }
-    .btn-outline:hover { border-color: #22c55e; color: #22c55e; }
-    .btn-primary {
-      background: #22c55e; color: #0a0e1a;
-    }
-    .btn-primary:hover { background: #16a34a; }
-    .btn-lg { padding: 14px 32px; font-size: 16px; }
-
-    /* Hero */
-    .hero {
-      text-align: center; padding: 100px 0 80px;
-    }
-    .hero h1 {
-      font-size: 56px; font-weight: 800; line-height: 1.1;
-      background: linear-gradient(135deg, #22c55e 0%, #10b981 50%, #06b6d4 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      margin-bottom: 24px;
-    }
-    .hero p {
-      font-size: 20px; color: #94a3b8; max-width: 600px;
-      margin: 0 auto 40px;
-    }
-    .hero-cta { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
-
-    /* Social proof */
-    .social-proof {
-      display: flex; justify-content: center; gap: 48px;
-      padding: 40px 0; border-top: 1px solid #1e293b;
-      border-bottom: 1px solid #1e293b; margin-bottom: 80px;
-    }
-    .stat { text-align: center; }
-    .stat-number { font-size: 32px; font-weight: 700; color: #22c55e; }
-    .stat-label { font-size: 14px; color: #64748b; }
-
-    /* Features */
-    .features { padding: 80px 0; }
-    .section-title {
-      text-align: center; font-size: 36px; font-weight: 700;
-      margin-bottom: 16px;
-    }
-    .section-subtitle {
-      text-align: center; color: #64748b; margin-bottom: 60px;
-    }
-    .feature-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 32px;
-    }
-    .feature-card {
-      background: #111827; border: 1px solid #1e293b;
-      border-radius: 16px; padding: 32px;
-    }
-    .feature-icon {
-      width: 48px; height: 48px; border-radius: 12px;
-      background: rgba(34, 197, 94, 0.1); display: flex;
-      align-items: center; justify-content: center;
-      font-size: 24px; margin-bottom: 20px;
-    }
-    .feature-card h3 { font-size: 20px; margin-bottom: 12px; }
-    .feature-card p { color: #64748b; font-size: 15px; }
-
-    /* How it works */
-    .how-it-works { padding: 80px 0; background: #0f172a; }
-    .steps {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 32px; margin-top: 60px;
-    }
-    .step {
-      text-align: center; position: relative;
-    }
-    .step-number {
-      width: 48px; height: 48px; border-radius: 50%;
-      background: #22c55e; color: #0a0e1a;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 20px; font-weight: 700; margin: 0 auto 20px;
-    }
-    .step h3 { margin-bottom: 8px; }
-    .step p { color: #64748b; font-size: 15px; }
-
-    /* Pricing */
-    .pricing { padding: 80px 0; }
-    .pricing-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 24px; margin-top: 60px;
-    }
-    .pricing-card {
-      background: #111827; border: 1px solid #1e293b;
-      border-radius: 16px; padding: 40px 32px;
-      position: relative;
-    }
-    .pricing-card.popular {
-      border-color: #22c55e;
-      transform: scale(1.02);
-    }
-    .popular-badge {
-      position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
-      background: #22c55e; color: #0a0e1a; padding: 4px 16px;
-      border-radius: 20px; font-size: 12px; font-weight: 700;
-    }
-    .pricing-card h3 { font-size: 20px; margin-bottom: 8px; }
-    .price {
-      font-size: 48px; font-weight: 800; color: #e2e8f0;
-      margin: 16px 0;
-    }
-    .price span { font-size: 16px; color: #64748b; font-weight: 400; }
-    .pricing-card ul { list-style: none; margin: 24px 0; }
-    .pricing-card li {
-      padding: 8px 0; color: #94a3b8; font-size: 15px;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .pricing-card li::before {
-      content: "✓"; color: #22c55e; font-weight: 700;
-    }
-    .pricing-card .btn { width: 100%; margin-top: 16px; }
-
-    /* CTA */
-    .cta {
-      text-align: center; padding: 100px 0;
-      background: linear-gradient(135deg, #0f172a 0%, #111827 100%);
-    }
-    .cta h2 { font-size: 36px; margin-bottom: 16px; }
-    .cta p { color: #64748b; margin-bottom: 32px; }
-
-    /* Footer */
-    footer {
-      text-align: center; padding: 40px 0;
-      border-top: 1px solid #1e293b; color: #475569;
-      font-size: 14px;
-    }
-
-    /* Auth modal */
-    #auth-modal {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.8); z-index: 100;
-      align-items: center; justify-content: center;
-    }
-    #auth-modal.active { display: flex; }
-    .auth-box {
-      background: #111827; border: 1px solid #1e293b;
-      border-radius: 16px; padding: 40px; width: 100%;
-      max-width: 420px;
-    }
-    .auth-box h2 { margin-bottom: 24px; text-align: center; }
-    .close-modal {
-      position: absolute; top: 20px; right: 20px;
-      background: none; border: none; color: #64748b;
-      font-size: 24px; cursor: pointer;
-    }
-
-    /* Dashboard link (shown when logged in) */
-    #user-nav { display: none; align-items: center; gap: 16px; }
-    #user-nav.active { display: flex; }
-    #user-email { color: #94a3b8; font-size: 14px; }
-
-    @media (max-width: 768px) {
-      .hero h1 { font-size: 36px; }
-      .social-proof { flex-direction: column; gap: 24px; }
-    }
-  </style>
+  /* auth (ids/classes used by the live script) */
+  #auth-buttons{display:flex;gap:30px;align-items:center}
+  #user-nav{display:none;align-items:center;gap:16px}
+  #user-nav.active{display:flex}
+  #user-email{color:var(--muted);font-size:14px}
+  button.link{background:none;border:0;font:inherit;color:inherit;cursor:pointer}
+  #auth-modal{display:none;position:fixed;inset:0;background:rgba(21,23,27,.7);z-index:100;align-items:center;justify-content:center}
+  #auth-modal.active{display:flex}
+  .auth-box{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:40px;width:100%;max-width:420px}
+  .auth-box h2{font-size:28px;text-align:center;margin-bottom:24px}
+  .close-modal{position:absolute;top:20px;right:24px;background:none;border:0;color:#f5f3ee;font-size:28px;cursor:pointer}
+  /* waitlist */
+  .cta{text-align:center;border-top:1px solid var(--line)}
+  .cta .sub{margin:0 auto 28px}
+  #waitlist-form{max-width:460px;margin:28px auto 0;display:flex;flex-direction:column;gap:12px}
+  #waitlist-form input,#waitlist-form select{padding:14px 16px;border-radius:6px;border:1px solid var(--line);background:#fff;color:var(--ink);font:16px var(--sans)}
+  #waitlist-form .hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+  #waitlist-form button{cursor:pointer;background:transparent;color:var(--ink)}
+  #wl-msg{min-height:1.2em;font-size:15px}
+  .terms{font-size:13px;color:var(--muted);margin-top:14px}.terms a{text-decoration:underline}
+  .ctas{flex-wrap:wrap}
+  @media (max-width:880px){#auth-buttons{gap:14px}#auth-buttons a:not(.btn){display:none}#auth-buttons button.link{font-size:14px}#auth-buttons .btn,#user-nav .btn{padding:10px 14px;font-size:14px}#user-email{display:none}}
+</style>
 </head>
 <body>
-  <div class="container">
-    <nav>
-      <div class="logo">Prop<span>TradeBot</span></div>
+
+<div class="wrap">
+  <nav>
+    <div class="logo">PropTrade<i>Bot</i></div>
+    <div class="links">
       <div id="auth-buttons">
-        <button class="btn btn-outline" onclick="showAuth('sign-in')">Sign In</button>
-        <a href="/dashboard.html" class="btn btn-outline" style="text-decoration:none;">Dashboard</a>
-        <a href="https://whop.com/proptradebot/proptradebot-pro/" target="_blank" rel="noopener" class="btn btn-primary" style="text-decoration:none;">Start 7-day trial</a>
+        <a href="#how-it-works">How it works</a><a href="#guides">Guides</a><a href="#pricing">Pricing</a>
+        <button class="link" onclick="showAuth('sign-in')">Sign in</button>
+        <a href="/dashboard.html">Dashboard</a>
+        <a class="btn solid" href="https://whop.com/proptradebot/proptradebot-pro/" target="_blank" rel="noopener">Start 7-day trial</a>
       </div>
       <div id="user-nav">
         <span id="user-email"></span>
-        <a href="/dashboard.html" class="btn btn-primary">Dashboard</a>
-        <button class="btn btn-outline" onclick="clerk.signOut()">Sign Out</button>
+        <a href="/dashboard.html" class="btn solid">Dashboard</a>
+        <button class="btn line link" onclick="clerk.signOut()">Sign out</button>
       </div>
-    </nav>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <div>
+      <div class="eyebrow">Execution software for Topstep · macOS</div>
+      <h1>Your strategy. Executed <em>the same way</em> on every account.</h1>
+      <p class="lede">Send your TradingView alerts or your Discord provider's signals to PropTradeBot. It runs the whole managed trade on your Topstep accounts, whether or not you are at the screen.</p>
+      <div class="ctas"><a class="btn solid" href="https://whop.com/proptradebot/proptradebot-pro/" target="_blank" rel="noopener">Start your 7-day trial</a><a class="btn line" href="#how-it-works">See how it works</a></div>
+      <p class="fine">Founding members: $99/month, locked for your first 12 months. 20 seats.</p>
+    </div>
+
+    <div>
+      <div class="ticket">
+        <div class="tk-head"><span>PropTradeBot</span><span>one alert → every account</span></div>
+        <div class="tk-alert"><span class="pill buy">BUY</span><span>MES1! · alert from TradingView</span><span class="pill" style="margin-left:auto">accepted</span></div>
+
+        <div class="acct">
+          <div class="acct-top"><b>Account 1</b><span class="ok">entry filled · stop placed</span></div>
+          <div class="rail"><div class="fill" style="left:28%;width:44%"></div>
+            <div class="mk stop" style="left:6%">STOP</div><div class="mk ent" style="left:28%">ENTRY</div>
+            <div class="mk hit" style="left:50%">T1</div><div class="mk hit" style="left:72%">T2</div><div class="mk" style="left:94%">RUNNER</div></div>
+        </div>
+        <div class="acct">
+          <div class="acct-top"><b>Account 2</b><span class="ok">entry filled · stop placed</span></div>
+          <div class="rail"><div class="fill" style="left:28%;width:22%"></div>
+            <div class="mk stop" style="left:6%">STOP</div><div class="mk ent" style="left:28%">ENTRY</div>
+            <div class="mk hit" style="left:50%">T1</div><div class="mk" style="left:72%">T2</div><div class="mk" style="left:94%">RUNNER</div></div>
+        </div>
+        <div class="acct">
+          <div class="acct-top"><b>Account 3</b><span class="ok">entry filled · stop placed</span></div>
+          <div class="rail">
+            <div class="mk stop" style="left:6%">STOP</div><div class="mk ent" style="left:28%">ENTRY</div>
+            <div class="mk" style="left:50%">T1</div><div class="mk" style="left:72%">T2</div><div class="mk" style="left:94%">RUNNER</div></div>
+        </div>
+      </div>
+      <p class="caption">Illustration. Each account is managed off its own fill.</p>
+    </div>
   </div>
+</div>
 
-  <section class="hero">
-    <div class="container">
-      <h1>Your strategy. Executed the same way on every account.</h1>
-      <p>Send your TradingView alerts or your Discord provider's signals to PropTradeBot and it runs the whole managed trade on your Topstep accounts: one market entry, a stop on every position, T1/T2 trims and a runner, flat before the close. The same trade, the same size, every time, whether or not you are at the screen.</p>
-      <p style="color:#94a3b8; font-size:15px;">Founding members: $99/month, locked for your first 12 months. 20 seats. 7-day free trial.</p>
-      <div class="hero-cta">
-        <a href="https://whop.com/proptradebot/proptradebot-pro/" target="_blank" rel="noopener" class="btn btn-primary btn-lg" style="text-decoration:none;">Start your 7-day trial</a>
-        <button class="btn btn-outline btn-lg" onclick="document.getElementById('how-it-works').scrollIntoView({behavior:'smooth'})">See how it works</button>
-      </div>
+<div class="wrap"><div class="strip">
+  <div><span>01</span><b>One market entry</b></div>
+  <div><span>02</span><b>A stop on every position</b></div>
+  <div><span>03</span><b>T1 / T2 trims and a runner</b></div>
+  <div><span>04</span><b>Flat before the close</b></div>
+</div></div>
+
+<section><div class="wrap split">
+  <div>
+    <div class="kicker">The part that protects your accounts</div>
+    <h2>It refuses rather than guesses.</h2>
+    <p class="sub">Only TradingView alerts in PropTradeBot's format, and Discord messages matching what you taught it, are traded. Anything else is refused, with the reason shown in the app.</p>
+  </div>
+  <div>
+    <div class="log">
+      <div class="tk-head"><span>signal log</span><span>illustration</span></div>
+      <div class="row"><span class="tag rf">REFUSED</span><span>Wrong contract size<small>The alert is for a different contract size than your preset trades.</small></span></div>
+      <div class="row"><span class="tag rf">REFUSED</span><span>Second entry while a trade is open<small>One market entry per trade. The open trade keeps being managed.</small></span></div>
+      <div class="row"><span class="tag rf">REFUSED</span><span>Entry far from the market price<small>The signal's price is too far from where the market is.</small></span></div>
+      <div class="row"><span class="tag rf">REFUSED</span><span>Message not understood<small>It never guesses what a message meant.</small></span></div>
+      <div class="row"><span class="tag ac">TRADED</span><span>BUY MES1! · every account you chose<small>Sized, stopped and laddered by your preset.</small></span></div>
     </div>
-  </section>
+  </div>
+</div></section>
 
-  
-
-  <section class="video-demo" style="padding: 60px 0; background: #0f172a;">
-    <div class="container" style="text-align: center;">
-      <h2 style="color: #38bdf8; font-size: 28px; margin-bottom: 16px;">One alert, every account</h2>
-      <p style="color: #94a3b8; margin-bottom: 32px; max-width: 600px; margin-left: auto; margin-right: auto;">
-        A single signal, from TradingView or a Discord provider, fires the same managed trade on every account you choose: entry, laddered trims, breakeven stop, flat by the close. Each account is managed off its own fill.
-      </p>
-      <div style="max-width: 900px; margin: 0 auto; border-radius: 12px; overflow: hidden; border: 2px solid #1e293b; background: #111827;">
-        <img src="/PropTradeBot_Poster.png" alt="One buy alert fanned out to five accounts, each with its own stop, entry, T1 and T2" style="width: 100%; display: block;">
-      </div>
+<section class="dark" id="how-it-works"><div class="wrap">
+  <div class="kicker">Bring your own strategy</div>
+  <h2>Two ways in. The same managed trade out.</h2>
+  <p class="sub">Pick your firm in the guided setup and PropTradeBot configures the connection: no endpoint URLs, no config files. Set your sizing, trims, stop and accounts once, and save it as your preset.</p>
+  <div class="sources">
+    <div class="src">
+      <h3>TradingView</h3>
+      <ol>
+        <li>Copy your webhook and alert message from your PropTradeBot dashboard.</li>
+        <li>Paste both into a TradingView alert on your strategy.</li>
+        <li>Every alert runs your preset on every account you chose.</li>
+      </ol>
     </div>
-  </section>
-
-  
-
-
-  <section class="features">
-    <div class="container">
-      <h2 class="section-title">Bring your own strategy</h2>
-      <p class="section-subtitle">Connect a TradingView alert or a Discord signal provider. Every signal is sized, stopped, laddered out and flattened by the close, on every account you choose.</p>
-      <div class="feature-grid">
-        <div class="feature-card">
-          <div class="feature-icon">⚡</div>
-          <h3>TradingView or Discord</h3>
-          <p>One webhook connects your TradingView strategy. Or follow any Discord signal provider: teach PropTradeBot their message format by pasting one real example, try it in shadow mode, then go live. Signals execute in seconds with your preset sizing, trims, and stops.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🛑</div>
-          <h3>Refuses Rather Than Guesses</h3>
-          <p>Only TradingView alerts in PropTradeBot's format, and Discord messages matching what you taught it, are traded. The wrong contract size, a second entry while a trade is open, an entry far from the market price, or a message it doesn't understand is refused, with the reason shown in the app.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🏦</div>
-          <h3>Every Account, One Alert</h3>
-          <p>Trade all your Topstep accounts from one alert — directly, or one leader with Topstep's Trade Copier — with the same managed plan on every account.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🛡️</div>
-          <h3>Eval-Saving Safety Rules</h3>
-          <p>Automatic end-of-day flatten, hard cutoffs, early-close handling, orphaned-stop cleanup, daily-loss circuit breaker. The technicalities that quietly kill evals — handled by the machine.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">📊</div>
-          <h3>Real-Time Dashboard</h3>
-          <p>Live P&L, per-account performance, open positions, trade history, and a flatten-all button — from any browser.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🖥️</div>
-          <h3>macOS Native</h3>
-          <p>Built for Mac. Runs locally — no VPS, no shared servers — so it stays inside prop firm rules. Keep it open during your session.</p>
-        </div>
-      </div>
+    <div class="src">
+      <h3>Discord provider</h3>
+      <ol>
+        <li>Install the PropTradeBot Connector in Chrome and keep your provider's channel open.</li>
+        <li>Teach it their format by pasting one real entry and exit message.</li>
+        <li><span>Watch it in shadow mode <span class="tag2">SHADOW</span>, then switch to live.</span></li>
+      </ol>
     </div>
-  </section>
+  </div>
+</div></section>
 
-  <section class="how-it-works" id="how-it-works">
-    <div class="container">
-      <h2 class="section-title">How It Works</h2>
-      <p class="section-subtitle">From your call to a fully managed position in 4 steps.</p>
-      <div class="steps">
-        <div class="step">
-          <div class="step-number">1</div>
-          <h3>Connect Your Accounts</h3>
-          <p>Pick your firm in the guided setup and PropTradeBot configures the connection — no endpoint URLs, no config files. Live on Topstep today. We add a firm only after it confirms in writing that its accounts can be automated through an API.</p>
-        </div>
-        <div class="step">
-          <div class="step-number">2</div>
-          <h3>Configure Strategy</h3>
-          <p>Set your sizing, trim targets, stop, breakeven, and which accounts to trade. Save it as your preset.</p>
-        </div>
-        <div class="step">
-          <div class="step-number">3</div>
-          <h3>Connect Your Signal</h3>
-          <p>TradingView: paste your PropTradeBot webhook and the alert message the app gives you into an alert. Discord: install the PropTradeBot Connector in Chrome, keep your provider's channel open, and teach the app their entry and exit messages.</p>
-        </div>
-        <div class="step">
-          <div class="step-number">4</div>
-          <h3>It Runs Your Plan</h3>
-          <p>The bot executes and manages the whole trade — trims, breakeven, runner, EOD flatten — across every account while you watch the P&L.</p>
-        </div>
-      </div>
+<section><div class="wrap">
+  <div class="kicker">Eval-saving safety rules</div>
+  <h2>The technicalities that quietly kill evals, handled by the machine.</h2>
+  <div class="rules">
+    <div class="rule"><b>End-of-day flatten</b><p>Automatic flatten before the close, with hard cutoffs and early-close handling.</p></div>
+    <div class="rule"><b>Daily-loss circuit breaker</b><p>A daily loss limit per account.</p></div>
+    <div class="rule"><b>Orphaned-stop cleanup</b><p>Stops left behind by a closed position are cleaned up.</p></div>
+    <div class="rule"><b>Live dashboard</b><p>Live P&amp;L, per-account performance, open positions, trade history, and a flatten-all button, from any browser.</p></div>
+    <div class="rule"><b>Runs on your Mac</b><p>Runs locally: no VPS, no shared servers, so it stays inside prop firm rules. Keep it open during your session.</p></div>
+  </div>
+</div></section>
+
+<section style="padding-top:0" id="guides"><div class="wrap">
+  <div class="kicker">Video guides</div>
+  <h2>See it set up, step by step.</h2>
+  <div class="vids">
+    <a class="vid" target="_blank" rel="noopener" href="https://youtu.be/flwVcYgAV5s"><img src="/img/video1.jpg" alt=""><h4>Install PropTradeBot and connect Topstep</h4><p>5 min · practice account first · no trades placed</p></a>
+    <a class="vid" target="_blank" rel="noopener" href="https://youtu.be/LIiwuvwtZrY"><img src="/img/video2.jpg" alt=""><h4>TradingView alerts: set up and test first</h4><p>4 min · webhook, test alert, then your strategy</p></a>
+  </div>
+</div></section>
+
+<section style="padding-top:0" id="pricing"><div class="wrap">
+  <div class="kicker">Pricing</div>
+  <h2>One plan. Everything included.</h2>
+  <div class="price">
+    <div class="l">
+      <div class="eyebrow">Founding members · 20 seats</div>
+      <div class="big">$99<small> /month</small></div>
+      <p class="fine" style="margin:14px 0 28px">Locked for your first 12 months of continuous paid service. Regular price $149/month after that, with notice. Your 7-day free trial starts at checkout on Whop.</p>
+      <a class="btn solid" href="https://whop.com/proptradebot/proptradebot-pro/" target="_blank" rel="noopener">Start your 7-day trial</a>
+      <p class="terms">Paid plans are covered by our <a href="/terms.html">Terms of Service</a>.</p>
     </div>
-  </section>
+    <ul>
+      <li>Multiple Topstep accounts</li>
+      <li>TradingView webhook automation</li>
+      <li>Discord signals from any provider (Chrome Connector)</li>
+      <li>MES or ES, MNQ or NQ</li>
+      <li>Auto ladder: trims, stops, runner rules</li>
+      <li>Safety: EOD flatten, daily loss limit per account</li>
+      <li>Dashboard with P&amp;L from Topstep's fills</li>
+    </ul>
+  </div>
+</div></section>
 
-  
-
-  <section class="pricing" id="pricing">
-    <div class="container">
-      <h2 class="section-title">Simple Pricing</h2>
-      <p class="section-subtitle">One plan. Everything included.</p>
-      <div class="pricing-grid" style="max-width: 420px; margin: 60px auto 0;">
-        <div class="pricing-card popular">
-          <div class="popular-badge">ALL-INCLUSIVE</div>
-          <h3>PropTradeBot Pro</h3>
-          <div class="price">$99<span>/month founding price</span></div>
-          <p style="color:#94a3b8; font-size:14px; margin:-8px 0 12px;">Regular price $149/month</p>
-          <p style="color:#64748b; margin-bottom:16px;">Disciplined execution for serious prop firm traders.</p>
-          <ul>
-            <li>Multiple Topstep accounts</li>
-            <li>TradingView webhook automation</li>
-            <li>Discord signals from any provider (Chrome Connector)</li>
-            <li>MES or ES, MNQ or NQ</li>
-            <li>Auto ladder: trims, stops, runner rules</li>
-            <li>Safety: EOD flatten, daily loss limit per account</li>
-            <li>Dashboard with P&L from Topstep's fills</li>
-            <li>Priority support</li>
-          </ul>
-          <a href="https://whop.com/proptradebot/proptradebot-pro/" target="_blank" rel="noopener" class="btn btn-primary" style="text-decoration:none;">Start 7-day trial</a>
-        </div>
-      </div>
-      <div style="max-width: 420px; margin: 24px auto 0; padding: 18px 20px; border: 1px solid #22c55e; border-radius: 12px; background: rgba(34,197,94,0.06);">
-        <p style="color:#22c55e; font-weight:700; margin:0 0 6px;">Founding members: $99/month, locked for 12 months</p>
-        <p style="color:#94a3b8; font-size:14px; margin:0;">For the first 20 customers, through our Whop store. Your 7-day free trial starts at checkout on Whop. After 12 months of continuous paid service the regular price applies, with notice.</p>
-      </div>
-      <p style="text-align: center; color: #64748b; margin-top: 24px; font-size: 14px;">
-        <span style="font-size: 12px;">Paid plans are covered by our <a href="/terms.html" style="color: #22c55e;">Terms of Service</a></span>
-      </p>
-    </div>
-  </section>
-
-  <section class="cta" id="waitlist">
-    <div class="container">
-      <h2>Start your 7-day trial</h2>
-      <p>Founding price $99/month for your first 12 months. 20 seats.</p>
-      <a href="https://whop.com/proptradebot/proptradebot-pro/" target="_blank" rel="noopener" class="btn btn-primary btn-lg" style="text-decoration:none; display:inline-block; margin-top:16px;">Start 7-day trial on Whop</a>
-      <p style="margin-top:32px; color:#94a3b8;">Not ready yet? Leave your email and we'll send you product updates. No card, no charge.</p>
-      <form id="waitlist-form" onsubmit="joinWaitlist(event)" style="max-width: 460px; margin: 24px auto 0; display: flex; flex-direction: column; gap: 12px;">
-        <input type="email" id="wl-email" required maxlength="254" placeholder="you@example.com" autocomplete="email"
-               style="padding: 14px 16px; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; font-size: 16px;">
-        <input type="text" id="wl-handle" maxlength="100" placeholder="Discord or Telegram handle (optional)"
-               style="padding: 14px 16px; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; font-size: 16px;">
-        <select id="wl-heard" aria-label="How did you hear about us?"
-               style="padding: 14px 16px; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; font-size: 16px;">
+<section class="cta" id="waitlist"><div class="wrap">
+  <h2>Start your 7-day trial.</h2>
+  <p class="sub">Founding price $99/month for your first 12 months. 20 seats.</p>
+  <a class="btn solid" href="https://whop.com/proptradebot/proptradebot-pro/" target="_blank" rel="noopener">Start 7-day trial on Whop</a>
+  <p class="fine" style="margin-top:36px">Not ready yet? Leave your email and we'll send you product updates. No card, no charge.</p>
+  <form id="waitlist-form" onsubmit="joinWaitlist(event)">
+        <input type="email" id="wl-email" required maxlength="254" placeholder="you@example.com" autocomplete="email">
+        <input type="text" id="wl-handle" maxlength="100" placeholder="Discord or Telegram handle (optional)">
+        <select id="wl-heard" aria-label="How did you hear about us?">
           <option value="">How did you hear about us? (optional)</option>
           <option value="x">X (Twitter)</option>
           <option value="youtube">YouTube</option>
@@ -374,26 +325,13 @@
           <option value="friend">A friend</option>
           <option value="other">Other</option>
         </select>
-        <input type="text" id="wl-website" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"
-               style="position:absolute; left:-9999px; width:1px; height:1px; opacity:0;">
+        <input type="text" class="hp" id="wl-website" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
         <button type="submit" id="wl-submit" class="btn btn-outline btn-lg">Send me updates</button>
-        <p id="wl-msg" role="status" style="min-height: 1.2em; margin: 0; font-size: 15px;"></p>
+        <p id="wl-msg" role="status"></p>
       </form>
-    </div>
-  </section>
+</div></section>
 
-  <footer>
-    <div class="container">
-      <p>© 2026 PropTradeBot. Built for traders, by traders.</p>
-      <p style="margin-top: 8px; font-size: 14px;">
-        <a href="/privacy.html" style="color: #64748b; text-decoration: none; margin: 0 8px;">Privacy Policy</a>
-        <span style="color: #334155;">|</span>
-        <a href="/terms.html" style="color: #64748b; text-decoration: none; margin: 0 8px;">Terms of Service</a>
-        <span style="color: #334155;">|</span>
-        <a href="/support.html" style="color: #64748b; text-decoration: none; margin: 0 8px;">Support</a>
-      </p>
-    </div>
-  </footer>
+<div class="wrap"><footer><span>© 2026 PropTradeBot. Built for traders, by traders.</span><span><a href="/privacy.html">Privacy Policy</a> · <a href="/terms.html">Terms of Service</a> · <a href="/support.html">Support</a></span></footer></div>
 
   <!-- Auth Modal -->
   <div id="auth-modal">
