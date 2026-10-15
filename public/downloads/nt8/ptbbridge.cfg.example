@@ -1,0 +1,29 @@
+# PropTradeBot add-on (PTBBridge) settings.
+# Save as:  Documents\NinjaTrader 8\ptbbridge.cfg   on the Windows PC that runs NinjaTrader 8.
+# One setting per line. Lines starting with # are notes. The add-on will not start without this file.
+
+# The NinjaTrader accounts PropTradeBot may trade (exact names from NinjaTrader's Accounts tab), comma-separated.
+accounts=YOUR-ACCOUNT-NAME
+
+# The instruments it may trade. MES, or MES,MNQ if you also trade the Nasdaq leg.
+instruments=MES
+
+# Hard limits that hold even if PropTradeBot misbehaves.
+# max_order_qty: the most contracts in any single order (at least your Contracts setting in PropTradeBot).
+# max_position_qty: the most contracts open at once (at least your Contracts setting).
+max_order_qty=2
+max_position_qty=2
+
+# When an account is down this much today (USD), the add-on closes its position and refuses new entries
+# for the rest of the session (0 = off).
+daily_loss_limit=300
+
+# Refuse orders when the price feed has been silent for this many milliseconds.
+feed_stale_ms=5000
+
+# --- Network: how your Mac reaches this PC ---
+# listen     = THIS PC's IPv4 address (run ipconfig). Leave out to accept connections from this PC only.
+# allow_from = your Mac's IP address (or a subnet like 192.168.1.0/24). Required when listen is set;
+#              every other address is cut off before anything is read.
+listen=192.168.1.20
+allow_from=192.168.1.15
