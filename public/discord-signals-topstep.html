@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auto-trade Discord signals on Topstep — PropTradeBot</title>
+  <meta name="description" content="Turn your Discord signal provider's calls into orders on your Topstep accounts automatically, with a stop on every trade, trims and an end-of-day flatten. Mac app.">
+  <link rel="canonical" href="https://proptradebot.com/discord-signals-topstep.html">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0a0e1a; color: #e2e8f0; line-height: 1.65; padding: 40px 20px; }
+    .container { max-width: 760px; margin: 0 auto; }
+    h1 { color: #38bdf8; font-size: 32px; line-height: 1.25; margin-bottom: 16px; }
+    .answer { font-size: 18px; color: #e2e8f0; margin-bottom: 28px; }
+    h2 { color: #f59e0b; font-size: 20px; margin: 36px 0 12px; }
+    p, li { color: #94a3b8; }
+    p { margin-bottom: 16px; }
+    ul, ol { margin: 0 0 16px 22px; }
+    li { margin-bottom: 6px; }
+    b { color: #e2e8f0; }
+    a { color: #38bdf8; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .box { background: #1e293b; border-radius: 12px; padding: 20px 24px; margin: 28px 0; border-left: 4px solid #38bdf8; }
+    .box p:last-child { margin-bottom: 0; }
+    .back { display: inline-block; margin-bottom: 24px; color: #64748b; }
+    .cta { display: inline-block; background: #38bdf8; color: #0a0e1a; font-weight: 600; padding: 12px 22px; border-radius: 8px; margin: 8px 12px 8px 0; }
+    .cta.line { background: none; color: #38bdf8; border: 1px solid #38bdf8; }
+    .fine { font-size: 13px; color: #64748b; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <a class="back" href="/">← PropTradeBot</a>
+  <h1>How to auto-trade Discord signals on Topstep</h1>
+
+  <p class="answer">PropTradeBot reads your signal provider's Discord channel in Chrome and turns each entry and exit
+  call into orders on your Topstep accounts. Every trade gets a stop, your trims and a runner, and it's flat by your
+  end-of-day time. It's a Mac app, and you teach it your provider's message format once.</p>
+
+  <h2>Why I built it</h2>
+  <p>The calls kept landing while I was at work. <a href="/trade-while-at-work.html">More on that here.</a></p>
+
+  <h2>How it works</h2>
+  <ol>
+    <li><b>Install the PropTradeBot Connector for Chrome.</b> It reads the Discord channel you have open. Nothing else.</li>
+    <li><b>Teach the app your provider's format.</b> Paste one real entry message (like <i>ES Long 7712</i>) and one exit
+    message (like <i>all out</i>). From then on it trades only messages that match. A message that could mean two things is never
+    traded.</li>
+    <li><b>Start in Shadow.</b> The app logs what it would have traded without placing anything. When the log looks
+    right, switch the provider to <b>Live</b>.</li>
+    <li><b>Keep Chrome open on the channel</b> while you trade, and keep the app running.</li>
+  </ol>
+  <p>Each call becomes one market entry with a stop on every position, then T1 and T2 trims and a runner, using your
+  own sizes, targets and stops. One signal can trade several Topstep accounts, directly or through Topstep's Trade
+  Copier.</p>
+
+  <h2>What it won't do</h2>
+  <ul>
+    <li>Guess. A message it doesn't understand is not traded, and the reason shows in the app.</li>
+    <li>Chase. An entry is refused when the market is more than 10 points (S&amp;P) or 40 points (Nasdaq) from the
+    provider's price, or when it can't read a current price. That catches typos and late messages.</li>
+    <li>Stack trades. A second entry while a trade is open is refused.</li>
+    <li>Hold past your flatten time. You set it; after it, no new entries.</li>
+  </ul>
+
+  <h2>What you need</h2>
+  <ul>
+    <li>A Mac that stays awake during your session, with Google Chrome.</li>
+    <li>A Topstep account with API access. Topstep bills that separately; see
+    <a href="https://help.topstep.com/en/articles/11187768-topstepx-api-access" target="_blank" rel="noopener">Topstep's API access page</a>
+    for the current price and how to get your key.</li>
+    <li>Your provider on Discord. Telegram is not supported.</li>
+  </ul>
+
+  <div class="box">
+    <p><b>Check the rules first.</b> Following Topstep's rules is your responsibility. Read
+    <a href="/support.html#firm-rules">Topstep's automation rules</a> before you go live. Topstep doesn't approve or
+    endorse PropTradeBot, and PropTradeBot isn't affiliated with any signal provider.</p>
+  </div>
+
+  <h2>Try it</h2>
+  <p>$99/month founding price, locked for 12 months, with a 7-day free trial. Start on a practice account.</p>
+  <a class="cta" href="https://whop.com/proptradebot/proptradebot-pro/" target="_blank" rel="noopener">Start your 7-day trial</a>
+  <a class="cta line" href="/support.html">Setup guides</a>
+  <p class="fine" style="margin-top:24px">PropTradeBot is an execution tool. It doesn't provide signals, a strategy or any expected result.</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TradingView alerts to Topstep — PropTradeBot</title>
+  <meta name="description" content="Send your TradingView strategy alerts to your Topstep accounts by webhook. PropTradeBot places the trade with a stop, trims and an end-of-day flatten. Mac app.">
+  <link rel="canonical" href="https://proptradebot.com/tradingview-alerts-topstep.html">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0a0e1a; color: #e2e8f0; line-height: 1.65; padding: 40px 20px; }
+    .container { max-width: 760px; margin: 0 auto; }
+    h1 { color: #38bdf8; font-size: 32px; line-height: 1.25; margin-bottom: 16px; }
+    .answer { font-size: 18px; color: #e2e8f0; margin-bottom: 28px; }
+    h2 { color: #f59e0b; font-size: 20px; margin: 36px 0 12px; }
+    p, li { color: #94a3b8; }
+    p { margin-bottom: 16px; }
+    ul, ol { margin: 0 0 16px 22px; }
+    li { margin-bottom: 6px; }
+    b { color: #e2e8f0; }
+    a { color: #38bdf8; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .box { background: #1e293b; border-radius: 12px; padding: 20px 24px; margin: 28px 0; border-left: 4px solid #38bdf8; }
+    .box p:last-child { margin-bottom: 0; }
+    .back { display: inline-block; margin-bottom: 24px; color: #64748b; }
+    .cta { display: inline-block; background: #38bdf8; color: #0a0e1a; font-weight: 600; padding: 12px 22px; border-radius: 8px; margin: 8px 12px 8px 0; }
+    .cta.line { background: none; color: #38bdf8; border: 1px solid #38bdf8; }
+    .fine { font-size: 13px; color: #64748b; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <a class="back" href="/">← PropTradeBot</a>
+  <h1>How to send TradingView alerts to Topstep</h1>
+
+  <p class="answer">Point a TradingView alert's webhook at PropTradeBot, and each alert becomes orders on your Topstep accounts. Every trade gets a stop, your trims and a runner, and it's flat by your end-of-day time. Your strategy decides when; PropTradeBot does the clicking.</p>
+
+  <h2>Why bother</h2>
+  <p>If your strategy lives in TradingView, the alert already knows when to get in. The weak link is you: seeing it,
+  switching windows and placing the order, on every account, before the price moves. A webhook removes that step.</p>
+
+  <h2>How it works</h2>
+  <ol>
+    <li><b>Get your webhook.</b> On proptradebot.com, open <b>Dashboard → TradingView Strategy → Generate Webhook</b>.
+    It shows your Webhook URL, your passphrase and the alert message, each with a Copy button.</li>
+    <li><b>Send a test first.</b> Make a simple alert with the test message. It proves TradingView reaches us with the
+    right URL and passphrase, and it is never sent to the app, so it can't place an order. Ask the dashboard's Setup
+    Assistant whether it arrived.</li>
+    <li><b>Set up the real alert on your strategy</b> with the Webhook URL and the alert message. Delete the test alert.</li>
+    <li><b>Keep the app open</b> on your Mac while you trade.</li>
+  </ol>
+  <p>Using an indicator instead of a strategy? The app's <b>Alerts</b> tab has one message each for buy, sell and exit.</p>
+  <p>Alerts travel TradingView → proptradebot.com → your Mac. An alert the app hasn't collected within 60 seconds is
+  dropped, not traded late.</p>
+
+  <h2>What it won't do</h2>
+  <ul>
+    <li>Trade a message it can't read. It's refused, and the reason shows in the app.</li>
+    <li>Stack trades. A second entry while a trade is open is refused; send an exit first.</li>
+    <li>Trade late. Stale alerts are dropped.</li>
+  </ul>
+
+  <h2>What you need</h2>
+  <ul>
+    <li>A TradingView plan with webhook alerts, and two-factor authentication turned on. TradingView only sends
+    webhooks from accounts with 2FA.</li>
+    <li>A chart of the contract you trade: MES1!, ES1!, MNQ1! or NQ1!.</li>
+    <li>A Mac that stays awake during your session, and a Topstep account with API access. Topstep bills that
+    separately; see <a href="https://help.topstep.com/en/articles/11187768-topstepx-api-access" target="_blank" rel="noopener">Topstep's API access page</a>.</li>
+  </ul>
+
+  <div class="box">
+    <p><b>Keep your webhook private.</b> The URL and passphrase together let anyone queue trades on your account. Don't
+    post them or show them on screen. And check <a href="/support.html#firm-rules">Topstep's automation rules</a>
+    before you go live; following them is your responsibility.</p>
+  </div>
+
+  <h2>Try it</h2>
+  <p>$99/month founding price, locked for 12 months, with a 7-day free trial. Start on a practice account.</p>
+  <a class="cta" href="https://whop.com/proptradebot/proptradebot-pro/" target="_blank" rel="noopener">Start your 7-day trial</a>
+  <a class="cta line" href="/support.html">Setup guides</a>
+  <p class="fine" style="margin-top:24px">PropTradeBot is an execution tool. It doesn't provide signals, a strategy or any expected result.</p>
+</div>
+</body>
+</html>

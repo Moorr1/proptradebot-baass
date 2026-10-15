@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>End-of-day flatten for futures accounts — PropTradeBot</title>
+  <meta name="description" content="Close your futures positions automatically at a time you set and take no new entries after it. PropTradeBot's end-of-day flatten for Topstep and NinjaTrader 8 accounts.">
+  <link rel="canonical" href="https://proptradebot.com/end-of-day-flatten.html">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0a0e1a; color: #e2e8f0; line-height: 1.65; padding: 40px 20px; }
+    .container { max-width: 760px; margin: 0 auto; }
+    h1 { color: #38bdf8; font-size: 32px; line-height: 1.25; margin-bottom: 16px; }
+    .answer { font-size: 18px; color: #e2e8f0; margin-bottom: 28px; }
+    h2 { color: #f59e0b; font-size: 20px; margin: 36px 0 12px; }
+    p, li { color: #94a3b8; }
+    p { margin-bottom: 16px; }
+    ul, ol { margin: 0 0 16px 22px; }
+    li { margin-bottom: 6px; }
+    b { color: #e2e8f0; }
+    a { color: #38bdf8; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .box { background: #1e293b; border-radius: 12px; padding: 20px 24px; margin: 28px 0; border-left: 4px solid #38bdf8; }
+    .box p:last-child { margin-bottom: 0; }
+    .back { display: inline-block; margin-bottom: 24px; color: #64748b; }
+    .cta { display: inline-block; background: #38bdf8; color: #0a0e1a; font-weight: 600; padding: 12px 22px; border-radius: 8px; margin: 8px 12px 8px 0; }
+    .cta.line { background: none; color: #38bdf8; border: 1px solid #38bdf8; }
+    .fine { font-size: 13px; color: #64748b; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <a class="back" href="/">← PropTradeBot</a>
+  <h1>How to flatten automatically at the end of the day</h1>
+
+  <p class="answer">PropTradeBot closes your positions at a time you set, in New York time, and takes no new entries after it, so nothing is held into the close by accident. You choose the time. There's no default, and until you set one it won't take new entries.</p>
+
+  <h2>Why it matters</h2>
+  <p>Holding past the close is one of the easiest ways to end an evaluation on a rule instead of a bad trade. You
+  get busy, the trade is still open, and the cutoff passes. A flatten time you set once removes that.</p>
+
+  <h2>How it works</h2>
+  <ul>
+    <li>Set <b>"Flatten all positions at"</b> on the app's Strategy tab, or during setup. Set it before your firm's
+    cutoff, with a margin.</li>
+    <li>Optional: <b>"Stop taking new entries at"</b>, an earlier time after which no new trades start.</li>
+    <li>At the flatten time it closes every position on the accounts it trades, not only its own trades, and takes no
+    new entries until the 6:00 PM ET reopen.</li>
+    <li>A refused entry says why in plain words: past your cutoff, past your flatten time, or no flatten time set.</li>
+    <li>Don't want it? Tick "Don't auto-flatten" and it's really off.</li>
+  </ul>
+
+  <h2>Also worth knowing</h2>
+  <ul>
+    <li>It won't restart while a trade is open, so a settings change never lands mid-trade.</li>
+    <li>The Mac has to be awake and the app open at your flatten time.</li>
+    <li>Works on Topstep and on accounts you trade in <a href="/nt8-guide.html">NinjaTrader 8</a>.</li>
+  </ul>
+
+  <div class="box">
+    <p><b>Your firm's cutoff is the one that counts.</b> Check it in your firm's own rules; for Topstep, see
+    <a href="/support.html#firm-rules">Topstep's automation rules</a>. Following them is your responsibility.</p>
+  </div>
+
+  <h2>Try it</h2>
+  <p>$99/month founding price, locked for 12 months, with a 7-day free trial. Start on a practice account.</p>
+  <a class="cta" href="https://whop.com/proptradebot/proptradebot-pro/" target="_blank" rel="noopener">Start your 7-day trial</a>
+  <a class="cta line" href="/support.html">Setup guides</a>
+  <p class="fine" style="margin-top:24px">PropTradeBot is an execution tool. It doesn't provide signals, a strategy or any expected result.</p>
+</div>
+</body>
+</html>

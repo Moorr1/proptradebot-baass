@@ -20,6 +20,11 @@ Who it's for: futures traders (MES, ES, MNQ, NQ), often with a day job, who foll
 - [Home](https://proptradebot.com/): what it does, how it works, pricing
 - [Support and FAQ](https://proptradebot.com/support.html): setup guides, TradingView and Discord setup, Topstep automation rules
 - [NinjaTrader 8 setup guide](https://proptradebot.com/nt8-guide.html): connecting the Mac app to NinjaTrader 8 on Windows
+- [Discord signals to Topstep](https://proptradebot.com/discord-signals-topstep.html)
+- [TradingView alerts to Topstep](https://proptradebot.com/tradingview-alerts-topstep.html)
+- [NinjaTrader 8 from a Mac](https://proptradebot.com/ninjatrader-8-mac.html)
+- [Trading while you're at work](https://proptradebot.com/trade-while-at-work.html)
+- [End-of-day flatten](https://proptradebot.com/end-of-day-flatten.html)
 - [Download](https://proptradebot.com/downloads/PropTradeBot.dmg): notarized macOS app
 - [Start a trial](https://whop.com/proptradebot/proptradebot-pro/)
 - [Terms](https://proptradebot.com/terms.html), [Privacy](https://proptradebot.com/privacy.html)

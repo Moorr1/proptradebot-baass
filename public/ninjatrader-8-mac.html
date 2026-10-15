@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automate NinjaTrader 8 from a Mac — PropTradeBot</title>
+  <meta name="description" content="Run your TradingView or Discord signals on NinjaTrader 8 from your Mac. PropTradeBot drives NT8 on a Windows PC or VM through a small add-on, with a stop on every trade.">
+  <link rel="canonical" href="https://proptradebot.com/ninjatrader-8-mac.html">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0a0e1a; color: #e2e8f0; line-height: 1.65; padding: 40px 20px; }
+    .container { max-width: 760px; margin: 0 auto; }
+    h1 { color: #38bdf8; font-size: 32px; line-height: 1.25; margin-bottom: 16px; }
+    .answer { font-size: 18px; color: #e2e8f0; margin-bottom: 28px; }
+    h2 { color: #f59e0b; font-size: 20px; margin: 36px 0 12px; }
+    p, li { color: #94a3b8; }
+    p { margin-bottom: 16px; }
+    ul, ol { margin: 0 0 16px 22px; }
+    li { margin-bottom: 6px; }
+    b { color: #e2e8f0; }
+    a { color: #38bdf8; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .box { background: #1e293b; border-radius: 12px; padding: 20px 24px; margin: 28px 0; border-left: 4px solid #38bdf8; }
+    .box p:last-child { margin-bottom: 0; }
+    .back { display: inline-block; margin-bottom: 24px; color: #64748b; }
+    .cta { display: inline-block; background: #38bdf8; color: #0a0e1a; font-weight: 600; padding: 12px 22px; border-radius: 8px; margin: 8px 12px 8px 0; }
+    .cta.line { background: none; color: #38bdf8; border: 1px solid #38bdf8; }
+    .fine { font-size: 13px; color: #64748b; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <a class="back" href="/">← PropTradeBot</a>
+  <h1>How to automate NinjaTrader 8 from a Mac</h1>
+
+  <p class="answer">NinjaTrader 8 runs on Windows, so PropTradeBot stays on your Mac and drives NT8 on a Windows PC or a Windows virtual machine through a small add-on called PTBBridge. Your TradingView alerts or Discord signals become NT8 orders with a stop, your trims and an end-of-day flatten.</p>
+
+  <div class="box">
+    <p><b>Check your firm's rules first.</b> Many prop firms don't allow automated trading. If you trade a prop account
+    in NinjaTrader, confirming your firm allows it is your responsibility. Setup asks you to confirm it, and PropTradeBot
+    doesn't check it for you.</p>
+  </div>
+
+  <h2>How it works</h2>
+  <ol>
+    <li><b>Find two addresses:</b> the Windows PC's and your Mac's, on your home network.</li>
+    <li><b>Create the add-on's settings file</b> on the Windows PC: which accounts and instruments it may trade, and its
+    own hard limits.</li>
+    <li><b>Add one Windows Firewall rule</b> so only your Mac can reach the add-on.</li>
+    <li><b>Install the add-on</b> in NinjaTrader and compile it. It starts with NinjaTrader from then on.</li>
+    <li><b>Connect PropTradeBot</b> with the add-on's address and token, pick your accounts, and set your flatten time.</li>
+  </ol>
+  <p>About 15 minutes. The <a href="/nt8-guide.html">step-by-step guide</a> has the exact commands.</p>
+
+  <h2>How trades are handled</h2>
+  <ul>
+    <li>Only the stop rests at NinjaTrader. PropTradeBot fires your targets from NinjaTrader's live price.</li>
+    <li>Discord signals are checked against NinjaTrader's own price. No fresh price, no trade.</li>
+    <li>If the link to NinjaTrader drops, no new entries. When it's back, the open trade is rebuilt from NinjaTrader's
+    own positions before anything else happens.</li>
+    <li>The add-on has its own limits: largest order, largest position and a daily loss limit. They hold even if
+    PropTradeBot misbehaves.</li>
+    <li>At your flatten time, every position on those accounts is closed, not only PropTradeBot's.</li>
+  </ul>
+
+  <h2>What you need</h2>
+  <ul>
+    <li>Your Mac, plus a Windows PC or a Windows virtual machine running NinjaTrader 8, logged in, on the same home network.</li>
+    <li>A Windows administrator login, for the one firewall rule.</li>
+    <li>Your signals: TradingView alerts or a Discord provider.</li>
+  </ul>
+  <p>Never forward the add-on's port on your router. It's for your own network only.</p>
+
+  <h2>Try it</h2>
+  <p>$99/month founding price, locked for 12 months, with a 7-day free trial. Start on a practice account.</p>
+  <a class="cta" href="https://whop.com/proptradebot/proptradebot-pro/" target="_blank" rel="noopener">Start your 7-day trial</a>
+  <a class="cta line" href="/support.html">Setup guides</a>
+  <p class="fine" style="margin-top:24px">PropTradeBot is an execution tool. It doesn't provide signals, a strategy or any expected result.</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Take futures trades while you're at work — PropTradeBot</title>
+  <meta name="description" content="Your signals fire during work hours. PropTradeBot takes the trade the moment the alert or Discord call lands, with a stop, trims and a flatten at your time. Mac app.">
+  <link rel="canonical" href="https://proptradebot.com/trade-while-at-work.html">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0a0e1a; color: #e2e8f0; line-height: 1.65; padding: 40px 20px; }
+    .container { max-width: 760px; margin: 0 auto; }
+    h1 { color: #38bdf8; font-size: 32px; line-height: 1.25; margin-bottom: 16px; }
+    .answer { font-size: 18px; color: #e2e8f0; margin-bottom: 28px; }
+    h2 { color: #f59e0b; font-size: 20px; margin: 36px 0 12px; }
+    p, li { color: #94a3b8; }
+    p { margin-bottom: 16px; }
+    ul, ol { margin: 0 0 16px 22px; }
+    li { margin-bottom: 6px; }
+    b { color: #e2e8f0; }
+    a { color: #38bdf8; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .box { background: #1e293b; border-radius: 12px; padding: 20px 24px; margin: 28px 0; border-left: 4px solid #38bdf8; }
+    .box p:last-child { margin-bottom: 0; }
+    .back { display: inline-block; margin-bottom: 24px; color: #64748b; }
+    .cta { display: inline-block; background: #38bdf8; color: #0a0e1a; font-weight: 600; padding: 12px 22px; border-radius: 8px; margin: 8px 12px 8px 0; }
+    .cta.line { background: none; color: #38bdf8; border: 1px solid #38bdf8; }
+    .fine { font-size: 13px; color: #64748b; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <a class="back" href="/">← PropTradeBot</a>
+  <h1>How to take futures trades while you're at work</h1>
+
+  <p class="answer">If your strategy or signal provider calls trades while you're at work, PropTradeBot can take them for you. It runs on your Mac, places the order the moment the alert or Discord call lands, puts the stop on, trims at your targets and flattens at your time. You check in when you can.</p>
+
+  <h2>Why I built it</h2>
+  <p>I follow a Discord provider and trade Topstep. The calls come when the market moves, and that's usually when I'm
+  at work. By the time I'd seen the message, opened the platform and typed the order, the entry was gone. Or I'd get
+  it in and forget the stop. So I built something that takes the call the moment it lands, the same way every time.</p>
+
+  <h2>What it does while you're away</h2>
+  <ul>
+    <li>Enters at market the moment a signal arrives, on one account or several.</li>
+    <li>Puts a stop on every position, straight away.</li>
+    <li>Takes T1 and T2 at your targets, moves the stop to your setting, and manages the runner.</li>
+    <li>Stops taking entries at your cutoff, and flattens at your end-of-day time.</li>
+    <li>Stops for the day when an account hits your daily loss limit.</li>
+  </ul>
+
+  <h2>What it won't do</h2>
+  <ul>
+    <li>Guess. A signal it can't read is refused, with the reason in the app.</li>
+    <li>Chase. A Discord entry too far from the provider's price is refused.</li>
+    <li>Stack trades. One trade at a time.</li>
+    <li>Make a bad strategy good. It executes your signals; the decisions are still yours.</li>
+  </ul>
+
+  <h2>What you need</h2>
+  <ul>
+    <li>A Mac at home that stays awake during your session, with the app open.</li>
+    <li>Your signals: TradingView alerts, or a Discord provider with Chrome open on the channel.</li>
+    <li>A Topstep account with API access, or an account you trade in NinjaTrader 8 (needs a Windows PC or Windows
+    virtual machine; see the <a href="/nt8-guide.html">NinjaTrader guide</a>).</li>
+  </ul>
+
+  <div class="box">
+    <p><b>Check the rules first.</b> Following your firm's rules is your responsibility. For Topstep, read
+    <a href="/support.html#firm-rules">Topstep's automation rules</a> before you go live.</p>
+  </div>
+
+  <h2>Try it</h2>
+  <p>$99/month founding price, locked for 12 months, with a 7-day free trial. Start on a practice account.</p>
+  <a class="cta" href="https://whop.com/proptradebot/proptradebot-pro/" target="_blank" rel="noopener">Start your 7-day trial</a>
+  <a class="cta line" href="/support.html">Setup guides</a>
+  <p class="fine" style="margin-top:24px">PropTradeBot is an execution tool. It doesn't provide signals, a strategy or any expected result.</p>
+</div>
+</body>
+</html>
