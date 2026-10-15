@@ -1,0 +1,27 @@
+# PropTradeBot
+
+> PropTradeBot is a Mac app that executes a futures trader's own signals (TradingView alerts or Discord signal-provider messages) on their Topstep accounts, or on any account they trade in NinjaTrader 8, and manages every trade the same way: one market entry, a stop on every position, T1/T2 trims and a runner, and flat at the trader's end-of-day time. It is an execution and safety tool. It does not provide signals, a strategy or any expected result.
+
+Who it's for: futures traders (MES, ES, MNQ, NQ), often with a day job, who follow a Discord signal provider or run their own TradingView strategy and can't sit at the screen for every call. Many trade prop-firm evaluation accounts.
+
+## Key facts
+
+- Platform: macOS app. Runs locally on the trader's Mac (no VPS); the app must be open during the session.
+- Signals: TradingView webhook alerts; Discord messages from any provider, read by the PropTradeBot Connector for Chrome after the trader teaches the app that provider's entry and exit format. Telegram is not supported.
+- Brokers: Topstep directly through the TopstepX / ProjectX API. Any account in NinjaTrader 8 (prop or personal) through the PTBBridge add-on, which runs on a Windows PC or a Windows virtual machine.
+- Firm rules: many prop firms don't allow automated trading. On the NinjaTrader 8 route the trader confirms their firm allows it; PropTradeBot does not check. No firm endorses PropTradeBot, and it is not affiliated with Topstep, NinjaTrader, TradingView or any signal provider.
+- Safety: refuses rather than guesses (wrong size, a second entry while a trade is open, a message it doesn't understand, a Discord price too far from the market); daily loss limit per account; end-of-day flatten at the trader's own time; optional entry cutoff; no restart while a trade is open.
+- Multiple accounts: one signal to several Topstep accounts (directly, or a leader account with Topstep's Trade Copier), or several NinjaTrader 8 accounts.
+- AI assistants: the app offers a read-only MCP server (`PropTradeBot --mcp`) so Claude Desktop and similar apps can answer "am I flat?" or "why was that signal refused?". It cannot place, change or cancel orders.
+- Price: $99/month founding-member price (locked for 12 months of continuous paid service), 7-day free trial, sold on Whop. Topstep's API access is billed separately by Topstep.
+
+## Pages
+
+- [Home](https://proptradebot.com/): what it does, how it works, pricing
+- [Support and FAQ](https://proptradebot.com/support.html): setup guides, TradingView and Discord setup, Topstep automation rules
+- [NinjaTrader 8 setup guide](https://proptradebot.com/nt8-guide.html): connecting the Mac app to NinjaTrader 8 on Windows
+- [Download](https://proptradebot.com/downloads/PropTradeBot.dmg): notarized macOS app
+- [Start a trial](https://whop.com/proptradebot/proptradebot-pro/)
+- [Terms](https://proptradebot.com/terms.html), [Privacy](https://proptradebot.com/privacy.html)
+
+Contact: support@proptradebot.com

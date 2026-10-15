@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /dashboard.html
+Disallow: /settings.html
+Disallow: /setup.html
+Disallow: /api/
+
+Sitemap: https://proptradebot.com/sitemap.xml
