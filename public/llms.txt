@@ -13,7 +13,7 @@ Who it's for: futures traders (MES, ES, MNQ, NQ), often with a day job, who foll
 - Safety: refuses rather than guesses (wrong size, a second entry while a trade is open, a message it doesn't understand, a Discord price too far from the market); daily loss limit per account; end-of-day flatten at the trader's own time; optional entry cutoff; no restart while a trade is open.
 - Multiple accounts: one signal to several Topstep accounts (directly, or a leader account with Topstep's Trade Copier), or several NinjaTrader 8 accounts.
 - AI assistants: the app offers a read-only MCP server (`PropTradeBot --mcp`) so Claude Desktop and similar apps can answer "am I flat?" or "why was that signal refused?". It cannot place, change or cancel orders.
-- Price: $99/month founding-member price (locked for 12 months of continuous paid service), 7-day free trial, sold on Whop. Topstep's API access is billed separately by Topstep.
+- Price: $99/month founding-member price (locked while the subscription stays active), 7-day free trial, sold on Whop. Topstep's API access is billed separately by Topstep.
 
 ## Pages
 

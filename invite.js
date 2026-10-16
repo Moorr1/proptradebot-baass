@@ -16,7 +16,7 @@ function inviteEmail() {
     'Hi,',
     '',
     "Thanks for joining the PropTradeBot waitlist. A founding seat is open for you:",
-    '$99/month, locked for your first 12 months of continuous paid service.',
+    '$99/month, locked for as long as you stay subscribed.',
     '',
     `Activate here (this link is just for you, please don't share it): ${CHECKOUT}`,
     '',

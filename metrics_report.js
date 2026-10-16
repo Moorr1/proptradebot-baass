@@ -2,13 +2,12 @@
 //   node metrics_report.js            # markdown report (counts only, no emails)
 //   node metrics_report.js --json     # machine-readable
 // Founding members are read from whop_events (every Whop webhook payload is
-// stored there); the 12-month price lock ends 12 months after they joined.
+// stored there). Founders keep $99/month while their subscription stays active (decided 2026-10-16).
 
 const { Pool } = require('pg');
 require('dotenv').config();
 
 const FOUNDING_PLAN = 'plan_L1WL2pR12CuEP';
-const LOCK_WARN_DAYS = 30;
 
 async function report(pool, now = new Date()) {
   const w = (await pool.query(`SELECT
@@ -25,10 +24,7 @@ async function report(pool, now = new Date()) {
       AND payload->'plan'->>'id' = $1
     GROUP BY 1 ORDER BY 2`, [FOUNDING_PLAN])).rows;
   const members = f.map((r, i) => {
-    const lockEnds = new Date(r.joined); lockEnds.setUTCMonth(lockEnds.getUTCMonth() + 12);
-    const daysLeft = Math.ceil((lockEnds - now) / 86400000);
-    return { n: i + 1, joined: r.joined.toISOString().slice(0, 10), lockEnds: lockEnds.toISOString().slice(0, 10),
-             daysLeft, due: daysLeft <= LOCK_WARN_DAYS };
+    return { n: i + 1, joined: r.joined.toISOString().slice(0, 10) };
   });
   // Signups by where they came from (ops #39): link tag and "How did you hear".
   w.by_source = (await pool.query(`SELECT coalesce(source, 'unknown') AS k, count(*)::int AS n
@@ -106,8 +102,7 @@ function markdown(r, stamp) {
     lines.push(`**How they heard:** ${fmt(w.by_heard)}`);
   }
   for (const m of f.members) {
-    lines.push(`- Founding member #${m.n}: joined ${m.joined}, price lock ends ${m.lockEnds}` +
-      (m.due ? ` ⚠️ **${m.daysLeft} days left: move to the public price after notice**` : ''));
+    lines.push(`- Founding member #${m.n}: joined ${m.joined}`);
   }
   return lines.join('\n');
 }
