@@ -34,6 +34,8 @@ app.use('/whop-webhook', express.raw({ type: 'application/json' }));
 app.use('/tv', express.text({ type: '*/*', limit: '16kb' }));  // TradingView webhook raw body
 
 app.use(express.json());
+// Page views for the daily metrics, cookieless, server-side. See pageviews.js.
+require('./pageviews').mountPageviews(app, pool);
 app.use(express.static('public', { extensions: ['html'] }));
 
 // Download redirects — generic URL → versioned file

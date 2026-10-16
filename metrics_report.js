@@ -49,7 +49,30 @@ async function report(pool, now = new Date()) {
   } catch (e) {
     downloads = null;
   }
-  return { waitlist: w, founding: { taken: members.length, of: 20, members }, downloads };
+  // Site visits (pageviews.js), humans only: not bot-like UA and the browser sent
+  // Sec-Fetch-Dest: document. A visit = a human view arriving from outside the site.
+  // null until the site has created the table.
+  let visits = null;
+  try {
+    const human = `NOT is_bot AND is_doc`;
+    const arrived = `${human} AND referrer_host IS DISTINCT FROM '(self)'`;
+    visits = (await pool.query(`SELECT
+        count(*) FILTER (WHERE ${arrived} AND created_at > now() - interval '24 hours')::int AS last_24h,
+        count(*) FILTER (WHERE ${arrived} AND created_at > now() - interval '7 days')::int AS last_7d,
+        count(*) FILTER (WHERE ${human} AND created_at > now() - interval '7 days')::int AS views_7d,
+        count(*) FILTER (WHERE NOT (${human}) AND created_at > now() - interval '7 days')::int AS bots_7d,
+        min(created_at) AS since
+      FROM page_views`)).rows[0];
+    visits.by_referrer = (await pool.query(`SELECT coalesce(referrer_host, 'direct') AS k, count(*)::int AS n
+      FROM page_views WHERE ${arrived} AND created_at > now() - interval '7 days' GROUP BY 1 ORDER BY 2 DESC LIMIT 8`)).rows;
+    visits.by_utm = (await pool.query(`SELECT utm_source AS k, count(*)::int AS n
+      FROM page_views WHERE ${arrived} AND utm_source IS NOT NULL AND created_at > now() - interval '7 days' GROUP BY 1 ORDER BY 2 DESC LIMIT 8`)).rows;
+    visits.by_page = (await pool.query(`SELECT page AS k, count(*)::int AS n
+      FROM page_views WHERE ${arrived} AND created_at > now() - interval '7 days' GROUP BY 1 ORDER BY 2 DESC LIMIT 8`)).rows;
+  } catch (e) {
+    visits = null;
+  }
+  return { waitlist: w, founding: { taken: members.length, of: 20, members }, downloads, visits };
 }
 
 function markdown(r, stamp) {
@@ -65,6 +88,19 @@ function markdown(r, stamp) {
   lines.push(d ? `**App downloads (humans, since 2026-10-06):** ${d.total} total · ${d.last_24h} in the last 24h · ${d.last_7d} in the last 7 days` +
                  (d.by_referrer && d.by_referrer.length ? ` · from (7d): ${fmt(d.by_referrer)}` : '')
                : '**App downloads:** not available yet');
+  const v = r.visits;
+  if (!v || !v.since) {
+    lines.push('**Site visits:** not available yet');
+  } else {
+    const since = new Date(v.since).toISOString().slice(0, 10);
+    lines.push(`**Site visits (humans, since ${since}):** ${v.last_24h} in the last 24h · ${v.last_7d} in the last 7 days` +
+               ` · ${v.views_7d} page views (7d) · ${v.bots_7d} bot/script hits ignored (7d)`);
+    if (v.last_7d) {
+      lines.push(`**Visits from (7d):** ${fmt(v.by_referrer)}`);
+      lines.push(`**Landing pages (7d):** ${fmt(v.by_page)}`);
+      if (v.by_utm.length) lines.push(`**Visits by link (utm_source, 7d):** ${fmt(v.by_utm)}`);
+    }
+  }
   if (w.total) {
     lines.push(`**By link (utm_source):** ${fmt(w.by_source)}`);
     lines.push(`**How they heard:** ${fmt(w.by_heard)}`);
