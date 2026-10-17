@@ -1378,7 +1378,9 @@ app.get('/api/user/subscription', ClerkExpressRequireAuth(), async (req, res) =>
 // =============================================================================
 
 // Helper: provision API key for a Whop member (idempotent)
-async function provisionWhopUser({ whopMembershipId, whopUserId, email, username }) {
+async function provisionWhopUser({ whopMembershipId, whopUserId, email, username, whopStatus }) {
+  // Whop sends status 'trialing' during the free trial; payment.succeeded moves the user to 'active'.
+  const status = whopStatus === 'trialing' ? 'trialing' : 'active';
   // Upsert user by whop_membership_id
   const apiKey = 'ptb_' + crypto.randomBytes(32).toString('hex');
 
@@ -1392,11 +1394,11 @@ async function provisionWhopUser({ whopMembershipId, whopUserId, email, username
     // Existing user — reactivate
     await pool.query(
       `UPDATE users
-         SET subscription_status = 'active',
+         SET subscription_status = $3,
              plan_tier            = 'pro',
              whop_user_id         = $2
        WHERE whop_membership_id = $1`,
-      [whopMembershipId, whopUserId]
+      [whopMembershipId, whopUserId, status]
     );
     console.log('✅ Whop user reactivated:', whopMembershipId);
     return result.rows[0];
@@ -1411,10 +1413,10 @@ async function provisionWhopUser({ whopMembershipId, whopUserId, email, username
        (clerk_id, email, name, plan_tier, subscription_status,
         api_key, api_key_created_at, billing_source, whop_membership_id, whop_user_id)
      VALUES
-       ($1, $2, $3, 'pro', 'active',
+       ($1, $2, $3, 'pro', $7,
         $4, NOW(), 'whop', $5, $6)
      ON CONFLICT (whop_membership_id) DO UPDATE
-       SET subscription_status = 'active',
+       SET subscription_status = EXCLUDED.subscription_status,
            plan_tier            = 'pro',
            whop_user_id         = EXCLUDED.whop_user_id
      RETURNING id, api_key`,
@@ -1424,11 +1426,12 @@ async function provisionWhopUser({ whopMembershipId, whopUserId, email, username
       username || whopMembershipId,
       apiKey,
       whopMembershipId,
-      whopUserId
+      whopUserId,
+      status
     ]
   );
 
-  console.log('✅ Whop user provisioned:', userEmail, whopMembershipId);
+  console.log('✅ Whop user provisioned:', userEmail, whopMembershipId, status);
   return result.rows[0];
 }
 
@@ -1494,7 +1497,7 @@ app.post('/whop-webhook', async (req, res) => {
         const email    = mem.user?.email;
         const username = mem.user?.username || mem.user?.name;
 
-        await provisionWhopUser({ whopMembershipId, whopUserId, email, username });
+        await provisionWhopUser({ whopMembershipId, whopUserId, email, username, whopStatus: mem.status });
         break;
       }
 
