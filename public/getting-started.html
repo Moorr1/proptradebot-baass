@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Getting started with PropTradeBot — the user guide</title>
+  <meta name="description" content="Set up PropTradeBot step by step: install, connect Topstep or NinjaTrader 8, choose accounts, set your strategy and flatten time, then connect TradingView alerts or a Discord provider. Start on a practice account.">
+  <link rel="canonical" href="https://proptradebot.com/getting-started.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="PropTradeBot">
+  <meta property="og:title" content="Getting started with PropTradeBot — the user guide">
+  <meta property="og:description" content="Install, connect, set your strategy and flatten time, then connect your signals. Start on a practice account.">
+  <meta property="og:url" content="https://proptradebot.com/getting-started.html">
+  <meta property="og:image" content="https://proptradebot.com/img/og-card-2026-10.png">
+  <meta property="og:image:width" content="2400">
+  <meta property="og:image:height" content="1260">
+  <meta property="og:image:alt" content="PropTradeBot — your strategy, executed the same way on every account">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://proptradebot.com/img/og-card-2026-10.png">
+  <style>
+    :root{
+      --paper:#f5f3ee; --paper2:#ecE9e1; --ink:#15171b; --ink2:#3b3f46; --muted:#6a6e75; --line:#d9d5cb;
+      --green:#0e7a4a; --green-soft:#e1efe6; --red:#b3261e; --amber:#a86a00;
+      --term:#121417; --termtext:#d7dbe0;
+      --serif:"Iowan Old Style","Charter","Palatino","Georgia",serif;
+      --sans:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Segoe UI",sans-serif;
+      --mono:ui-monospace,"SF Mono","Menlo","Consolas",monospace;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.65}
+    .wrap{max-width:760px;margin:0 auto;padding:0 24px 80px}
+    header{display:flex;justify-content:space-between;align-items:center;padding:22px 0;border-bottom:1px solid var(--line);margin-bottom:48px}
+    .brand{font-family:var(--serif);font-size:22px;color:var(--ink);text-decoration:none}
+    .brand span{color:var(--green)}
+    header nav a{color:var(--ink2);text-decoration:none;margin-left:22px;font-size:15px}
+    .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin-bottom:14px}
+    h1{font-family:var(--serif);font-weight:400;font-size:46px;line-height:1.08;letter-spacing:-.01em;margin-bottom:18px}
+    h1 em{color:var(--green)}
+    .lede{font-size:19px;color:var(--ink2);margin-bottom:12px}
+    .meta{font-family:var(--mono);font-size:13px;color:var(--muted);margin-bottom:28px}
+    .pdf{display:inline-block;font-size:15px;font-weight:600;color:var(--ink);border:1px solid var(--ink);border-radius:6px;padding:9px 16px;text-decoration:none;margin-bottom:36px}
+    .toc{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:18px 0;margin-bottom:40px;columns:2;column-gap:32px}
+    .toc a{display:block;color:var(--ink2);text-decoration:none;font-size:15px;padding:3px 0}
+    .toc a b{font-family:var(--mono);font-weight:400;color:var(--green);margin-right:8px}
+    h2{font-family:var(--serif);font-weight:400;font-size:30px;line-height:1.2;margin:52px 0 14px;padding-top:20px;border-top:1px solid var(--line)}
+    h2 .n{font-family:var(--mono);font-size:14px;color:var(--green);display:block;margin-bottom:6px;letter-spacing:.06em}
+    h3{font-size:17px;font-weight:700;margin:24px 0 8px}
+    p{margin-bottom:14px;color:var(--ink2)}
+    ul,ol{margin:0 0 16px 22px;color:var(--ink2)}
+    li{margin-bottom:7px}
+    b,strong{color:var(--ink)}
+    a{color:var(--green)}
+    code{font-family:var(--mono);font-size:14.5px;background:var(--paper2);padding:1px 6px;border-radius:4px;color:var(--ink)}
+    .ui{font-weight:600;color:var(--ink)}
+    .note{background:var(--green-soft);border-left:3px solid var(--green);border-radius:4px;padding:14px 18px;margin:20px 0}
+    .warn{background:#f6ead6;border-left:3px solid var(--amber);border-radius:4px;padding:14px 18px;margin:20px 0}
+    .note p:last-child,.warn p:last-child{margin-bottom:0}
+    .term{background:var(--term);color:var(--termtext);font-family:var(--mono);font-size:14px;border-radius:8px;padding:14px 18px;margin:16px 0;line-height:1.7}
+    .term .r{color:#f28b82}
+    table{width:100%;border-collapse:collapse;margin:12px 0 20px;font-size:15.5px}
+    th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink2)}
+    th{font-weight:700;color:var(--ink);font-size:14px}
+    footer{margin-top:64px;padding-top:20px;border-top:1px solid var(--line);font-size:13.5px;color:var(--muted)}
+    footer p{color:var(--muted);margin-bottom:8px}
+    @media (max-width:640px){h1{font-size:36px}.toc{columns:1}header nav{display:none}}
+    @media print{
+      @page{size:Letter;margin:18mm 16mm}
+      body{font-size:11.5pt;background:#fff}
+      .wrap{max-width:none;padding:0}
+      header nav,.pdf,.screen-only{display:none}
+      header{margin-bottom:28px}
+      h1{font-size:30pt}
+      h2{break-before:auto;break-after:avoid;margin-top:28px}
+      h3,.term,.note,.warn,table,li:not(:has(ul)){break-inside:avoid}
+      a{color:var(--ink);text-decoration:none}
+      a[href^="http"]::after{content:" (" attr(href) ")";font-size:9pt;color:var(--muted)}
+      .toc a::after{content:none}
+      pre,code{white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word}
+      .table-wrap{overflow:visible}
+      pre{background:var(--paper2);padding:10px 12px;border-radius:6px;font-size:9.5pt}
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="brand" href="/">PropTrade<span>Bot</span></a>
+    <nav><a href="/support.html">Support</a><a href="/nt8-guide.html">NT8 guide</a><a href="/dashboard">Dashboard</a></nav>
+  </header>
+
+  <div class="eyebrow">User guide · app 1.11.2</div>
+  <h1>Getting started with <em>PropTradeBot</em></h1>
+  <p class="lede">From download to your first signal, in order. Start on a practice account, check that it does what you expect, then switch on the accounts you trade.</p>
+  <p class="meta">Updated 16 October 2026 · About 20 minutes, plus your signal source</p>
+  <a class="pdf screen-only" href="/downloads/PropTradeBot-User-Guide.pdf">Download this guide as a PDF</a>
+
+  <nav class="toc">
+    <a href="#before"><b>01</b>Before you start</a>
+    <a href="#install"><b>02</b>Install the app</a>
+    <a href="#key"><b>03</b>Your PropTradeBot API key</a>
+    <a href="#connect"><b>04</b>Connect Topstep</a>
+    <a href="#accounts"><b>05</b>Choose your accounts</a>
+    <a href="#strategy"><b>06</b>Strategy, stops and flatten time</a>
+    <a href="#save"><b>07</b>Review and save</a>
+    <a href="#tradingview"><b>08</b>Connect TradingView alerts</a>
+    <a href="#discord"><b>09</b>Connect a Discord provider</a>
+    <a href="#daily"><b>10</b>Day to day</a>
+    <a href="#refuse"><b>11</b>When it refuses a trade</a>
+    <a href="#help"><b>12</b>Getting help</a>
+  </nav>
+
+  <h2 id="before"><span class="n">01</span>Before you start</h2>
+  <ul>
+    <li><b>A Mac.</b> PropTradeBot is a macOS app and runs on your own Mac, not on a server. It must be running, and the Mac awake, while you trade.</li>
+    <li><b>A PropTradeBot subscription</b> (the 7-day trial counts).</li>
+    <li><b>Where your orders go</b>, one of:
+      <ul>
+        <li><b>Topstep</b>, through Topstep's API. API access is billed by Topstep/ProjectX, separately from PropTradeBot. See <a href="https://help.topstep.com/en/articles/11187768-topstepx-api-access">Topstep's API access article</a> for the current price.</li>
+        <li><b>NinjaTrader 8</b>, for any account you trade in NT8. NT8 runs on a Windows PC or a Windows virtual machine; follow the <a href="/nt8-guide.html">NinjaTrader 8 guide</a> for that part, then come back to step 5. On this route you confirm that your firm allows automated trading through NT8; PropTradeBot doesn't check that for you.</li>
+      </ul>
+    </li>
+    <li><b>Your signals</b>, one of:
+      <ul>
+        <li><b>TradingView alerts</b>: a TradingView plan with webhook alerts, and two-factor authentication turned on.</li>
+        <li><b>A Discord provider</b>: Google Chrome on the same Mac, open on the provider's channel.</li>
+      </ul>
+    </li>
+  </ul>
+  <div class="note"><p>PropTradeBot executes <b>your</b> signals. It doesn't provide signals, trade calls or a strategy, and it doesn't promise any result.</p></div>
+
+  <h2 id="install"><span class="n">02</span>Install the app</h2>
+  <ol>
+    <li>Download the app from <a href="https://proptradebot.com/downloads/PropTradeBot.dmg">proptradebot.com/downloads/PropTradeBot.dmg</a>.</li>
+    <li>Open the DMG and drag <span class="ui">PropTradeBot.app</span> onto the <span class="ui">Applications</span> shortcut.</li>
+    <li>Open PropTradeBot from Applications. It's signed and notarized by Apple, so macOS opens it normally.</li>
+  </ol>
+  <p>Setup opens by itself on first launch. Its four steps are shown at the top: <span class="ui">1. Connect · 2. Accounts · 3. Strategy · 4. Review &amp; Save</span>.</p>
+  <p>Prefer to watch? <a href="https://youtu.be/flwVcYgAV5s">Install PropTradeBot and connect Topstep</a> (5 minutes) covers steps 2 to 7 on a practice account. No trades are placed in it.</p>
+
+  <h2 id="key"><span class="n">03</span>Your PropTradeBot API key</h2>
+  <p>Sign in at <a href="https://proptradebot.com/dashboard">proptradebot.com/dashboard</a> with the <b>same email you used on Whop</b>, and copy your PropTradeBot API key. The first setup screen, <span class="ui">Connect Your Broker(s)</span>, asks for it.</p>
+
+  <h2 id="connect"><span class="n">04</span>Connect Topstep</h2>
+  <h3>Get your Topstep API key (from Topstep's article)</h3>
+  <ol>
+    <li>Create a ProjectX Dashboard account.</li>
+    <li>Subscribe to API Access there.</li>
+    <li>Link the subscription to your TopstepX profile. Skip this and you'll see "User lacks subscription".</li>
+    <li>Generate the API key in TopstepX.</li>
+  </ol>
+  <p>Topstep doesn't give coding or API support, so if a step on their side fails, their article is the place to check.</p>
+  <h3>In the app</h3>
+  <ol>
+    <li>Paste your <b>PropTradeBot API key</b>.</li>
+    <li>Answer <span class="ui">Which prop firm is your account with?</span></li>
+    <li>Enter your <b>Topstep Username</b> (your email) and <b>Topstep API Key</b>, then click <span class="ui">Connect Topstep</span>.</li>
+    <li>When it works, the line changes to <span class="ui">✓ connected</span> and you'll see <span class="ui">Topstep connected.</span> Click <span class="ui">Next →</span>.</li>
+  </ol>
+  <div class="warn"><p>Key fields show <b>dots, not the key</b>, with a <b>Show</b> button. Don't click Show while you're recording or sharing your screen.</p></div>
+
+  <h2 id="accounts"><span class="n">05</span>Choose your accounts</h2>
+  <p><span class="ui">Trading Accounts</span> asks <span class="ui">Do you use Topstep's Trade Copier?</span></p>
+  <table>
+    <tr><th>Answer</th><th>What PropTradeBot does</th></tr>
+    <tr><td><b>Yes</b></td><td>Trades one leader account. Topstep's copier copies it to your other accounts.</td></tr>
+    <tr><td><b>No</b></td><td>Places orders on each account you tick.</td></tr>
+  </table>
+  <p><b>Nothing is selected for you.</b> An account trades only when you turn it on. Practice accounts (their names contain <code>PRAC</code>) are listed first. <b>Start with one practice account.</b></p>
+  <p>Topstep Live Funded accounts can't trade through Topstep's API (Topstep's rule), so PropTradeBot can't trade them.</p>
+
+  <h2 id="strategy"><span class="n">06</span>Strategy, stops and flatten time</h2>
+  <p>Every trade is managed the same way: <b>one market entry, a stop on every position, T1 and T2 trims and a runner</b>, and flat before the close. Sizes, targets and stops are your settings.</p>
+  <h3>Quick presets</h3>
+  <p>MNQ 3-1-1, MNQ 1-1-1, MES 1-1-1, MNQ 4-1-1, MES 4-1-1, or Custom. <b>MES 1-1-1 is the smallest risk</b> (3 MES, 11-point stop), a sensible place to start. A preset sets the other instrument to 0 contracts, and an alert for an instrument left at 0 is refused.</p>
+  <h3>Stop after T1</h3>
+  <p>After T1 fills, the stop moves to your <span class="ui">Stop after T1</span> setting, in points from entry (0 = breakeven). The presets use 7 for MES and 35 for MNQ, so it is <b>not</b> breakeven unless you set 0.</p>
+  <h3>Daily loss limit</h3>
+  <p>Set per account. P&amp;L comes from the broker's own fills. Setup refuses a strategy whose full stop is bigger than the daily loss limit (default $500).</p>
+  <h3>Flatten time and entry cutoff</h3>
+  <ul>
+    <li><b>Set a flatten time.</b> There's no default, and until you set one, new entries are refused.</li>
+    <li>Optional: <span class="ui">Stop taking new entries at</span>, a cutoff before the flatten.</li>
+    <li>Both are on the <span class="ui">Strategy</span> tab after setup, so you can change them any time.</li>
+  </ul>
+
+  <h2 id="save"><span class="n">07</span>Review and save</h2>
+  <p>Check the summary on <span class="ui">✅ Review &amp; Save</span>, then click <span class="ui">💾 Save &amp; Restart Bot</span>. The app restarts into its home screen on the <span class="ui">Status</span> tab. If a position is open, it saves but won't restart until you're flat.</p>
+
+  <h2 id="tradingview"><span class="n">08</span>Connect TradingView alerts</h2>
+  <p>Your chart must be the contract you trade: <code>MES1!</code>, <code>ES1!</code>, <code>MNQ1!</code> or <code>NQ1!</code>. Video version: <a href="https://youtu.be/LIiwuvwtZrY">TradingView alerts: webhook, alert message, test alert</a> (4 minutes).</p>
+  <h3>1. Get your webhook</h3>
+  <p>On <a href="https://proptradebot.com/dashboard">proptradebot.com/dashboard</a>, find <span class="ui">📈 TradingView Strategy</span> and click <span class="ui">Generate Webhook</span>. You'll get a <b>Webhook URL</b>, a <b>Passphrase</b>, the alert message and a <b>Test first</b> message, each with a Copy button.</p>
+  <div class="warn"><p>The webhook URL and passphrase are <b>secrets</b>: together they let anyone send trades to your account. Never post or share them. If they leak, click <span class="ui">Regenerate Webhook</span>: the old URL and passphrase stop working, so paste the new ones into your TradingView alerts.</p></div>
+  <h3>2. Send a test first</h3>
+  <ol>
+    <li>In TradingView, create an alert with any simple condition. Under Notifications, turn on <b>Webhook URL</b> and paste yours.</li>
+    <li>Paste the <b>Test first</b> message as the alert message.</li>
+    <li>When it fires, ask the dashboard's <span class="ui">💬 Setup Assistant</span> "did my test alert arrive?"</li>
+  </ol>
+  <p>The test is recorded on the website and <b>never sent to the app</b>, so it can't place an order. Delete the test alert afterwards.</p>
+  <h3>3. Create the real alert</h3>
+  <p>The dashboard's main message works on an alert <b>on your strategy</b>. Create an alert on your strategy, paste the Webhook URL under Notifications, and paste the message exactly as shown.</p>
+  <p>Using an indicator instead of a strategy? The app's <span class="ui">Alerts</span> tab has one message each for <b>Buy</b>, <b>Sell</b> and <b>Exit</b>. Replace <code>YOUR_WEBHOOK_PASSPHRASE</code> in them with your passphrase.</p>
+  <p>Alerts go TradingView → proptradebot.com → the app, which collects them while it's open and connected. <b>An alert not collected within 60 seconds is dropped, not traded late.</b></p>
+
+  <h2 id="discord"><span class="n">09</span>Connect a Discord provider</h2>
+  <ol>
+    <li>Download the <a href="https://proptradebot.com/downloads/PropTradeBot-Connector-v5.0.2.zip">PropTradeBot Connector</a> and unzip it.</li>
+    <li>In Chrome, open <code>chrome://extensions</code>, turn on <b>Developer mode</b>, click <b>Load unpacked</b> and choose the unzipped folder.</li>
+    <li>Open the Connector from Chrome's toolbar and paste the passphrase from PropTradeBot → <span class="ui">Alerts</span>.</li>
+    <li>In PropTradeBot → <span class="ui">Discord</span>, add the provider and <b>teach</b> it their messages: paste one real entry and one real exit.</li>
+    <li><b>Start in Shadow.</b> The app logs what it would have traded, without trading.</li>
+    <li>Keep the provider's channel open in Chrome while you trade. When the shadow log looks right, switch the provider to <b>Live</b>.</li>
+  </ol>
+  <p>Only messages that match what you taught are traded. Unrecognised or ambiguous messages never trade. If you still have the old Chrome extension (Connector 4.x or earlier), remove it.</p>
+
+  <h2 id="daily"><span class="n">10</span>Day to day</h2>
+  <ul>
+    <li><b>Keep the app running and the Mac awake</b> during your session. If the Mac sleeps, signals in that time are missed.</li>
+    <li>The home tabs are <span class="ui">Status, Alerts, Strategy, Accounts, Discord, Connection</span>, plus a red <span class="ui">Flatten all</span> button.</li>
+    <li><span class="ui">Status</span> shows the connection, the accounts being traded, the open trade, today's P&amp;L and <span class="ui">Recent notices</span>.</li>
+    <li><b>One trade at a time.</b> A second entry while a trade is open is refused ("send an exit first").</li>
+    <li>At your flatten time, positions are closed. On the NT8 route that's <b>every position on those accounts</b>, not only PropTradeBot's.</li>
+    <li>The app won't restart while a trade is open.</li>
+  </ul>
+
+  <h2 id="refuse"><span class="n">11</span>When it refuses a trade</h2>
+  <p>PropTradeBot <b>refuses rather than guesses</b>, and says why under <span class="ui">Status → Recent notices</span>:</p>
+  <div class="term"><span class="r">⛔ Alert refused:</span> …<br><span class="r">⛔ Entry refused:</span> …</div>
+  <p>Common reasons:</p>
+  <ul>
+    <li>No flatten time set, past your entry cutoff, or past the flatten time.</li>
+    <li>The wrong contract size, or an instrument set to 0 contracts.</li>
+    <li>A second entry while a trade is open, or an exit with no open trade.</li>
+    <li>A message it doesn't understand (for strategy alerts: "action must be buy, sell or exit").</li>
+    <li>Discord: the market is more than <b>10 points (S&amp;P)</b> or <b>40 points (Nasdaq)</b> from the provider's price, or no current price can be read.</li>
+  </ul>
+
+  <h2 id="help"><span class="n">12</span>Getting help</h2>
+  <ul>
+    <li>Email <a href="mailto:support@proptradebot.com">support@proptradebot.com</a>. We reply within 24 hours.</li>
+    <li>The PropTradeBot Discord: setup help, release news and feedback. No trade calls, no P&amp;L posts.</li>
+    <li>FAQ and videos: <a href="https://proptradebot.com/support.html">proptradebot.com/support.html</a></li>
+    <li>Firm rules: <a href="https://proptradebot.com/support.html#firm-rules">proptradebot.com/support.html#firm-rules</a>. Always check your firm's current published rules.</li>
+  </ul>
+
+  <footer>
+    <p>PropTradeBot is not affiliated with or endorsed by Topstep, ProjectX, NinjaTrader, TradingView, Discord or any signal provider. It executes your own signals and does not provide signals, trade calls, a strategy or advice. Futures trading involves substantial risk of loss.</p>
+    <p>© 2026 PropTradeBot · <a href="/terms.html">Terms</a> · <a href="/privacy.html">Privacy</a></p>
+  </footer>
+</div>
+</body>
+</html>
