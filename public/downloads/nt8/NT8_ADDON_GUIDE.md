@@ -59,12 +59,29 @@ netsh advfirewall firewall set rule name="PropTradeBot add-on" new remoteip=NEW.
 
 ## 4. Install the add-on in NinjaTrader
 
-1. Copy `PTBBridge.cs` into `Documents\NinjaTrader 8\bin\Custom\AddOns\` on the Windows PC.
-2. In NinjaTrader: **New → NinjaScript Editor**.
-3. In the *NinjaScript Explorer* on the right, double-click **AddOns**, then double-click **PTBBridge**.
-4. Right-click in the code → **Compile**. When it finishes there are no errors at the bottom, and the add-on starts
-   straight away.
-5. Close the NinjaScript Editor.
+1. Download **PTBBridge.zip** to the Windows PC. Don't unzip it.
+2. In NinjaTrader's Control Center: **Tools → Import → NinjaScript Add-On…**
+3. Choose `PTBBridge.zip` and click **Open**.
+4. NinjaTrader warns that the archive "contains NinjaScript add ons which are run automatically" and asks whether
+   to authorize them. Click **Yes**.
+5. NinjaTrader then asks you to shut down and restart it "for the assembly PTBBridge to take effect". Close
+   NinjaTrader completely and start it again.
+
+**Is your Documents folder in OneDrive?** (Common on Windows 11 with a Microsoft account: the path to
+`Documents\NinjaTrader 8` contains `OneDrive`.) Then Import fails with "Import failed. The NinjaScript Archive File
+may contain duplicate method names…" and NinjaTrader may close. That message is misleading: OneDrive keeps
+NinjaTrader's folders read-only, so the import can't finish. Install by hand instead:
+
+1. Copy `PTBBridge.cs` into `Documents\NinjaTrader 8\bin\Custom\AddOns\`.
+2. In NinjaTrader: **New → NinjaScript Editor**. In the *NinjaScript Explorer* on the right, double-click **AddOns**,
+   then **PTBBridge**.
+3. Right-click in the code → **Compile**. When it finishes with no errors at the bottom, close the editor.
+
+OneDrive also copies the add-on's token file (section 5) to your Microsoft cloud. If that matters to you, keep
+NinjaTrader's folder out of OneDrive.
+
+Until the settings file from section 2 is in place, the Log shows "PTBBridge FAILED to start: missing
+…ptbbridge.cfg (no accounts allowed without it)". That's expected: without settings it refuses to trade.
 
 Check it started: in NinjaTrader's Control Center open the **Log** tab and look for
 

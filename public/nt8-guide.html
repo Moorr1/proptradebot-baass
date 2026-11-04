@@ -51,7 +51,7 @@
   <div class="box">
     <p><b>Downloads</b> (save both on the Windows PC)</p>
     <ul>
-      <li><a href="/downloads/nt8/PTBBridge.cs" download>PTBBridge.cs</a>: the add-on</li>
+      <li><a href="/downloads/nt8/PTBBridge.zip" download>PTBBridge.zip</a>: the add-on (don't unzip it)</li>
       <li><a href="/downloads/nt8/ptbbridge.cfg.example" download>ptbbridge.cfg.example</a>: a sample settings file</li>
     </ul>
     <p>You'll also need a Windows administrator login (for one firewall rule) and NinjaTrader 8 logged in.</p>
@@ -95,13 +95,28 @@
 
   <h2>4. Install the add-on in NinjaTrader</h2>
   <ol>
-    <li>Copy <code>PTBBridge.cs</code> into <code>Documents\NinjaTrader 8\bin\Custom\AddOns\</code> on the Windows PC.</li>
-    <li>In NinjaTrader: <b>New → NinjaScript Editor</b>.</li>
-    <li>In the <i>NinjaScript Explorer</i> on the right, double-click <b>AddOns</b>, then double-click <b>PTBBridge</b>.</li>
-    <li>Right-click in the code → <b>Compile</b>. When it finishes there are no errors at the bottom, and the add-on
-    starts straight away.</li>
-    <li>Close the NinjaScript Editor.</li>
+    <li>In NinjaTrader's Control Center: <b>Tools → Import → NinjaScript Add-On…</b></li>
+    <li>Choose <code>PTBBridge.zip</code> and click <b>Open</b>.</li>
+    <li>NinjaTrader warns that the archive "contains NinjaScript add ons which are run automatically" and asks
+    whether to authorize them. Click <b>Yes</b>.</li>
+    <li>NinjaTrader then asks you to shut down and restart it "for the assembly PTBBridge to take effect".
+    Close NinjaTrader completely and start it again.</li>
   </ol>
+  <p><b>Is your Documents folder in OneDrive?</b> (Common on Windows 11 with a Microsoft account: the path to
+  <code>Documents\NinjaTrader 8</code> contains <code>OneDrive</code>.) Then Import fails with "Import failed. The
+  NinjaScript Archive File may contain duplicate method names…" and NinjaTrader may close. That message is
+  misleading: OneDrive keeps NinjaTrader's folders read-only, so the import can't finish. Install by hand instead:</p>
+  <ol>
+    <li>Download <a href="/downloads/nt8/PTBBridge.cs" download>PTBBridge.cs</a> and copy it into
+    <code>Documents\NinjaTrader 8\bin\Custom\AddOns\</code>.</li>
+    <li>In NinjaTrader: <b>New → NinjaScript Editor</b>. In the <i>NinjaScript Explorer</i> on the right, double-click
+    <b>AddOns</b>, then <b>PTBBridge</b>.</li>
+    <li>Right-click in the code → <b>Compile</b>. When it finishes with no errors at the bottom, close the editor.</li>
+  </ol>
+  <p>OneDrive also copies the add-on's token file (step 5) to your Microsoft cloud. If that matters to you, keep
+  NinjaTrader's folder out of OneDrive.</p>
+  <p>Until the settings file from step 2 is in place, the Log shows "PTBBridge FAILED to start: missing …ptbbridge.cfg
+  (no accounts allowed without it)". That's expected: without settings it refuses to trade.</p>
   <p>Check it started: in NinjaTrader's Control Center open the <b>Log</b> tab and look for</p>
   <pre><code>PTBBridge listening on 192.168.1.20:7811 allow_from=192.168.1.15 accounts=... roots=MES ...</code></pre>
   <p>with your addresses. The add-on starts by itself every time NinjaTrader starts.</p>
