@@ -36,6 +36,8 @@ app.use('/tv', express.text({ type: '*/*', limit: '16kb' }));  // TradingView we
 app.use(express.json());
 // Page views for the daily metrics, cookieless, server-side. See pageviews.js.
 require('./pageviews').mountPageviews(app, pool);
+// Old URL contained the NinjaTrader trademark (vendor guidelines forbid it in URLs). Permanent redirect keeps search traffic.
+app.get(['/ninjatrader-8-mac.html', '/ninjatrader-8-mac'], (req, res) => res.redirect(301, '/nt8-mac.html'));
 app.use(express.static('public', { extensions: ['html'] }));
 
 // Download redirects — generic URL → versioned file
