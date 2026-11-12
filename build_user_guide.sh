@@ -10,7 +10,10 @@ python3 - "$T/guide.html" <<'PY'
 import re, sys
 g = open("public/getting-started.html").read()
 n = open("public/nt8-guide.html").read()
-body = re.search(r'<div class="container">(.*)</div>\s*</body>', n, re.S).group(1)
+# The page ends with the NinjaTrader-required disclosure footer (2026-11-10); take the guide body up to it.
+# The PDF keeps one disclosure footer: getting-started's, at the very end.
+m = re.search(r'<div class="container">(.*)</div>\s*<!-- ptb-disclosures -->', n, re.S) or re.search(r'<div class="container">(.*)</div>\s*</body>', n, re.S)
+body = m.group(1)
 body = re.sub(r'<a class="back"[^>]*>.*?</a>', "", body, flags=re.S)
 body = re.sub(r"<h1>(.*?)</h1>", r'<h2 id="nt8"><span class="n">APPENDIX</span>\1</h2>', body, flags=re.S)
 body = re.sub(r"<h2>(.*?)</h2>", r"<h3>\1</h3>", body, flags=re.S)
