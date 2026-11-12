@@ -13,7 +13,7 @@ n = open("public/nt8-guide.html").read()
 # The page ends with the NinjaTrader-required disclosure footer (2026-11-10); take the guide body up to it.
 # The PDF keeps one disclosure footer: getting-started's, at the very end.
 m = re.search(r'<div class="container">(.*)</div>\s*<!-- ptb-disclosures -->', n, re.S) or re.search(r'<div class="container">(.*)</div>\s*</body>', n, re.S)
-body = m.group(1)
+body = re.sub(r'<header class="site">.*?</header>', "", m.group(1), flags=re.S)   # site header is for the web page, not the PDF appendix
 body = re.sub(r'<a class="back"[^>]*>.*?</a>', "", body, flags=re.S)
 body = re.sub(r"<h1>(.*?)</h1>", r'<h2 id="nt8"><span class="n">APPENDIX</span>\1</h2>', body, flags=re.S)
 body = re.sub(r"<h2>(.*?)</h2>", r"<h3>\1</h3>", body, flags=re.S)

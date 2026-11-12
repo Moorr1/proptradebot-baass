@@ -4,91 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Support — PropTradeBot</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #0a0e1a;
-      color: #e2e8f0;
-      line-height: 1.6;
-      padding: 40px 20px;
-    }
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-    }
-    h1 {
-      color: #38bdf8;
-      font-size: 32px;
-      margin-bottom: 8px;
-    }
-    .subtitle {
-      color: #64748b;
-      font-size: 16px;
-      margin-bottom: 32px;
-    }
-    h2 {
-      color: #f59e0b;
-      font-size: 20px;
-      margin: 32px 0 12px;
-    }
-    p {
-      margin-bottom: 16px;
-      color: #94a3b8;
-    }
-    .contact-box {
-      background: #1e293b;
-      border-radius: 12px;
-      padding: 24px;
-      margin: 24px 0;
-      border-left: 4px solid #38bdf8;
-    }
-    .contact-box h3 {
-      color: #38bdf8;
-      margin-bottom: 8px;
-    }
-    a {
-      color: #38bdf8;
-      text-decoration: none;
-    }
-    a:hover {
-      text-decoration: underline;
-    }
-    .faq {
-      margin: 16px 0;
-    }
-    .faq-item {
-      background: #0f172a;
-      border-radius: 8px;
-      padding: 16px;
-      margin-bottom: 12px;
-    }
-    .faq-item h4 {
-      color: #e2e8f0;
-      margin-bottom: 8px;
-    }
-    .faq-item p {
-      margin: 0;
-    }
-    .back {
-      margin-top: 40px;
-      padding-top: 20px;
-      border-top: 1px solid #1e293b;
-    }
-    .rules-note { color: #94a3b8; font-size: 14px; margin-bottom: 16px; }
-    h3 { margin: 28px 0 10px; }
-    table.rules { width: 100%; border-collapse: collapse; margin-bottom: 8px; font-size: 14px; }
-    table.rules th, table.rules td { border: 1px solid #1e293b; padding: 10px 12px; text-align: left; vertical-align: top; }
-    table.rules th { background: #111827; color: #e2e8f0; }
-    table.rules td { color: #94a3b8; }
-    table.rules td:first-child { color: #e2e8f0; white-space: nowrap; }
-  </style>
+  <link rel="stylesheet" href="/guide.css">
   <link rel="canonical" href="https://proptradebot.com/support.html">
   <meta name="description" content="PropTradeBot setup guides and answers: TradingView alerts, Discord signals, NinjaTrader 8, Topstep automation rules, Mac requirements, billing.">
-  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Do I need a browser extension?", "acceptedAnswer": {"@type": "Answer", "text": "Only for Discord providers. TradingView alerts need nothing in a browser: they are delivered from our servers directly to your bot, which checks for them every few seconds. Discord providers need the PropTradeBot Connector for Chrome (5.0 or later), which reads the channel you have open; see \"How do I connect a Discord signal provider?\" below. If you installed the old Chrome extension (Connector 4.x or earlier), remove it: it does not work with current versions of the app."}}, {"@type": "Question", "name": "The bot says \"Not connected\" — what's wrong?", "acceptedAnswer": {"@type": "Answer", "text": "Check that PropTradeBot is running on your computer, then look at its Status and Connection tabs. If it says your API key was rejected, generate a fresh key on your dashboard , then in PropTradeBot open Connection → Run setup again and paste it."}}, {"@type": "Question", "name": "Can I use PropTradeBot on Windows?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. PropTradeBot runs on Windows 10 and 11 as well as macOS. Download the Windows installer from your dashboard."}}, {"@type": "Question", "name": "How do I cancel my subscription?", "acceptedAnswer": {"@type": "Answer", "text": "Email support@proptradebot.com and we'll cancel immediately. Your access continues until the end of your billing period. No questions asked."}}, {"@type": "Question", "name": "Is my trading data secure?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. We use industry-standard encryption and never store your broker credentials. All API keys are encrypted at rest. Your trading bot runs locally on your computer and sends orders straight to your broker. TradingView alerts reach your Mac through proptradebot.com; Discord signals are read in your own Chrome."}}, {"@type": "Question", "name": "What signal formats are supported?", "acceptedAnswer": {"@type": "Answer", "text": "TradingView alerts, in PropTradeBot's alert format: the app gives you the exact message to paste, with a Copy button. The chart must be the contract you trade. Anything else is refused, with the reason shown in the app; PropTradeBot never guesses. Discord signals from any provider you follow (app 1.10 or later). You teach the app the provider's format by pasting one real message of each kind — an entry such as ES Long 7712 , and an exit such as all out — and it trades only messages that match. A message it doesn't recognise, or that could be read two ways, is never traded. Telegram is not supported."}}, {"@type": "Question", "name": "How do I connect a Discord signal provider?", "acceptedAnswer": {"@type": "Answer", "text": "You need PropTradeBot 1.10 or later and Google Chrome on the same Mac. Download the PropTradeBot Connector and unzip it. In Chrome, open chrome://extensions , turn on Developer mode , click Load unpacked and choose the unzipped folder. Open the Connector from Chrome's toolbar and paste the passphrase from PropTradeBot → Alerts. In PropTradeBot → Discord, add the provider and teach it their messages. Start in Shadow : the app logs what it would have traded without trading. Keep the provider's channel open in Chrome while you trade. When the shadow log looks right, switch the provider to Live . An entry is refused when the market is more than 10 points (S&P) or 40 points (Nasdaq) from the provider's price, or when the app can't read a current price. That catches typos and late messages. PropTradeBot is not affiliated with any signal provider."}}, {"@type": "Question", "name": "What do I need from TradingView?", "acceptedAnswer": {"@type": "Answer", "text": "A TradingView plan that includes webhook alerts (check TradingView's plan comparison), with two-factor authentication turned on: TradingView only sends webhook alerts from accounts with 2-factor authentication. Your chart must be the contract you trade (MES1!, ES1!, MNQ1! or NQ1!). Get TradingView (Affiliate link: PropTradeBot earns a commission if you subscribe through it. It costs you nothing extra, and you can use any TradingView link you like.)"}}, {"@type": "Question", "name": "What happens when the market is closed?", "acceptedAnswer": {"@type": "Answer", "text": "The bot stays connected and ready. If a signal arrives while the market is closed, your broker should reject the order, so it isn’t filled. The bot logs the rejection and continues monitoring."}}, {"@type": "Question", "name": "Will I miss trades if my Mac goes to sleep?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. PropTradeBot runs locally on your computer and must be awake to receive signals and execute trades. We recommend disabling sleep mode during trading hours (System Settings → Battery → Prevent automatic sleeping). The bot will reconnect automatically when your Mac wakes up."}}, {"@type": "Question", "name": "Which prop firms are supported?", "acceptedAnswer": {"@type": "Answer", "text": "PropTradeBot trades Topstep directly (through the TopstepX / ProjectX API). See Topstep's automation rules below. It can also trade any account you trade in NinjaTrader 8 , prop or personal, through our add-on ( setup guide ). Many prop firms don't allow automated trading, so check your firm's rules first: that's your responsibility, and setup asks you to confirm it. Questions? support@proptradebot.com ."}}]}</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Do I need a browser extension?", "acceptedAnswer": {"@type": "Answer", "text": "Only for Discord providers. TradingView alerts need nothing in a browser: they are delivered from our servers directly to your bot, which checks for them every few seconds. Discord providers need the PropTradeBot Connector for Chrome (5.0 or later), which reads the channel you have open; see \"How do I connect a Discord signal provider?\" below. If you installed the old Chrome extension (Connector 4.x or earlier), remove it: it does not work with current versions of the app."}}, {"@type": "Question", "name": "The bot says \"Not connected\" — what's wrong?", "acceptedAnswer": {"@type": "Answer", "text": "Check that PropTradeBot is running on your computer, then look at its Status and Connection tabs. If it says your API key was rejected, generate a fresh key on your dashboard , then in PropTradeBot open Connection → Run setup again and paste it."}}, {"@type": "Question", "name": "Can I use PropTradeBot on Windows?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. PropTradeBot runs on Windows 10 and 11 as well as macOS. Download the Windows installer from your dashboard."}}, {"@type": "Question", "name": "How do I cancel my subscription?", "acceptedAnswer": {"@type": "Answer", "text": "Email support@proptradebot.com and we'll cancel immediately. Your access continues until the end of your billing period. No questions asked."}}, {"@type": "Question", "name": "Is my trading data secure?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. We use industry-standard encryption and never store your broker credentials. All API keys are encrypted at rest. Your trading bot runs locally on your computer and sends orders straight to your broker. TradingView alerts reach your computer through proptradebot.com; Discord signals are read in your own Chrome."}}, {"@type": "Question", "name": "What signal formats are supported?", "acceptedAnswer": {"@type": "Answer", "text": "TradingView alerts, in PropTradeBot's alert format: the app gives you the exact message to paste, with a Copy button. The chart must be the contract you trade. Anything else is refused, with the reason shown in the app; PropTradeBot never guesses. Discord signals from any provider you follow (app 1.10 or later). You teach the app the provider's format by pasting one real message of each kind — an entry such as ES Long 7712 , and an exit such as all out — and it trades only messages that match. A message it doesn't recognise, or that could be read two ways, is never traded. Telegram is not supported."}}, {"@type": "Question", "name": "How do I connect a Discord signal provider?", "acceptedAnswer": {"@type": "Answer", "text": "You need PropTradeBot 1.10 or later and Google Chrome on the same Mac. Download the PropTradeBot Connector and unzip it. In Chrome, open chrome://extensions , turn on Developer mode , click Load unpacked and choose the unzipped folder. Open the Connector from Chrome's toolbar and paste the passphrase from PropTradeBot → Alerts. In PropTradeBot → Discord, add the provider and teach it their messages. Start in Shadow : the app logs what it would have traded without trading. Keep the provider's channel open in Chrome while you trade. When the shadow log looks right, switch the provider to Live . An entry is refused when the market is more than 10 points (S&P) or 40 points (Nasdaq) from the provider's price, or when the app can't read a current price. That catches typos and late messages. PropTradeBot is not affiliated with any signal provider."}}, {"@type": "Question", "name": "What do I need from TradingView?", "acceptedAnswer": {"@type": "Answer", "text": "A TradingView plan that includes webhook alerts (check TradingView's plan comparison), with two-factor authentication turned on: TradingView only sends webhook alerts from accounts with 2-factor authentication. Your chart must be the contract you trade (MES1!, ES1!, MNQ1! or NQ1!). Get TradingView (Affiliate link: PropTradeBot earns a commission if you subscribe through it. It costs you nothing extra, and you can use any TradingView link you like.)"}}, {"@type": "Question", "name": "What happens when the market is closed?", "acceptedAnswer": {"@type": "Answer", "text": "The bot stays connected and ready. If a signal arrives while the market is closed, your broker should reject the order, so it isn’t filled. The bot logs the rejection and continues monitoring."}}, {"@type": "Question", "name": "Will I miss trades if my Mac goes to sleep?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. PropTradeBot runs locally on your computer and must be awake to receive signals and execute trades. We recommend disabling sleep mode during trading hours (System Settings → Battery → Prevent automatic sleeping). The bot will reconnect automatically when your computer wakes up."}}, {"@type": "Question", "name": "Which prop firms are supported?", "acceptedAnswer": {"@type": "Answer", "text": "PropTradeBot trades Topstep directly (through the TopstepX / ProjectX API). See Topstep's automation rules below. It can also trade any account you trade in NinjaTrader 8 , prop or personal, through our add-on ( setup guide ). Many prop firms don't allow automated trading, so check your firm's rules first: that's your responsibility, and setup asks you to confirm it. Questions? support@proptradebot.com ."}}]}</script>
 </head>
 <body>
   <div class="container">
+  <header class="site"><a class="brand" href="/">PropTrade<span>Bot</span></a><nav><a href="/getting-started.html">Getting started</a><a href="/nt8-guide.html">NinjaTrader</a><a href="/support.html">Support</a><a href="/#pricing">Pricing</a></nav></header>
     <h1>Support</h1>
     <p class="subtitle">We're here to help you get the most out of PropTradeBot.</p>
 
@@ -128,7 +51,7 @@
 
       <div class="faq-item">
         <h4>Is my trading data secure?</h4>
-        <p>Yes. We use industry-standard encryption and never store your broker credentials. All API keys are encrypted at rest. Your trading bot runs locally on your computer and sends orders straight to your broker. TradingView alerts reach your Mac through proptradebot.com; Discord signals are read in your own Chrome.</p>
+        <p>Yes. We use industry-standard encryption and never store your broker credentials. All API keys are encrypted at rest. Your trading bot runs locally on your computer and sends orders straight to your broker. TradingView alerts reach your computer through proptradebot.com; Discord signals are read in your own Chrome.</p>
       </div>
 
       <div class="faq-item">
@@ -163,7 +86,7 @@
 
       <div class="faq-item">
         <h4>Will I miss trades if my Mac goes to sleep?</h4>
-        <p>Yes. PropTradeBot runs locally on your computer and must be awake to receive signals and execute trades. We recommend disabling sleep mode during trading hours (System Settings → Battery → Prevent automatic sleeping). The bot will reconnect automatically when your Mac wakes up.</p>
+        <p>Yes. PropTradeBot runs locally on your computer and must be awake to receive signals and execute trades. We recommend disabling sleep mode during trading hours (System Settings → Battery → Prevent automatic sleeping). The bot will reconnect automatically when your computer wakes up.</p>
       </div>
 
       <div class="faq-item">

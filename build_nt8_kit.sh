@@ -9,6 +9,8 @@ T=$(mktemp -d); D=public/downloads/nt8
 python3 - "$T/nt8.html" <<'PY'
 import sys
 t = open("public/nt8-guide.html").read()
+# Inline the shared stylesheet: the PDF must not depend on the live site (or a relative /guide.css under file://).
+t = t.replace('<link rel="stylesheet" href="/guide.css">', "<style>" + open("public/guide.css").read() + "</style>")
 css = ("<style>@media print{*{color:#111 !important;background:transparent !important;box-shadow:none !important;border-color:#bbb !important}"
        "a{color:#1d4ed8 !important}pre,code{background:#f1f5f9 !important}.nt-badge img{filter:none}nav,.back{display:none !important}}</style>")
 assert t.count("</head>") == 1
