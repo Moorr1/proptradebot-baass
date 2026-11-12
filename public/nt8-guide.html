@@ -40,9 +40,14 @@
   <p class="subtitle">Connect PropTradeBot to NinjaTrader 8: on the same Windows PC, or from your Mac to NT8 on Windows. About 15 minutes.</p>
   <div class="nt-badge" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:14px 0 22px"><a href="https://ninjatraderus.pxf.io/WOrvE3" target="_blank" rel="sponsored noopener" style="display:inline-block;padding:18px;line-height:0"><img src="/img/nt-wordmark.png" alt="NinjaTrader" width="222" height="28" style="display:block"></a><span style="font-size:15px">Works with NinjaTrader 8. <a href="https://ninjatraderus.pxf.io/WOrvE3" target="_blank" rel="sponsored noopener">Download NinjaTrader free</a> for charting and simulation.</span></div>
 
-  <p>PropTradeBot runs on your Mac. NinjaTrader 8 runs on Windows, either a separate Windows PC or a Windows virtual
-  machine on your Mac. A small NinjaTrader add-on, <b>PTBBridge</b>, connects the two. It places PropTradeBot's orders
-  in NinjaTrader and enforces its own hard limits, even if PropTradeBot stops.</p>
+  <p>A small NinjaTrader add-on, <b>PTBBridge</b>, connects PropTradeBot to NinjaTrader 8. It places PropTradeBot's
+  orders in NinjaTrader and enforces its own hard limits, even if PropTradeBot stops. There are two ways to set it up:</p>
+  <ul>
+    <li><a href="#same-pc"><b>PropTradeBot and NinjaTrader on the same Windows PC</b></a>: the simple one. No addresses,
+    no firewall rule, no administrator login. About 10 minutes.</li>
+    <li><a href="#mac-and-windows"><b>PropTradeBot on a Mac, NinjaTrader on Windows</b></a>: a separate Windows PC or a
+    Windows virtual machine on your Mac. About 15 minutes and a Windows administrator login.</li>
+  </ul>
 
   <div class="box warn">
     <p><b>Before you start:</b> confirm that your prop firm allows automated trading through NinjaTrader 8 on your
@@ -55,8 +60,50 @@
       <li><a href="/downloads/nt8/PTBBridge.zip" download>PTBBridge.zip</a>: the add-on (don't unzip it)</li>
       <li><a href="/downloads/nt8/ptbbridge.cfg.example" download>ptbbridge.cfg.example</a>: a sample settings file</li>
     </ul>
-    <p>You'll also need a Windows administrator login (for one firewall rule) and NinjaTrader 8 logged in.</p>
+    <p>You'll also need NinjaTrader 8 logged in. The Mac setup also needs a Windows administrator login, for one
+    firewall rule.</p>
   </div>
+
+  <h2 id="same-pc" style="margin-top:36px">Option A: PropTradeBot and NinjaTrader on the same Windows PC</h2>
+  <p>Install <a href="/getting-started.html#install">PropTradeBot for Windows</a> on the PC that runs NinjaTrader 8.
+  Nothing leaves the PC: in this setup the add-on only accepts connections from the PC it runs on.</p>
+
+  <h3>A1. Create the add-on's settings file</h3>
+  <p>Create <code>Documents\NinjaTrader 8\ptbbridge.cfg</code>, starting from <code>ptbbridge.cfg.example</code>.
+  Set <code>accounts=</code>, <code>instruments=</code>, <code>max_order_qty=</code>, <code>max_position_qty=</code> and
+  <code>daily_loss_limit=</code> exactly as in the table in <a href="#settings-file">step 2 of option B</a>, then
+  <b>delete the <code>listen=</code> and <code>allow_from=</code> lines</b>. They're only for a Mac on another
+  machine; without them the add-on accepts connections from this PC only.</p>
+  <p>Windows may save the file as <code>ptbbridge.cfg.txt</code>. In File Explorer turn on
+  <b>View → Show → File name extensions</b> to check, and rename it if so.</p>
+
+  <h3>A2. Install the add-on in NinjaTrader</h3>
+  <p>Follow <a href="#install-addon">step 4 of option B</a> (Tools → Import, and the OneDrive note). Then check it
+  started: in NinjaTrader's Control Center open the <b>Log</b> tab and look for</p>
+  <pre><code>PTBBridge listening on 127.0.0.1:7811 allow_from=(this PC only) accounts=... roots=MES ...</code></pre>
+  <p>The add-on starts by itself every time NinjaTrader starts.</p>
+
+  <h3>A3. Connect PropTradeBot</h3>
+  <ol>
+    <li>Open PropTradeBot. In setup, choose the firm option <b>I trade through NinjaTrader 8 (any firm)</b> and tick
+    the confirmation.</li>
+    <li>Setup fills in <b>Add-on address</b> <code>127.0.0.1</code> (this PC) and <b>Port</b> <code>7811</code>. Keep both.</li>
+    <li>Setup finds the add-on's token on this PC by itself and shows <b>"Found the add-on's token"</b>. You don't
+    need to copy it. If setup asks for the token instead, NinjaTrader hasn't started the add-on yet (A2), or open
+    <code>Documents\NinjaTrader 8\ptbbridge_token.txt</code> and paste it.</li>
+    <li><b>Connect &amp; Find My Accounts</b>, then pick the account(s) PropTradeBot should trade.</li>
+    <li><b>Flatten my NinjaTrader accounts at:</b> set it before your firm's cutoff, with a margin. It's required and
+    has no default. At that time PropTradeBot closes <b>every position on those accounts</b>, not only its own trades,
+    and takes no new entries until the 6:00 PM ET reopen.</li>
+    <li>Set your strategy and <b>Save &amp; Restart</b>.</li>
+  </ol>
+  <p>NinjaTrader and PropTradeBot must both stay running, and NinjaTrader logged in, while PropTradeBot trades. Closing
+  PropTradeBot's window only minimises it to the taskbar; to stop it, use <b>Quit PropTradeBot</b> in its menu.</p>
+  <p><b>If it doesn't connect</b> on the same PC, the usual causes are an address other than <code>127.0.0.1</code>,
+  NinjaTrader not restarted since the add-on was installed, or NinjaTrader not running. See
+  <a href="#doesnt-connect">If it doesn't connect</a>.</p>
+
+  <h2 id="mac-and-windows" style="margin-top:36px">Option B: PropTradeBot on a Mac, NinjaTrader on Windows</h2>
 
   <h2>1. Find the two addresses</h2>
   <p>You'll need two addresses, one for each machine.</p>
@@ -70,7 +117,7 @@
   DHCP settings (often called "DHCP reservation" or "static lease"). Otherwise, if one changes, repeat the steps below
   that use it.</p>
 
-  <h2>2. Create the add-on's settings file</h2>
+  <h2 id="settings-file">2. Create the add-on's settings file</h2>
   <p>On the Windows PC, create the file <code>Documents\NinjaTrader 8\ptbbridge.cfg</code>. Start from
   <code>ptbbridge.cfg.example</code> and change:</p>
   <div class="table-wrap"><table>
@@ -94,7 +141,7 @@
   <pre><code>netsh advfirewall firewall set rule name="PropTradeBot add-on" new remoteip=NEW.MAC.ADDRESS</code></pre>
   <p><b>Never forward port 7811 on your router.</b> The add-on is for your own local network only.</p>
 
-  <h2>4. Install the add-on in NinjaTrader</h2>
+  <h2 id="install-addon">4. Install the add-on in NinjaTrader</h2>
   <ol>
     <li>In NinjaTrader's Control Center: <b>Tools → Import → NinjaScript Add-On…</b></li>
     <li>Choose <code>PTBBridge.zip</code> and click <b>Open</b>.</li>
@@ -142,7 +189,7 @@
   <p>NinjaTrader must stay running and logged in while PropTradeBot trades. If the connection drops, PropTradeBot stops
   taking entries, then rebuilds any open trade from NinjaTrader's own positions when it reconnects.</p>
 
-  <h2>If it doesn't connect</h2>
+  <h2 id="doesnt-connect">If it doesn't connect</h2>
   <div class="table-wrap"><table>
     <tr><th>What you see</th><th>What it means</th><th>Fix</th></tr>
     <tr><td>NinjaTrader Log: <code>PTBBridge refused a connection from 192.168.1.37 (not in allow_from)</code></td>
