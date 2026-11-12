@@ -1,6 +1,6 @@
 # PropTradeBot
 
-> PropTradeBot is a Mac app that executes a futures trader's own signals (TradingView alerts or Discord signal-provider messages) on their Topstep accounts, or on any account they trade in NinjaTrader 8, and manages every trade the same way: one market entry, a stop on every position, T1/T2 trims and a runner, and flat at the trader's end-of-day time. It is an execution and safety tool. It does not provide signals, a strategy or any expected result.
+> PropTradeBot is a Mac and Windows app that executes a futures trader's own signals (TradingView alerts or Discord signal-provider messages) on their Topstep accounts, or on any account they trade in NinjaTrader 8, and manages every trade the same way: one market entry, a stop on every position, T1/T2 trims and a runner, and flat at the trader's end-of-day time. It is an execution and safety tool. It does not provide signals, a strategy or any expected result.
 
 Who it's for: futures traders (MES, ES, MNQ, NQ), often with a day job, who follow a Discord signal provider or run their own TradingView strategy and can't sit at the screen for every call. Many trade prop-firm evaluation accounts.
 
@@ -19,7 +19,7 @@ Who it's for: futures traders (MES, ES, MNQ, NQ), often with a day job, who foll
 
 - [Home](https://proptradebot.com/): what it does, how it works, pricing
 - [Support and FAQ](https://proptradebot.com/support.html): setup guides, TradingView and Discord setup, Topstep automation rules
-- [NinjaTrader 8 setup guide](https://proptradebot.com/nt8-guide.html): connecting the Mac app to NinjaTrader 8 on Windows
+- [NinjaTrader 8 setup guide](https://proptradebot.com/nt8-guide.html): connecting the app to NinjaTrader 8 (same Windows PC, or from a Mac)
 - [Discord signals to Topstep](https://proptradebot.com/discord-signals-topstep.html)
 - [TradingView alerts to Topstep](https://proptradebot.com/tradingview-alerts-topstep.html)
 - [NinjaTrader 8 from a Mac](https://proptradebot.com/nt8-mac.html)
