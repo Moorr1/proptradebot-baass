@@ -153,11 +153,27 @@
   .terms{font-size:13px;color:var(--muted);margin-top:14px}.terms a{text-decoration:underline}
   .ctas{flex-wrap:wrap}
   @media (max-width:880px){#auth-buttons{gap:14px}#auth-buttons a:not(.btn){display:none}#auth-buttons button.link{font-size:14px}#auth-buttons .btn,#user-nav .btn{padding:10px 14px;font-size:14px}#user-email{display:none}}
+
+  /* 2026-11-12 home refresh: announcement bar, platform strip, works-with grid */
+  .announce{background:var(--ink);color:#e9e6de;font:13px/1.4 var(--sans);text-align:center;padding:9px 16px}
+  .announce a{color:#fff;text-decoration:underline;text-underline-offset:3px}
+  .announce b{color:#8fd3ad;font-weight:600}
+  .platforms{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;justify-content:center;border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);padding:16px 8px;margin:8px 0 0;font:12.5px/1.3 var(--mono);color:var(--ink2)}
+  .platforms span{white-space:nowrap}
+  .platforms i{font-style:normal;color:var(--muted)}
+  .works{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:26px}
+  .works a{display:block;border:1px solid var(--line);border-radius:10px;padding:18px 20px;color:inherit;text-decoration:none;background:#fbfaf6;transition:border-color .15s,transform .15s}
+  .works a:hover{border-color:var(--green);transform:translateY(-1px)}
+  .works h4{margin:0 0 6px;font:600 16px/1.3 var(--sans)} .works h4 span{color:var(--green)}
+  .works p{margin:0;font-size:14px;color:var(--muted);line-height:1.5}
+  @media (max-width:820px){.works{grid-template-columns:1fr 1fr}} @media (max-width:540px){.works{grid-template-columns:1fr}}
 </style>
   <link rel="canonical" href="https://proptradebot.com/">
   <script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "PropTradeBot", "operatingSystem": "macOS, Windows 10, Windows 11", "applicationCategory": "FinanceApplication", "description": "Send your TradingView alerts or Discord signals to PropTradeBot and it runs the full managed trade on your Topstep or NinjaTrader 8 accounts: one market entry, a stop on every position, T1/T2 trims and a runner, flat before the close. Mac and Windows app.", "url": "https://proptradebot.com/", "downloadUrl": ["https://proptradebot.com/downloads/PropTradeBot.dmg", "https://proptradebot.com/downloads/PropTradeBot-Setup.exe"], "offers": {"@type": "Offer", "price": "49", "priceCurrency": "USD", "url": "https://whop.com/proptradebot/proptradebot-pro/", "priceSpecification": {"@type": "UnitPriceSpecification", "price": "49", "priceCurrency": "USD", "billingDuration": "P1M", "unitText": "MONTH"}}, "publisher": {"@type": "Organization", "name": "PropTradeBot", "url": "https://proptradebot.com/", "email": "support@proptradebot.com"}}</script>
 </head>
 <body>
+<div class="announce"><b>New:</b> PropTradeBot for Windows, on the same PC as NinjaTrader 8. <a href="/getting-started.html#install">Install guide →</a></div>
 
 <div class="wrap">
   <nav>
@@ -183,7 +199,7 @@
       <h1>Your strategy. Executed <em>the same way</em> on every account.</h1>
       <p class="lede">Send your TradingView alerts or your Discord provider's signals to PropTradeBot. It runs the whole managed trade on your Topstep accounts, or on any account you trade in NinjaTrader 8, whether or not you are at the screen.</p>
       <div class="ctas"><a class="btn solid" href="https://whop.com/proptradebot/proptradebot-pro/" target="_blank" rel="noopener">Start your 7-day trial</a><a class="btn line" href="#how-it-works">See how it works</a></div>
-      <p class="fine">$49/month, with a 7-day free trial.</p>
+      <p class="fine">$49/month after a 7-day free trial · cancel anytime · Mac &amp; Windows</p>
     </div>
 
     <div>
@@ -214,6 +230,12 @@
     </div>
   </div>
 </div>
+
+<div class="wrap"><div class="platforms">
+  <span>macOS <i>· Apple-notarized</i></span><span>Windows 10/11 <i>· signed installer</i></span>
+  <span>Topstep <i>· TopstepX API</i></span><span>NinjaTrader 8 <i>· PTBBridge add-on</i></span>
+  <span>TradingView · Discord</span>
+</div></div>
 
 <div class="wrap"><div class="strip">
   <div><span>01</span><b>One market entry</b></div>
@@ -273,6 +295,19 @@
     <div class="rule"><b>Orphaned-stop cleanup</b><p>Stops left behind by a closed position are cleaned up.</p></div>
     <div class="rule"><b>Live dashboard</b><p>Live P&amp;L, per-account performance, open positions, trade history, and a flatten-all button, from any browser.</p></div>
     <div class="rule"><b>Runs on your own computer</b><p>Runs locally: no VPS, no shared servers. Keep it open during your session.</p></div>
+  </div>
+</div></section>
+
+<section style="padding-top:0" id="works-with"><div class="wrap">
+  <div class="kicker">Works with</div>
+  <h2>The accounts and signals you already use.</h2>
+  <div class="works">
+    <a href="/getting-started.html#connect"><h4>Topstep <span>→</span></h4><p>Your Topstep accounts through Topstep's own TopstepX API. One leader with Topstep's copier, or each account.</p></a>
+    <a href="/nt8-guide.html"><h4>NinjaTrader 8 <span>→</span></h4><p>Any account you trade in NT8 that your firm allows automated trading on, through the PTBBridge add-on.</p></a>
+    <a href="/tradingview-alerts-topstep.html"><h4>TradingView alerts <span>→</span></h4><p>Your own strategy's alerts, sent by webhook. Test first, then live.</p></a>
+    <a href="/discord-signals-topstep.html"><h4>Discord signals <span>→</span></h4><p>A provider you follow: teach it one entry and one exit, watch it in shadow mode, then go live.</p></a>
+    <a href="/getting-started.html#install"><h4>Mac &amp; Windows <span>→</span></h4><p>Runs on your own computer, never a VPS. On Windows it can sit on the same PC as NinjaTrader.</p></a>
+    <a href="/end-of-day-flatten.html"><h4>End-of-day flatten <span>→</span></h4><p>Closes every account it trades at the time you set. Set it before your firm's cutoff.</p></a>
   </div>
 </div></section>
 
