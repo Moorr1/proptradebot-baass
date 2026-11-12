@@ -49,9 +49,9 @@ app.use(express.static('public', { extensions: ['html'] }));
 // outside everything looked fine and customers quietly kept downloading a build
 // with known bugs in it. fbd_preflight.py now fails when the newest local build
 // is ahead of what lives in public/downloads.
-const LATEST_APP_VERSION = '1.11.2';   // the onboarding agent reports this too
+const LATEST_APP_VERSION = '1.12.0';   // the onboarding agent reports this too
 // Windows installer: own constant, so the Mac and Windows releases can move independently (1.12.0 = first Windows release).
-const LATEST_WINDOWS_VERSION = '1.11.2';
+const LATEST_WINDOWS_VERSION = '1.12.0';
 // Download count for the daily metrics (ops #36). Stores the time, the version
 // served, the referring site's host and whether the client looks like a bot.
 // No IP, no user agent string, nothing personal. Fire-and-forget: the redirect
