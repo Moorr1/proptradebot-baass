@@ -21,14 +21,14 @@
     .card p { color: #3b3f46; margin-bottom: 12px; line-height: 1.5; }
     .status-badge { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; text-transform: uppercase; }
     .status-active { background: #e1efe6; color: #0e7a4a; }
-    .status-trialing { background: #7c3aed; color: #6b21a8; }
+    .status-trialing { background: #ede4f7; color: #6b21a8; }
     .status-inactive { background: #f8e1df; color: #b3261e; }
     .status-cancelled { background: #d9d5cb; color: #3b3f46; }
     .status-canceled { background: #d9d5cb; color: #3b3f46; }
     .status-past_due { background: #f6ead6; color: #a86a00; }
     .btn { display: inline-block; padding: 10px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
     .btn-primary { background: #0e7a4a; color: #fff; }
-    .btn-primary:hover { background: #0e7a4a; }
+    .btn-primary:hover { background: #0b6b40; }
     .btn-danger { background: #b3261e; color: #fff; }
     .btn-secondary { background: #d9d5cb; color: #15171b; }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -378,7 +378,7 @@ on its own the first time.</pre>
       const log = document.getElementById('chat-log');
       const b = document.createElement('div');
       b.style.cssText = 'padding:10px 14px; border-radius:10px; font-size:14px; line-height:1.5; white-space:pre-wrap; max-width:85%;'
-        + (role === 'user' ? 'align-self:flex-end; background:#e1efe6; color:#e1efe6;' : 'align-self:flex-start; background:#f5f3ee; border:1px solid #d9d5cb; color:#15171b;');
+        + (role === 'user' ? 'align-self:flex-end; background:#e1efe6; color:#15171b;' : 'align-self:flex-start; background:#f5f3ee; border:1px solid #d9d5cb; color:#15171b;');
       b.textContent = text;
       log.appendChild(b); log.scrollTop = log.scrollHeight;
       return b;
