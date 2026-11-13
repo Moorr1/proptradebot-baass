@@ -1,7 +1,7 @@
 /* PropTradeBot guide pages: the same light design as the home page and Getting Started (2026-11-12). */
 :root{
   --paper:#f5f3ee; --paper2:#ecE9e1; --ink:#15171b; --ink2:#3b3f46; --muted:#6a6e75; --line:#d9d5cb;
-  --green:#1d4ed8; --green-soft:#e4ebfb;   /* accent: blue since 2026-11-13 (variable name kept) */ --red:#b3261e; --amber:#a86a00;
+  --green:#0e7a4a; --green-soft:#e1efe6; --red:#b3261e; --amber:#a86a00;
   --serif:"Iowan Old Style","Charter","Palatino","Georgia",serif;
   --sans:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Segoe UI",sans-serif;
   --mono:ui-monospace,"SF Mono","Menlo","Consolas",monospace;
@@ -53,6 +53,6 @@ th{font-weight:700;color:var(--ink);font-size:14px}
 .rules-note{color:var(--muted);font-size:14.5px;margin-bottom:16px}
 table.rules td:first-child{color:var(--ink);white-space:nowrap}
 .updated,.last-updated{font-family:var(--mono);font-size:13px;color:var(--muted);margin-bottom:36px}
-.highlight-box{background:var(--green-soft);border:1px solid #c7d6f5;border-radius:8px;padding:16px 20px;margin:22px 0}
+.highlight-box{background:var(--green-soft);border:1px solid #c9e2d3;border-radius:8px;padding:16px 20px;margin:22px 0}
 .highlight-box p{margin-bottom:0;color:var(--ink)}
 @media print{header.site nav{display:none}header.site{margin-bottom:24px}pre{white-space:pre-wrap}}
